@@ -1,11 +1,13 @@
 ﻿namespace DeltaBotFour.Models
 {
-    public class QueueMessage<TPayload>
+    public class QueueMessage
     {
-        public TPayload Payload { get; private set; }
+        public QueueMessageType Type { get; private set; }
+        public string Payload { get; private set; }
 
-        public QueueMessage(TPayload payload)
+        public QueueMessage(QueueMessageType type, string payload)
         {
+            Type = type;
             Payload = payload;
         }
     }

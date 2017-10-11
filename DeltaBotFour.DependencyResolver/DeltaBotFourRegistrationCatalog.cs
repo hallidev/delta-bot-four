@@ -30,7 +30,10 @@ namespace DeltaBotFour.DependencyResolver
             container.RegisterSingleton(subreddit);
 
             // Register functionality implementations
+            container.Register<IDB4Queue, DB4MemoryQueue>();
+            container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
             container.Register<ICommentMonitor, CommentMonitor>();
+            container.Register<ICommentProcessor, CommentProcessor>();
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -12,6 +15,7 @@ namespace DeltaBotFour.ServiceImplementations
         public string DB4ClientId => _configuration["DB4ClientId"];
         public string DB4ClientSecret => _configuration["DB4ClientSecret"];
         public string SubredditName => _configuration["SubredditName"];
+        public List<string> ValidDeltaIndicators => _configuration["ValidDeltaIndicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
         public AppConfiguration()
         {

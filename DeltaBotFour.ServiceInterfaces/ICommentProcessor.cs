@@ -4,6 +4,6 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentProcessor
     {
-        void Process(QueueMessage<DB4Comment> comment);
+        void Process(DB4Comment comment);
     }
 }

@@ -2,9 +2,12 @@
 {
     public class DB4Comment
     {
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string ParentAuthor { get; set; }
-        public string Link { get; set; }
+        public string Id { get; set; }
+        public string ParentId { get; set; }
+        public string LinkTitle { get; set; }
+        public string AuthorName { get; set; }
+        public string ParentAuthorName { get; set; }
+        public string ShortLink { get; set; }
+        public string Body { get; set; }
     }
 }
