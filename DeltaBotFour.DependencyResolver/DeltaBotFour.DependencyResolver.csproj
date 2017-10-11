@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RedditSharp" Version="1.1.14" />
+    <PackageReference Include="SimpleInjector" Version="4.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.ServiceImplementations\DeltaBotFour.ServiceImplementations.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
+  </ItemGroup>
+
+</Project>
