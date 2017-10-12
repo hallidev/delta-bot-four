@@ -27,7 +27,6 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void Process(DB4Comment comment)
         {
-            return;
             // DB4 doesn't qualify
             if(comment.AuthorName == _appConfiguration.DB4Username) { return; }
 

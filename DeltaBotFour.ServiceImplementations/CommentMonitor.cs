@@ -1,79 +1,100 @@
 ﻿using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp.Things;
-using System.Threading.Tasks;
 using RedditSharp;
 using Newtonsoft.Json;
 using System.Threading;
-using System.Linq;
+using System;
 
 namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentMonitor : ICommentMonitor
     {
-        private const string LINK_REPLACE_FROM = "oauth.reddit.com";
-        private const string LINK_REPLACE_TO = "www.reddit.com";
-
         private Reddit _reddit;
         private Subreddit _subreddit;
-        private IDB4Queue _queue;
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private IObserver<VotableThing> _commentObserver;
 
-        public CommentMonitor(Reddit reddit, Subreddit subreddit, IDB4Queue queue)
+        private CancellationToken _cancellationToken = new CancellationToken();
+
+        public CommentMonitor(Reddit reddit, Subreddit subreddit, IObserver<VotableThing> commentObserver)
         {
             _reddit = reddit;
             _subreddit = subreddit;
-            _queue = queue;
+            _commentObserver = commentObserver;
         }
 
-        public void Start()
+        public void Run()
         {
             monitorForComments();
             monitorForEdits();
         }
 
-        public void Stop()
-        {
-            _cancellationTokenSource.Cancel();
-        }
-
         private async void monitorForComments()
         {
-            //// Get all new comments as they are posted
-            //// This will run as long as the application is running
-            //await _subreddit.GetComments().Stream().ToAsyncEnumerable().ForEachAsync(comment =>
-            //{
-            //    var parent = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
-            //    //var children = _subreddit.Comments.Take(10).Where(c => c.ParentId == comment.FullName);
+            var commentsStream = _subreddit.GetComments().Stream();
 
-            //    var db4Comment = getDB4Comment(comment, parent);
-
-            //    //System.Console.WriteLine(children.ToList().Count);
-            //    if (db4Comment != null) { pushCommentToQueue(db4Comment); }
-            //});
+            // Get all new comments as they are posted
+            // This will run as long as the application is running
+            using (commentsStream.Subscribe(_commentObserver))
+            {
+                await commentsStream.Enumerate(_cancellationToken);
+            }
         }
 
-        private void monitorForEdits()
+        private async void monitorForEdits()
         {
-            //// Get all new comment edits as they are posted
-            //// This will run as long as the application is running
-            //await Task.Factory.StartNew(() =>
-            //{
-            //    var edits = _subreddit.GetEdited().Stream().wher;
+            var editsStream = _subreddit.GetEdited().Stream();
 
-            //    foreach (var edit in edits)
-            //    {
-            //        // The edit has to be on a comment
-            //        if (edit is Comment)
-            //        {
-            //            var parent = _reddit.GetThingByFullnameAsync(((Comment)edit).ParentId).Result;
+            // Get all new comments as they are posted
+            // This will run as long as the application is running
+            using (editsStream.Subscribe(_commentObserver))
+            {
+                await editsStream.Enumerate(_cancellationToken);
+            }
+        }
+    }
 
-            //            var db4Comment = getDB4Comment((Comment)edit, parent);
+    public class CommentObserver : IObserver<VotableThing>
+    {
+        private const string LINK_REPLACE_FROM = "oauth.reddit.com";
+        private const string LINK_REPLACE_TO = "www.reddit.com";
 
-            //            if (db4Comment != null) { pushCommentToQueue(db4Comment); }
-            //        }
-            //    }
-            //}, _cancellationTokenSource.Token);
+        private Reddit _reddit;
+        private IDB4Queue _queue;
+
+        public CommentObserver(Reddit reddit, IDB4Queue queue)
+        {
+            _reddit = reddit;
+            _queue = queue;
+        }
+
+        public void OnCompleted()
+        {
+
+        }
+
+        public void OnError(Exception error)
+        {
+
+        }
+
+        public void OnNext(VotableThing votableThing)
+        {
+            Comment comment = votableThing as Comment;
+
+            // We are only observing comments
+            if(comment == null) { return; }
+
+            var parent = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
+            //var children = _subreddit.Comments.Take(10).Where(c => c.ParentId == comment.FullName);
+
+            var db4Comment = getDB4Comment(comment, parent);
+
+            System.Console.WriteLine("hit");
+            if (db4Comment != null)
+            {
+                pushCommentToQueue(db4Comment);
+            }
         }
 
         private DB4Comment getDB4Comment(Comment comment, Thing parent)

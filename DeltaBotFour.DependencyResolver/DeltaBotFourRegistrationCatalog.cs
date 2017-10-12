@@ -2,6 +2,8 @@
 using DeltaBotFour.ServiceImplementations;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
+using RedditSharp.Things;
+using System;
 
 namespace DeltaBotFour.DependencyResolver
 {
@@ -33,6 +35,7 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<IDB4Queue, DB4MemoryQueue>();
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
             container.Register<ICommentMonitor, CommentMonitor>();
+            container.Register<IObserver<VotableThing>, CommentObserver>();
             container.Register<ICommentProcessor, CommentProcessor>();
             container.Register<ICommentReplyDetector, CommentReplyDetector>();
             container.Register<ICommentValidator, CommentValidator>();

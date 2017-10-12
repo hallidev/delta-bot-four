@@ -6,7 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="RedditSharp">
+      <HintPath>..\SharedAssemblies\RedditSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

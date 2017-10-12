@@ -7,11 +7,11 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="SimpleInjector" Version="4.0.11" />
+    <PackageReference Include="System.Interactive.Async" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
-    <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
     <ProjectReference Include="..\DeltaBotFour.ServiceImplementations\DeltaBotFour.ServiceImplementations.csproj" />
     <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
   </ItemGroup>
