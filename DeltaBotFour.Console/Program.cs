@@ -15,7 +15,8 @@ namespace DeltaBotFour.Console
 
             // Start comment monitor
             var commentMonitor = _container.Resolve<ICommentMonitor>();
-            commentMonitor.Run();
+            commentMonitor.MonitorForComments();
+            commentMonitor.MonitorForEdits();
 
             // Start queue dispatcher
             var queueDispatcher = _container.Resolve<IDB4QueueDispatcher>();

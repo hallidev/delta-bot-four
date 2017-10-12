@@ -8,6 +8,7 @@
         public string AuthorName { get; set; }
         public string ParentAuthorName { get; set; }
         public string ShortLink { get; set; }
+        public bool Edited { get; set; }
         public string Body { get; set; }
     }
 }
