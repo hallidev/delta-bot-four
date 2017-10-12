@@ -2,6 +2,7 @@
 {
     public interface IDB4QueueDispatcher
     {
-        void Run();
+        void Start();
+        void Stop();
     }
 }

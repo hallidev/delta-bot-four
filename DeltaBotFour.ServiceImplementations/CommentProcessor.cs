@@ -11,15 +11,23 @@ namespace DeltaBotFour.ServiceImplementations
     {
         private AppConfiguration _appConfiguration;
         private Subreddit _subreddit;
+        private ICommentValidator _commentValidator;
+        private IDeltaAwarder _deltaAwarder;
+        private ICommentReplier _commentReplier;
 
-        public CommentProcessor(AppConfiguration appConfiguration, Subreddit subreddit)
+        public CommentProcessor(AppConfiguration appConfiguration, Subreddit subreddit,
+            ICommentValidator commentValidator, IDeltaAwarder deltaAwarder, ICommentReplier commentReplier)
         {
             _appConfiguration = appConfiguration;
             _subreddit = subreddit;
+            _commentValidator = commentValidator;
+            _deltaAwarder = deltaAwarder;
+            _commentReplier = commentReplier;
         }
 
         public void Process(DB4Comment comment)
         {
+            return;
             // DB4 doesn't qualify
             if(comment.AuthorName == _appConfiguration.DB4Username) { return; }
 
@@ -35,6 +43,18 @@ namespace DeltaBotFour.ServiceImplementations
 
                 ConsoleHelper.WriteLine($"{edited}Comment has a delta!", ConsoleColor.Green);
                 ConsoleHelper.WriteLine($"Comment: {comment.Body}");
+
+                // Validate comment
+                var commentValidationResult = _commentValidator.Validate(comment);
+
+                if(commentValidationResult.IsValidDelta)
+                {
+                    // Award the delta
+                    _deltaAwarder.Award(comment);
+                }
+
+                // Post a reply with the result
+                _commentReplier.Reply(comment, commentValidationResult);
             }
         }
     }

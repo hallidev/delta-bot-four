@@ -2,7 +2,7 @@
 {
     public interface ICommentMonitor
     {
-        void MonitorForComments();
-        void MonitorForEdits();
+        void Start();
+        void Stop();
     }
 }

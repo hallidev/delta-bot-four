@@ -21,7 +21,7 @@ namespace DeltaBotFour.DependencyResolver
             );
 
             var reddit = new Reddit(botWebAgent, false);
-            var subreddit = reddit.GetSubreddit($"/r/{appConfiguration.SubredditName}");
+            var subreddit = reddit.GetSubredditAsync($"/r/{appConfiguration.SubredditName}").Result;
 
             // Register core / shared classes
             container.RegisterSingleton(appConfiguration);
@@ -34,6 +34,10 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
             container.Register<ICommentMonitor, CommentMonitor>();
             container.Register<ICommentProcessor, CommentProcessor>();
+            container.Register<ICommentReplyDetector, CommentReplyDetector>();
+            container.Register<ICommentValidator, CommentValidator>();
+            container.Register<ICommentReplier, CommentReplier>();
+            container.Register<IDeltaAwarder, DeltaAwarder>();
         }
     }
 }

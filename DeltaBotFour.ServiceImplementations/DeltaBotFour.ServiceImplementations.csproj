@@ -9,13 +9,18 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="RedditSharp" Version="1.1.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
     <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="RedditSharp">
+      <HintPath>..\SharedAssemblies\RedditSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

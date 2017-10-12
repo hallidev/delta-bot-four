@@ -2,6 +2,7 @@
 using DeltaBotFour.ServiceInterfaces;
 using Newtonsoft.Json;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DeltaBotFour.ServiceImplementations
@@ -10,6 +11,7 @@ namespace DeltaBotFour.ServiceImplementations
     {
         private IDB4Queue _queue;
         private ICommentProcessor _commentProcessor;
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public DB4QueueDispatcher(IDB4Queue queue, ICommentProcessor commentProcessor)
         {
@@ -17,7 +19,7 @@ namespace DeltaBotFour.ServiceImplementations
             _commentProcessor = commentProcessor;
         }
 
-        public async void Run()
+        public async void Start()
         {
             // Process messages from the queue
             // This will run as long as the application is running
@@ -42,7 +44,12 @@ namespace DeltaBotFour.ServiceImplementations
                         }
                     }
                 }
-            }, TaskCreationOptions.LongRunning);
+            }, _cancellationTokenSource.Token);
+        }
+
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
         }
     }
 }

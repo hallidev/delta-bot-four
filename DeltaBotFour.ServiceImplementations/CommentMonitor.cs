@@ -4,6 +4,8 @@ using RedditSharp.Things;
 using System.Threading.Tasks;
 using RedditSharp;
 using Newtonsoft.Json;
+using System.Threading;
+using System.Linq;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -15,6 +17,7 @@ namespace DeltaBotFour.ServiceImplementations
         private Reddit _reddit;
         private Subreddit _subreddit;
         private IDB4Queue _queue;
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public CommentMonitor(Reddit reddit, Subreddit subreddit, IDB4Queue queue)
         {
@@ -23,46 +26,54 @@ namespace DeltaBotFour.ServiceImplementations
             _queue = queue;
         }
 
-        public async void MonitorForComments()
+        public void Start()
         {
-            // Get all new comments as they are posted
-            // This will run as long as the application is running
-            await Task.Factory.StartNew(() =>
-            {
-                var comments = _subreddit.Comments.GetListingStream();
-
-                foreach (var comment in comments)
-                {
-                    var parent = _reddit.GetThingByFullname(comment.ParentId);
-
-                    var db4Comment = getDB4Comment(comment, parent);
-
-                    if (db4Comment != null) { pushCommentToQueue(db4Comment); }
-                }
-            }, TaskCreationOptions.LongRunning);
+            monitorForComments();
+            monitorForEdits();
         }
 
-        public async void MonitorForEdits()
+        public void Stop()
         {
-            // Get all new comment edits as they are posted
-            // This will run as long as the application is running
-            await Task.Factory.StartNew(() =>
-            {
-                var edits = _subreddit.Edited.GetListingStream();
+            _cancellationTokenSource.Cancel();
+        }
 
-                foreach (var edit in edits)
-                {
-                    // The edit has to be on a comment
-                    if (edit is Comment)
-                    {
-                        var parent = _reddit.GetThingByFullname(((Comment)edit).ParentId);
+        private async void monitorForComments()
+        {
+            //// Get all new comments as they are posted
+            //// This will run as long as the application is running
+            //await _subreddit.GetComments().Stream().ToAsyncEnumerable().ForEachAsync(comment =>
+            //{
+            //    var parent = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
+            //    //var children = _subreddit.Comments.Take(10).Where(c => c.ParentId == comment.FullName);
 
-                        var db4Comment = getDB4Comment((Comment)edit, parent);
+            //    var db4Comment = getDB4Comment(comment, parent);
 
-                        if (db4Comment != null) { pushCommentToQueue(db4Comment); }
-                    }
-                }
-            }, TaskCreationOptions.LongRunning);
+            //    //System.Console.WriteLine(children.ToList().Count);
+            //    if (db4Comment != null) { pushCommentToQueue(db4Comment); }
+            //});
+        }
+
+        private void monitorForEdits()
+        {
+            //// Get all new comment edits as they are posted
+            //// This will run as long as the application is running
+            //await Task.Factory.StartNew(() =>
+            //{
+            //    var edits = _subreddit.GetEdited().Stream().wher;
+
+            //    foreach (var edit in edits)
+            //    {
+            //        // The edit has to be on a comment
+            //        if (edit is Comment)
+            //        {
+            //            var parent = _reddit.GetThingByFullnameAsync(((Comment)edit).ParentId).Result;
+
+            //            var db4Comment = getDB4Comment((Comment)edit, parent);
+
+            //            if (db4Comment != null) { pushCommentToQueue(db4Comment); }
+            //        }
+            //    }
+            //}, _cancellationTokenSource.Token);
         }
 
         private DB4Comment getDB4Comment(Comment comment, Thing parent)
