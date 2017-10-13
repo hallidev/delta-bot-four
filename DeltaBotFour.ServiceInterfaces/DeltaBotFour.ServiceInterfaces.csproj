@@ -8,4 +8,10 @@
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="RedditSharp">
+      <HintPath>..\SharedAssemblies\RedditSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

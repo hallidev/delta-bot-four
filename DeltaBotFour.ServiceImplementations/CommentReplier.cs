@@ -8,7 +8,7 @@ namespace DeltaBotFour.ServiceImplementations
     {
         public void Reply(DB4Comment comment, DeltaCommentValidationResult deltaCommentValidationResult)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

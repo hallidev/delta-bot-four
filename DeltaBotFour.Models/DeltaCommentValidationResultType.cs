@@ -7,6 +7,6 @@
         FailCannotAwardDeltaBot,
         FailCannotAwardSelf,
         FailRejected,
-        Success
+        SuccessDeltaAwarded
     }
 }
