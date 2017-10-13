@@ -10,9 +10,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RedditSharp\RedditSharp\RedditSharp.csproj" />
     <ProjectReference Include="..\DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj" />
     <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="RedditSharp">
+      <HintPath>..\SharedAssemblies\RedditSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

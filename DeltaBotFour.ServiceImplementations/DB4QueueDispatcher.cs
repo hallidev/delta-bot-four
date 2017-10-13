@@ -1,5 +1,6 @@
 ﻿using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
+using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,8 @@ namespace DeltaBotFour.ServiceImplementations
                         switch(message.Type)
                         {
                             case QueueMessageType.Comment:
-                                _commentProcessor.Process((CommentComposite)message.Payload);
+                                var comment = JsonConvert.DeserializeObject<DB4Comment>(message.Payload);
+                                _commentProcessor.Process(comment);
                                 break;
                             default:
                                 throw new InvalidOperationException($"Unhandled enum value: {message.Type}");

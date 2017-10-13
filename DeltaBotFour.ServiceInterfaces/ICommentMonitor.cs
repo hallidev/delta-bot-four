@@ -2,7 +2,6 @@
 {
     public interface ICommentMonitor
     {
-        void Start();
-        void Stop();
+        void Run();
     }
 }

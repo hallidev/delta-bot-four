@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RedditSharp\RedditSharp\RedditSharp.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
   </ItemGroup>
 

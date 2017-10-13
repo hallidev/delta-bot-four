@@ -1,4 +1,5 @@
 ﻿using Core.Foundation.Helpers;
+using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp.Things;
 using System;
@@ -24,35 +25,35 @@ namespace DeltaBotFour.ServiceImplementations
             _commentReplier = commentReplier;
         }
 
-        public void Process(Models.CommentComposite commentComposite)
+        public void Process(DB4Comment comment)
         {
             // DB4 doesn't qualify
-            if(commentComposite.Comment.AuthorName == _appConfiguration.DB4Username) { return; }
+            if(comment.AuthorName == _appConfiguration.DB4Username) { return; }
 
             // Check for a delta
-            if (_appConfiguration.ValidDeltaIndicators.Any(d => commentComposite.Comment.Body.Contains(d)))
+            if (_appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d)))
             {
                 string edited = string.Empty;
 
-                if(commentComposite.Comment.Edited)
+                if(comment.Edited)
                 {
                     edited = "EDITED ";
                 }
 
                 ConsoleHelper.WriteLine($"{edited}Comment has a delta!", ConsoleColor.Green);
-                ConsoleHelper.WriteLine($"Comment: {commentComposite.Comment.Body}");
+                ConsoleHelper.WriteLine($"Comment: {comment.Body}");
 
                 // Validate comment
-                var commentValidationResult = _commentValidator.Validate(commentComposite);
+                var commentValidationResult = _commentValidator.Validate(comment);
 
                 if(commentValidationResult.IsValidDelta)
                 {
                     // Award the delta
-                    _deltaAwarder.Award(commentComposite);
+                    _deltaAwarder.Award(comment);
                 }
 
                 // Post a reply with the result
-                _commentReplier.Reply(commentComposite, commentValidationResult);
+                _commentReplier.Reply(comment, commentValidationResult);
             }
         }
     }

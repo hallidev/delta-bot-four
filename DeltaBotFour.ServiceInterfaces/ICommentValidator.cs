@@ -4,6 +4,6 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentValidator
     {
-        DeltaCommentValidationResult Validate(CommentComposite commentComposite);
+        DeltaCommentValidationResult Validate(DB4Comment comment);
     }
 }

@@ -6,7 +6,7 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentValidator : ICommentValidator
     {
-        public DeltaCommentValidationResult Validate(CommentComposite commentComposite)
+        public DeltaCommentValidationResult Validate(DB4Comment comment)
         {
             throw new NotImplementedException();
         }

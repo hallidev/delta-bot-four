@@ -4,6 +4,6 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentReplier
     {
-        void Reply(CommentComposite comment, DeltaCommentValidationResult deltaCommentValidationResult);
+        void Reply(DB4Comment comment, DeltaCommentValidationResult deltaCommentValidationResult);
     }
 }
