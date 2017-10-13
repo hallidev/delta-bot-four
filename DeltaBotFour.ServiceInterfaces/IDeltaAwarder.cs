@@ -4,6 +4,6 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface IDeltaAwarder
     {
-        void Award(DB4Comment comment);
+        void Award(CommentComposite comment);
     }
 }

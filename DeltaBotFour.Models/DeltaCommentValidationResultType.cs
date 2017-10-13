@@ -6,7 +6,8 @@
         FailCannotAwardOP,
         FailCannotAwardDeltaBot,
         FailCannotAwardSelf,
+        FailWithIssues,
         FailRejected,
-        Success
+        SuccessDeltaAwarded
     }
 }

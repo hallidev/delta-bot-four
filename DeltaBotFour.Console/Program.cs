@@ -15,7 +15,7 @@ namespace DeltaBotFour.Console
 
             // Start comment monitor
             var commentMonitor = _container.Resolve<ICommentMonitor>();
-            commentMonitor.Run();
+            commentMonitor.Start();
 
             // Start queue dispatcher
             var queueDispatcher = _container.Resolve<IDB4QueueDispatcher>();
@@ -25,6 +25,7 @@ namespace DeltaBotFour.Console
             {
                 if (System.Console.KeyAvailable && System.Console.ReadKey(true).Key == ConsoleKey.Escape)
                 {
+                    commentMonitor.Stop();
                     queueDispatcher.Stop();
                     return;
                 }

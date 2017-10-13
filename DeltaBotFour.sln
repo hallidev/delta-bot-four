@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Foundation", "Core.Foundation\Core.Foundation.csproj", "{E1D6893D-EB7D-4362-A9B7-88CE08F9C51B}"
 EndProject
@@ -20,6 +20,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.ServiceImplementations", "DeltaBotFour.ServiceImplementations\DeltaBotFour.ServiceImplementations.csproj", "{547C487A-3D4E-428F-A5D7-BB986D84675C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.DependencyResolver", "DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj", "{70D357B4-68F1-4277-91B7-04E3B1BA2B48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RedditSharp", "RedditSharp", "{945F995D-ED98-46AA-B5A3-E29986539267}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedditSharp", "..\RedditSharp\RedditSharp\RedditSharp.csproj", "{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,10 @@ Global
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +70,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E1D6893D-EB7D-4362-A9B7-88CE08F9C51B} = {0BE0CE52-85DF-44C2-AA6A-5635F28E85C1}
 		{4687F0A7-3C9C-450D-8089-87CAB47BFC44} = {47E2F6BD-C115-4C38-B7CF-6B6C55CF2BED}
+		{95B9AACC-E8AE-4A6B-B4F1-A36577BB38AF} = {945F995D-ED98-46AA-B5A3-E29986539267}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D73A23A-B5A9-403B-8EE6-33DFACC589F9}

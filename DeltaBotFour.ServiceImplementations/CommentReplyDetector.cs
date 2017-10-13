@@ -10,7 +10,7 @@ namespace DeltaBotFour.ServiceImplementations
 
         }
 
-        public bool DidDB4Reply(DB4Comment comment)
+        public bool DidDB4Reply(CommentComposite commentComposite)
         {
             // Check for a reply in the immediate children
 

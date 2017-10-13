@@ -4,6 +4,6 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentReplyDetector
     {
-        bool DidDB4Reply(DB4Comment comment);
+        bool DidDB4Reply(CommentComposite commentComposite);
     }
 }
