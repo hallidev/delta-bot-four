@@ -1,14 +1,13 @@
 ﻿using DeltaBotFour.ServiceInterfaces;
-using System;
-using DeltaBotFour.Models;
+using RedditSharp.Things;
 
 namespace DeltaBotFour.ServiceImplementations
 {
     public class DeltaAwarder : IDeltaAwarder
     {
-        public void Award(DB4Comment comment)
+        public void Award(Comment comment)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }

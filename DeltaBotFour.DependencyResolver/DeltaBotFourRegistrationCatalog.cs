@@ -35,7 +35,8 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<IDB4Queue, DB4MemoryQueue>();
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
             container.Register<ICommentMonitor, CommentMonitor>();
-            container.Register<IObserver<VotableThing>, CommentObserver>();
+            container.Register<ICommentDispatcher, CommentDispatcher>();
+            container.Register<IObserver<VotableThing>, IncomingCommentObserver>();
             container.Register<ICommentProcessor, CommentProcessor>();
             container.Register<ICommentReplyDetector, CommentReplyDetector>();
             container.Register<ICommentValidator, CommentValidator>();

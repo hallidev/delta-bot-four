@@ -2,7 +2,6 @@
 using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
-using RedditSharp.Things;
 using System;
 using System.Linq;
 
@@ -13,15 +12,18 @@ namespace DeltaBotFour.ServiceImplementations
         private AppConfiguration _appConfiguration;
         private Reddit _reddit;
         private ICommentValidator _commentValidator;
+        private ICommentReplyDetector _commentReplyDetector;
         private IDeltaAwarder _deltaAwarder;
         private ICommentReplier _commentReplier;
 
         public CommentProcessor(AppConfiguration appConfiguration, Reddit reddit,
-            ICommentValidator commentValidator, IDeltaAwarder deltaAwarder, ICommentReplier commentReplier)
+            ICommentValidator commentValidator, ICommentReplyDetector commentReplyDetector,
+            IDeltaAwarder deltaAwarder, ICommentReplier commentReplier)
         {
             _appConfiguration = appConfiguration;
             _reddit = reddit;
             _commentValidator = commentValidator;
+            _commentReplyDetector = commentReplyDetector;
             _deltaAwarder = deltaAwarder;
             _commentReplier = commentReplier;
         }
@@ -46,17 +48,23 @@ namespace DeltaBotFour.ServiceImplementations
                 var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.ShortLink)).Result;
                 var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
 
+                if(_commentReplyDetector.DidDB4Reply(qualifiedComment).DidDB4Reply)
+                {
+                    // DB4 has already replied, move on
+                    return;
+                }
+
                 // Validate comment
                 var commentValidationResult = _commentValidator.Validate(qualifiedComment, parentThing);
 
                 if(commentValidationResult.IsValidDelta)
                 {
                     // Award the delta
-                    _deltaAwarder.Award(comment);
+                    _deltaAwarder.Award(qualifiedComment);
                 }
 
                 // Post a reply with the result
-                _commentReplier.Reply(comment, commentValidationResult);
+                _commentReplier.Reply(qualifiedComment, commentValidationResult);
             }
         }
     }

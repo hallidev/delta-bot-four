@@ -1,20 +1,81 @@
 ﻿using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
+using RedditSharp.Things;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentReplyDetector : ICommentReplyDetector
     {
-        public CommentReplyDetector()
-        {
+        private const string TOKEN_MATCH_REGEX = ".+";
 
+        private AppConfiguration _appConfiguration;
+        private List<Regex> _successReplyRegexes = new List<Regex>();
+        private List<Regex> _failReplyRegexes = new List<Regex>();
+
+        public CommentReplyDetector(AppConfiguration appConfiguration)
+        {
+            _appConfiguration = appConfiguration;
+
+            // Replace all possible replies with a regex for matching
+            foreach (string db4reply in _appConfiguration.Replies.SuccessReplies)
+            {
+                _successReplyRegexes.Add(new Regex(getPattern(db4reply)));
+            }
+
+            foreach (string db4reply in _appConfiguration.Replies.FailReplies)
+            {
+                _failReplyRegexes.Add(new Regex(getPattern(db4reply)));
+            }
         }
 
-        public bool DidDB4Reply(DB4Comment comment)
+        public DB4ReplyResult DidDB4Reply(Comment comment)
         {
-            // Check for a reply in the immediate children
+            // Check for a reply in the immediate children of the comment
+            foreach(Comment childComment in comment.Comments)
+            {
+                foreach(Regex regex in _successReplyRegexes)
+                {
+                    if(regex.IsMatch(childComment.Body))
+                    {
+                        return new DB4ReplyResult { DidDB4Reply = true, WasSuccessReply = true };
+                    }
+                }
 
-            return false;
+                foreach (Regex regex in _failReplyRegexes)
+                {
+                    if (regex.IsMatch(childComment.Body))
+                    {
+                        return new DB4ReplyResult { DidDB4Reply = true, WasSuccessReply = false };
+                    }
+                }
+            }
+
+            return new DB4ReplyResult { DidDB4Reply = false, WasSuccessReply = false };
+        }
+
+        private string getPattern(string db4reply)
+        {
+            // Escape tokens and special characters
+            // []^$.|?*+()
+            string pattern = db4reply
+                .Replace("[", "\\[")
+                .Replace("]", "\\]")
+                .Replace("^", "\\^")
+                .Replace("$", "\\$")
+                .Replace(".", "\\.")
+                .Replace("?", "\\?")
+                .Replace("*", "\\*")
+                .Replace("+", "\\+")
+                .Replace("(", "\\(")
+                .Replace(")", "\\)")
+                .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, TOKEN_MATCH_REGEX)
+                .Replace(_appConfiguration.ReplaceTokens.DeltasToken, TOKEN_MATCH_REGEX)
+                .Replace(_appConfiguration.ReplaceTokens.SubredditToken, TOKEN_MATCH_REGEX)
+                .Replace(_appConfiguration.ReplaceTokens.IssueCountToken, TOKEN_MATCH_REGEX);
+
+            return $".*{pattern}.*";
         }
     }
 }

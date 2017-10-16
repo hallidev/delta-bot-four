@@ -2,8 +2,8 @@
 
 namespace DeltaBotFour.ServiceInterfaces
 {
-    public interface IDeltaAwarder
+    public interface ICommentDispatcher
     {
-        void Award(Comment comment);
+        void SendToQueue(Comment comment);
     }
 }

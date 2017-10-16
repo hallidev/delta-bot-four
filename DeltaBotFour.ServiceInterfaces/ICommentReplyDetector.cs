@@ -1,9 +1,10 @@
 ﻿using DeltaBotFour.Models;
+using RedditSharp.Things;
 
 namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentReplyDetector
     {
-        bool DidDB4Reply(DB4Comment comment);
+        DB4ReplyResult DidDB4Reply(Comment comment);
     }
 }

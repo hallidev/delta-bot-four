@@ -1,9 +1,10 @@
 ﻿using DeltaBotFour.Models;
+using RedditSharp.Things;
 
 namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentReplier
     {
-        void Reply(DB4Comment comment, DeltaCommentValidationResult deltaCommentValidationResult);
+        void Reply(Comment comment, DeltaCommentValidationResult deltaCommentValidationResult);
     }
 }

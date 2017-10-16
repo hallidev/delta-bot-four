@@ -1,48 +1,26 @@
-﻿using DeltaBotFour.Models;
-using DeltaBotFour.ServiceInterfaces;
-using Newtonsoft.Json;
-using RedditSharp;
+﻿using DeltaBotFour.ServiceInterfaces;
 using RedditSharp.Things;
-using System;
+using DeltaBotFour.Models;
+using Newtonsoft.Json;
 
 namespace DeltaBotFour.ServiceImplementations
 {
-    public class CommentObserver : IObserver<VotableThing>
+    public class CommentDispatcher : ICommentDispatcher
     {
         private string SHORT_LINK_FROM = "www.reddit.com";
         private string SHORT_LINK_TO = "oauth.reddit.com";
-        private Reddit _reddit;
+
         private IDB4Queue _queue;
 
-        public CommentObserver(Reddit reddit, IDB4Queue queue)
+        public CommentDispatcher(IDB4Queue queue)
         {
-            _reddit = reddit;
             _queue = queue;
         }
 
-        public void OnCompleted()
+        public void SendToQueue(Comment comment)
         {
-
-        }
-
-        public void OnError(Exception error)
-        {
-
-        }
-
-        public void OnNext(VotableThing votableThing)
-        {
-            Comment comment = votableThing as Comment;
-
-            // We are only observing comments
-            if (comment == null) { return; }
-
             var db4Comment = getDB4Comment(comment);
-
-            if (db4Comment != null)
-            {
-                pushCommentToQueue(db4Comment);
-            }
+            pushCommentToQueue(db4Comment);
         }
 
         private DB4Comment getDB4Comment(Comment comment)
