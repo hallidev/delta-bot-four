@@ -28,12 +28,6 @@ namespace DeltaBotFour.ServiceImplementations
                 return createValidationResult(DeltaCommentValidationResultType.FailCannotAwardOP, comment, parentThing);
             }
 
-            // Check comment length
-            if(comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
-            {
-                return createValidationResult(DeltaCommentValidationResultType.FailCommentTooShort, comment, parentThing);
-            }
-
             Comment parentComment = (Comment)parentThing;
 
             // Cannot award OP
@@ -54,8 +48,13 @@ namespace DeltaBotFour.ServiceImplementations
                 return createValidationResult(DeltaCommentValidationResultType.FailCannotAwardSelf, comment, parentThing);
             }
 
+            // Check comment length
+            if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
+            {
+                return createValidationResult(DeltaCommentValidationResultType.FailCommentTooShort, comment, parentThing);
+            }
+
             // TODO: Fail with issues
-            // TODO: Rejected
 
             // Success - valid delta
             return createValidationResult(DeltaCommentValidationResultType.SuccessDeltaAwarded, comment, parentThing);
@@ -85,7 +84,8 @@ namespace DeltaBotFour.ServiceImplementations
                 case DeltaCommentValidationResultType.SuccessDeltaAwarded:
                     body = _appConfiguration.Replies.DeltaAwarded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, parentComment.AuthorName)
-                        .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
+                        .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
+                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, DeltaHelper.GetDeltaCount(parentComment.AuthorFlairText).ToString() + 1);
                     break;
                 default:
                     throw new InvalidOperationException($"Unhandled DeltaCommentValidationResult: {resultType}");

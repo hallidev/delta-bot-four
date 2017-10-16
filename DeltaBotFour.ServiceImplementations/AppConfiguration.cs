@@ -19,7 +19,8 @@ namespace DeltaBotFour.ServiceImplementations
         public DeltaBotReplaceTokens ReplaceTokens { get; private set; }
         public DeltaBotReplies Replies { get; private set; }
         public DeltaBotValidationValues ValidationValues { get; private set; }
-        public string GlobalFooter => _configuration["global_footer"];
+        public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
+        public string ReplyFooter => _configuration["reply_footer"];
 
         public AppConfiguration()
         {

@@ -28,7 +28,7 @@ namespace DeltaBotFour.ServiceImplementations
         public void Start()
         {
             // Process comments from the last week
-            _subreddit.GetComments().Take(500).Where(c => c.Created > DateTime.Now.AddDays(-7))
+            _subreddit.GetComments().Take(500).Where(c => c.CreatedUTC > DateTime.UtcNow.AddDays(-7))
                 .ForEachAsync(c => _commentDispatcher.SendToQueue(c));
 
             // Start monitoring

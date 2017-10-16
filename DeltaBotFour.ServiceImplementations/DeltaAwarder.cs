@@ -9,5 +9,10 @@ namespace DeltaBotFour.ServiceImplementations
         {
             return;
         }
+
+        public void Unaward(Comment comment)
+        {
+            return;
+        }
     }
 }

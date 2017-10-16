@@ -35,24 +35,27 @@ namespace DeltaBotFour.ServiceImplementations
             // Check for a reply in the immediate children of the comment
             foreach(Comment childComment in comment.Comments)
             {
-                foreach(Regex regex in _successReplyRegexes)
+                if (childComment.AuthorName == _appConfiguration.DB4Username)
                 {
-                    if(regex.IsMatch(childComment.Body))
+                    foreach (Regex regex in _successReplyRegexes)
                     {
-                        return new DB4ReplyResult { DidDB4Reply = true, WasSuccessReply = true };
+                        if (regex.IsMatch(childComment.Body))
+                        {
+                            return new DB4ReplyResult { HasDB4Replied = true, WasSuccessReply = true, Comment = childComment };
+                        }
                     }
-                }
 
-                foreach (Regex regex in _failReplyRegexes)
-                {
-                    if (regex.IsMatch(childComment.Body))
+                    foreach (Regex regex in _failReplyRegexes)
                     {
-                        return new DB4ReplyResult { DidDB4Reply = true, WasSuccessReply = false };
+                        if (regex.IsMatch(childComment.Body))
+                        {
+                            return new DB4ReplyResult { HasDB4Replied = true, WasSuccessReply = false, Comment = childComment };
+                        }
                     }
                 }
             }
 
-            return new DB4ReplyResult { DidDB4Reply = false, WasSuccessReply = false };
+            return new DB4ReplyResult { HasDB4Replied = false, WasSuccessReply = false };
         }
 
         private string getPattern(string db4reply)
