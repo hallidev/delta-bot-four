@@ -16,11 +16,11 @@ namespace DeltaBotFour.ServiceImplementations
         public string DB4ClientSecret => _configuration["db4_client_secret"];
         public string SubredditName => _configuration["subreddit_name"];
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+        public string DB4ReplyTemplateFile => _configuration["db4_reply_template_file"];
+        public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
         public DeltaBotReplaceTokens ReplaceTokens { get; private set; }
         public DeltaBotReplies Replies { get; private set; }
         public DeltaBotValidationValues ValidationValues { get; private set; }
-        public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
-        public string ReplyFooter => _configuration["reply_footer"];
 
         public AppConfiguration()
         {
@@ -48,6 +48,7 @@ namespace DeltaBotFour.ServiceImplementations
             public string DeltasToken => _configuration["replace_tokens:deltas_token"];
             public string SubredditToken => _configuration["replace_tokens:subreddit_token"];
             public string IssueCountToken => _configuration["replace_tokens:issue_count_token"];
+            public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
 
             public void Initialize(IConfigurationRoot configuration)
             {

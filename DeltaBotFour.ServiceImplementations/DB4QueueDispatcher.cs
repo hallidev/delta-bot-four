@@ -1,4 +1,5 @@
-﻿using DeltaBotFour.Models;
+﻿using Core.Foundation.Helpers;
+using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using Newtonsoft.Json;
 using System;
@@ -27,21 +28,29 @@ namespace DeltaBotFour.ServiceImplementations
             {
                 while(true)
                 {
-                    var message = _queue.Pop();
-
-                    // If something was popped off the queue, dispatch
-                    // it to the correct processor
-                    if(message != null)
+                    try
                     {
-                        switch(message.Type)
+                        var message = _queue.Pop();
+
+                        // If something was popped off the queue, dispatch
+                        // it to the correct processor
+                        if (message != null)
                         {
-                            case QueueMessageType.Comment:
-                                var comment = JsonConvert.DeserializeObject<DB4Comment>(message.Payload);
-                                _commentProcessor.Process(comment);
-                                break;
-                            default:
-                                throw new InvalidOperationException($"Unhandled enum value: {message.Type}");
+                            switch (message.Type)
+                            {
+                                case QueueMessageType.Comment:
+                                    var comment = JsonConvert.DeserializeObject<DB4Comment>(message.Payload);
+                                    _commentProcessor.Process(comment);
+                                    break;
+                                default:
+                                    throw new InvalidOperationException($"Unhandled enum value: {message.Type}");
+                            }
                         }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Make sure no exceptions get thrown out of this loop
+                        ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
                     }
                 }
             }, _cancellationTokenSource.Token);

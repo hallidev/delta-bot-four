@@ -4,7 +4,7 @@ namespace DeltaBotFour.ServiceInterfaces
 {
     public interface IDeltaAwarder
     {
-        void Award(Comment comment);
-        void Unaward(Comment comment);
+        void Award(Comment comment, Comment parentComment);
+        void Unaward(Comment comment, Comment parentComment);
     }
 }

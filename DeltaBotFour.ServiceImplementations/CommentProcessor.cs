@@ -2,6 +2,7 @@
 using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
+using RedditSharp.Things;
 using System;
 using System.Linq;
 
@@ -53,14 +54,8 @@ namespace DeltaBotFour.ServiceImplementations
                 // If DB4 hasn't replied, or if it did but this is an edit, perform comment logic
                 if (!db4ReplyResult.HasDB4Replied)
                 {
-                    // Validate comment
-                    var commentValidationResult = _commentValidator.Validate(qualifiedComment, parentThing);
-
-                    if (commentValidationResult.IsValidDelta)
-                    {
-                        // Award the delta
-                        _deltaAwarder.Award(qualifiedComment);
-                    }
+                    // Validate comment and award delta if successful
+                    var commentValidationResult = validateAndAward(qualifiedComment, parentThing);
 
                     // Post a reply with the result
                     _commentReplier.Reply(qualifiedComment, commentValidationResult);
@@ -73,14 +68,8 @@ namespace DeltaBotFour.ServiceImplementations
                     // now passes validation. If it does, edit the old reply to be a success reply
                     if(!db4ReplyResult.WasSuccessReply)
                     {
-                        // Validate comment
-                        var commentValidationResult = _commentValidator.Validate(qualifiedComment, parentThing);
-
-                        if (commentValidationResult.IsValidDelta)
-                        {
-                            // Award the delta
-                            _deltaAwarder.Award(qualifiedComment);
-                        }
+                        // Validate comment and award delta if successful
+                        var commentValidationResult = validateAndAward(qualifiedComment, parentThing);
 
                         // Edit the result to reflect new delta comment
                         _commentReplier.EditReply(db4ReplyResult.Comment, commentValidationResult);
@@ -102,7 +91,10 @@ namespace DeltaBotFour.ServiceImplementations
                 if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && qualifiedComment.CreatedUTC < DateTime.Now.AddHours(-_appConfiguration.HoursToUnawardDelta))
                 {
                     // Unaward
-                    _deltaAwarder.Unaward(qualifiedComment);
+                    // parentThing can safely be cast to Comment here - we could have only
+                    // gotten here if a delta was previously awarded, meaning the parent of this
+                    // Comment is a Comment also
+                    _deltaAwarder.Unaward(qualifiedComment, (Comment)parentThing);
 
                     // Delete award comment
                     _commentReplier.DeleteReply(db4ReplyResult.Comment);
@@ -110,6 +102,22 @@ namespace DeltaBotFour.ServiceImplementations
                     ConsoleHelper.WriteLine($"DeltaBot unawarded and deleted a reply -> link: {qualifiedComment.Shortlink}");
                 }
             }
+        }
+
+        private DeltaCommentValidationResult validateAndAward(Comment qualifiedComment, Thing parentThing)
+        {
+            // Validate comment
+            var commentValidationResult = _commentValidator.Validate(qualifiedComment, parentThing);
+
+            if (commentValidationResult.IsValidDelta)
+            {
+                // Award the delta
+                // parentThing can safely be cast to Comment here - deltas are only
+                // valid when the parent is a Comment
+                _deltaAwarder.Award(qualifiedComment, (Comment)parentThing);
+            }
+
+            return commentValidationResult;
         }
     }
 }
