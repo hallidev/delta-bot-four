@@ -1,5 +1,4 @@
-﻿using Core.Foundation.Helpers;
-using DeltaBotFour.Models;
+﻿using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
 using RedditSharp.Things;
@@ -41,13 +40,6 @@ namespace DeltaBotFour.ServiceImplementations
             {
                 string edited = string.Empty;
 
-                if(comment.IsEdited)
-                {
-                    edited = "(EDITED)";
-                }
-
-                ConsoleHelper.WriteLine($"Comment has a delta! {edited}", ConsoleColor.Green);
-
                 // Check to see if db4 has already replied
                 var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
 
@@ -59,8 +51,6 @@ namespace DeltaBotFour.ServiceImplementations
 
                     // Post a reply with the result
                     _commentReplier.Reply(qualifiedComment, commentValidationResult);
-
-                    ConsoleHelper.WriteLine($"DeltaBot replied -> result: {commentValidationResult.ResultType.ToString()} link: {qualifiedComment.Shortlink}");
                 }
                 else
                 {
@@ -73,8 +63,6 @@ namespace DeltaBotFour.ServiceImplementations
 
                         // Edit the result to reflect new delta comment
                         _commentReplier.EditReply(db4ReplyResult.Comment, commentValidationResult);
-
-                        ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {commentValidationResult.ResultType.ToString()} link: {qualifiedComment.Shortlink}");
                     }
                 }
             }
@@ -98,8 +86,6 @@ namespace DeltaBotFour.ServiceImplementations
 
                     // Delete award comment
                     _commentReplier.DeleteReply(db4ReplyResult.Comment);
-
-                    ConsoleHelper.WriteLine($"DeltaBot unawarded and deleted a reply -> link: {qualifiedComment.Shortlink}");
                 }
             }
         }

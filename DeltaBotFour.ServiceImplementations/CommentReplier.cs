@@ -2,6 +2,7 @@
 using DeltaBotFour.Models;
 using RedditSharp.Things;
 using System.IO;
+using Core.Foundation.Helpers;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -20,6 +21,8 @@ namespace DeltaBotFour.ServiceImplementations
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             await comment.ReplyAsync(replyMessage);
+
+            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {comment.Shortlink}");
         }
 
         public async void EditReply(Comment commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
@@ -27,11 +30,15 @@ namespace DeltaBotFour.ServiceImplementations
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             await commentToEdit.EditTextAsync(replyMessage);
+
+            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public async void DeleteReply(Comment commentToDelete)
         {
             await commentToDelete.DelAsync();
+
+            ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }
 
         private string getReplyMessage(DeltaCommentValidationResult deltaCommentValidationResult)

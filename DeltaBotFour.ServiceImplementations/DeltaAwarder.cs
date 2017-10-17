@@ -1,5 +1,7 @@
-﻿using DeltaBotFour.ServiceInterfaces;
+﻿using Core.Foundation.Helpers;
+using DeltaBotFour.ServiceInterfaces;
 using RedditSharp.Things;
+using System;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -20,6 +22,8 @@ namespace DeltaBotFour.ServiceImplementations
 
             // Award to the parent comment
             await _subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
+
+            ConsoleHelper.WriteLine($"DeltaBot awarded a delta -> user: {parentComment.AuthorName}", ConsoleColor.Green);
         }
 
         public async void Unaward(Comment comment, Comment parentComment)
@@ -28,6 +32,8 @@ namespace DeltaBotFour.ServiceImplementations
 
             // Unaward to the parent comment
             await _subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
+
+            ConsoleHelper.WriteLine($"DeltaBot unawarded a delta -> user: {parentComment.AuthorName}", ConsoleColor.Green);
         }
     }
 }

@@ -22,6 +22,8 @@ namespace DeltaBotFour.ServiceImplementations
 
         public async void Start()
         {
+            ConsoleHelper.WriteLine("DB4QueueDispatcher: Running...", ConsoleColor.Green);
+
             // Process messages from the queue
             // This will run as long as the application is running
             await Task.Factory.StartNew(() =>

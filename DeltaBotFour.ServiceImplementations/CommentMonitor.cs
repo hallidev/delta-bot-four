@@ -4,6 +4,7 @@ using RedditSharp;
 using System.Threading;
 using System;
 using System.Linq;
+using Core.Foundation.Helpers;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -33,7 +34,12 @@ namespace DeltaBotFour.ServiceImplementations
 
             // Start monitoring
             monitorForComments();
+
+            ConsoleHelper.WriteLine("CommentMonitor: Started monitoring comments...", ConsoleColor.Green);
+
             monitorForEdits();
+
+            ConsoleHelper.WriteLine("CommentMonitor: Started monitoring edits...", ConsoleColor.Green);
         }
 
         public void Stop()
@@ -49,6 +55,7 @@ namespace DeltaBotFour.ServiceImplementations
             // This will run as long as the application is running
             using (commentsStream.Subscribe(_commentObserver))
             {
+                // TODO: Fix cancel
                 await commentsStream.Enumerate(_cancellationTokenSource.Token);
             }
         }
