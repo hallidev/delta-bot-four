@@ -22,6 +22,13 @@ namespace DeltaBotFour.ServiceImplementations
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
         public string WikiUrlUser => _configuration["wiki_url_user"];
         public Regex HiddenParamsRegex => new Regex(_configuration["hidden_params_regex"], RegexOptions.Singleline);
+        public string DefaultHiddenParamsComment => _configuration["default_hidden_params_comment"];
+        public Regex GetWikiLinkRegex(string subredditName, string contextNumber)
+        { 
+            return new Regex(_configuration["wiki_link_regex"]
+                .Replace(ReplaceTokens.SubredditToken, subredditName)
+                .Replace(ReplaceTokens.ContextNumberToken, contextNumber));
+        }
         public DeltaBotTemplateFiles TemplateFiles { get; private set; }
         public DeltaBotReplaceTokens ReplaceTokens { get; private set; }
         public DeltaBotReplies Replies { get; private set; }
@@ -81,6 +88,7 @@ namespace DeltaBotFour.ServiceImplementations
             public string SubredditToken => _configuration["replace_tokens:subreddit_token"];
             public string IssueCountToken => _configuration["replace_tokens:issue_count_token"];
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
+            public string ContextNumberToken => _configuration["replace_tokens:context_number_token"];
 
 
             public void Initialize(IConfigurationRoot configuration)

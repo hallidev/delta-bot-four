@@ -7,7 +7,7 @@ namespace DeltaBotFour.Models
         [JsonProperty("b")]
         public string PostLink { get; set; }
         [JsonProperty("dc")]
-        public string ThingShortId { get; set; }
+        public string CommentId { get; set; }
         [JsonProperty("t")]
         public string PostTitle { get; set; }
         [JsonProperty("ab")]

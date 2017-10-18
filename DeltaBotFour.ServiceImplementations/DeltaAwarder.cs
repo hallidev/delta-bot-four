@@ -18,7 +18,7 @@ namespace DeltaBotFour.ServiceImplementations
             _subreddit = subreddit;
         }
 
-        public async void Award(Comment comment, Comment parentComment)
+        public void Award(Comment comment, Comment parentComment)
         {
             if(_appConfiguration.ReadonlyMode) { return; }
 
@@ -26,7 +26,7 @@ namespace DeltaBotFour.ServiceImplementations
 
             // Award to the parent comment
             // TODO:uncomment
-            //await _subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
+            //_subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
 
             // Update wiki
             _wikiEditor.UpdateUserWikiEntryAward(comment, parentComment);
@@ -34,14 +34,14 @@ namespace DeltaBotFour.ServiceImplementations
             ConsoleHelper.WriteLine($"DeltaBot awarded a delta -> user: {parentComment.AuthorName}", ConsoleColor.Green);
         }
 
-        public async void Unaward(Comment comment, Comment parentComment)
+        public void Unaward(Comment comment, Comment parentComment)
         {
             if (_appConfiguration.ReadonlyMode) { return; }
 
             string newFlairText = DeltaHelper.GetDecrementedFlairText(parentComment.AuthorFlairText);
 
             // Unaward from the parent comment
-            await _subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
+            _subreddit.SetUserFlairAsync(parentComment.AuthorName, parentComment.AuthorFlairCssClass, newFlairText);
 
             // Update wiki
             _wikiEditor.UpdateUserWikiEntryUnaward(comment, parentComment);

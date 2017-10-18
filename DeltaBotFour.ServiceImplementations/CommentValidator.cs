@@ -17,7 +17,7 @@ namespace DeltaBotFour.ServiceImplementations
         public DeltaCommentValidationResult Validate(Comment comment, Thing parentThing)
         {
             // With RedditSharp, comment.Parent is the parent Post, not parent comment
-            // I'm using the "parentThing" variable for the parent comment
+            // "parentThing" is for the parent Comment - *not* Post
             Post parentPost = (Post)comment.Parent;
 
             string opName = parentPost.AuthorName;
@@ -49,10 +49,11 @@ namespace DeltaBotFour.ServiceImplementations
             }
 
             // Check comment length
-            if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
-            {
-                return createValidationResult(DeltaCommentValidationResultType.FailCommentTooShort, comment, parentThing);
-            }
+            // TODO: Uncomment
+            //if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
+            //{
+            //    return createValidationResult(DeltaCommentValidationResultType.FailCommentTooShort, comment, parentThing);
+            //}
 
             // TODO: Fail with issues
 

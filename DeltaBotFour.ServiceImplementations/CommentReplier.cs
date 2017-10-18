@@ -16,33 +16,33 @@ namespace DeltaBotFour.ServiceImplementations
             _appConfiguration = appConfiguration;
         }
 
-        public async void Reply(Comment comment, DeltaCommentValidationResult deltaCommentValidationResult)
+        public void Reply(Comment comment, DeltaCommentValidationResult deltaCommentValidationResult)
         {
             if (_appConfiguration.ReadonlyMode) { return; }
 
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
-            await comment.ReplyAsync(replyMessage);
+            comment.ReplyAsync(replyMessage);
 
             ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {comment.Shortlink}");
         }
 
-        public async void EditReply(Comment commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
+        public void EditReply(Comment commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
         {
             if (_appConfiguration.ReadonlyMode) { return; }
 
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
-            await commentToEdit.EditTextAsync(replyMessage);
+            commentToEdit.EditTextAsync(replyMessage);
 
             ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
-        public async void DeleteReply(Comment commentToDelete)
+        public void DeleteReply(Comment commentToDelete)
         {
             if (_appConfiguration.ReadonlyMode) { return; }
 
-            await commentToDelete.DelAsync();
+            commentToDelete.DelAsync();
 
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }
