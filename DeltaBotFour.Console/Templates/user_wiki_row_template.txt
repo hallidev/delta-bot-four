@@ -1,0 +1,1 @@
+﻿|{{datemmdyyyy}}|[{{posttitle}}]({{postlink}})|[Link]({{commentlink}})|{{username}}|

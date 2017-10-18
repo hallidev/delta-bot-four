@@ -1,0 +1,21 @@
+﻿[​](HTTP://DB3PARAMSSTART
+{{hiddenparams}}
+DB3PARAMSEND)
+#Delta History for {{username}}
+
+##Deltas Received
+
+/u/{{username}} has received {{deltasreceivedcount}} deltas:
+
+| Date | Submission | Delta Comment | Awarded By |
+| :------: | :------: | :------: | :------: |
+{{wikirowsreceived}}
+
+
+##Deltas Given
+
+/u/{{username}} has given {{deltasgivencount}} deltas:
+
+| Date | Submission | Delta Comment | Awarded To |
+| :------: | :------: | :------: | :------: |
+{{wikirowsgiven}}

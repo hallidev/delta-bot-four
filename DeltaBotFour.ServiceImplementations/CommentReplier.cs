@@ -18,6 +18,8 @@ namespace DeltaBotFour.ServiceImplementations
 
         public async void Reply(Comment comment, DeltaCommentValidationResult deltaCommentValidationResult)
         {
+            if (_appConfiguration.ReadonlyMode) { return; }
+
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             await comment.ReplyAsync(replyMessage);
@@ -27,6 +29,8 @@ namespace DeltaBotFour.ServiceImplementations
 
         public async void EditReply(Comment commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
         {
+            if (_appConfiguration.ReadonlyMode) { return; }
+
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             await commentToEdit.EditTextAsync(replyMessage);
@@ -36,6 +40,8 @@ namespace DeltaBotFour.ServiceImplementations
 
         public async void DeleteReply(Comment commentToDelete)
         {
+            if (_appConfiguration.ReadonlyMode) { return; }
+
             await commentToDelete.DelAsync();
 
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
@@ -46,7 +52,7 @@ namespace DeltaBotFour.ServiceImplementations
             if(string.IsNullOrEmpty(_replyTemplate))
             {
                 // Load reply template
-                _replyTemplate = File.ReadAllText(_appConfiguration.DB4ReplyTemplateFile);
+                _replyTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.DB4ReplyTemplateFile);
             }
 
             // TODO: Fix footer

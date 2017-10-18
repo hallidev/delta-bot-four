@@ -1,4 +1,5 @@
-﻿using DeltaBotFour.ServiceInterfaces;
+﻿using Core.Foundation.Helpers;
+using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
 using RedditSharp.Things;
 using System;

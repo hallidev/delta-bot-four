@@ -35,6 +35,16 @@ namespace DeltaBotFour.ServiceImplementations
             var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.ShortLink)).Result;
             var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
 
+            // TODO: Remove this if block
+            if (parentThing is Comment)
+            {
+                if (((Comment)parentThing).AuthorName != "hallidev")
+                {
+                    _deltaAwarder.Award(qualifiedComment, (Comment)parentThing);
+                    return;
+                }
+            }
+
             // Check for a delta
             if (_appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d)))
             {

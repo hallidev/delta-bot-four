@@ -55,8 +55,15 @@ namespace DeltaBotFour.ServiceImplementations
             // This will run as long as the application is running
             using (commentsStream.Subscribe(_commentObserver))
             {
-                // TODO: Fix cancel
-                await commentsStream.Enumerate(_cancellationTokenSource.Token);
+                try
+                {
+                    await commentsStream.Enumerate(_cancellationTokenSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
+                    ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                }
             }
         }
 
@@ -68,7 +75,15 @@ namespace DeltaBotFour.ServiceImplementations
             // This will run as long as the application is running
             using (editsStream.Subscribe(_commentObserver))
             {
-                await editsStream.Enumerate(_cancellationTokenSource.Token);
+                try
+                {
+                    await editsStream.Enumerate(_cancellationTokenSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
+                    ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                }
             }
         }
     }

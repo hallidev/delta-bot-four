@@ -42,7 +42,7 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<ICommentValidator, CommentValidator>();
             container.Register<ICommentReplier, CommentReplier>();
             container.Register<IDeltaAwarder, DeltaAwarder>();
-            container.Register<IWikiEditor, WikiEditor>();
+            container.Register<IUserWikiEditor, UserWikiEditor>();
         }
     }
 }
