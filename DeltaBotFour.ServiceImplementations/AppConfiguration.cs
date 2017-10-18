@@ -118,7 +118,6 @@ namespace DeltaBotFour.ServiceImplementations
                 SuccessReplies.Add(DeltaAwarded);
 
                 FailReplies = new List<string>();
-                FailReplies.Add(DeltaAwarded);
                 FailReplies.Add(CommentTooShort);
                 FailReplies.Add(CannotAwardOP);
                 FailReplies.Add(CannotAwardDeltaBot);
