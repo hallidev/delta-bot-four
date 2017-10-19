@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -28,7 +29,17 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void UpdateUserWikiEntryAward(Comment comment, Comment parentComment)
         {
-            if(string.IsNullOrEmpty(_userWikiTemplate))
+            performWikiPageUpdate(comment, parentComment, true);
+        }
+
+        public void UpdateUserWikiEntryUnaward(Comment comment, Comment parentComment)
+        {
+            performWikiPageUpdate(comment, parentComment, false);
+        }
+
+        private void performWikiPageUpdate(Comment comment, Comment parentComment, bool isAward)
+        {
+            if (string.IsNullOrEmpty(_userWikiTemplate))
             {
                 _userWikiTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.UserWikiTemplateFile);
             }
@@ -42,22 +53,17 @@ namespace DeltaBotFour.ServiceImplementations
             string receivingUserUrl = getUserWikiUrl(parentComment.AuthorName);
 
             // Get content for the user giving
-            string givingUserPageContent = buildUserPageContent(givingUserUrl, comment.AuthorName, parentComment.AuthorName, comment, true);
+            string givingUserPageContent = buildUserPageContent(givingUserUrl, comment.AuthorName, parentComment.AuthorName, comment, true, isAward);
 
             // Get content for the user receiving
-            string receivngUserPageContent = buildUserPageContent(receivingUserUrl, parentComment.AuthorName, comment.AuthorName, comment, false);
+            string receivngUserPageContent = buildUserPageContent(receivingUserUrl, parentComment.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
             _subreddit.GetWiki.EditPageAsync(givingUserUrl, givingUserPageContent);
             _subreddit.GetWiki.EditPageAsync(receivingUserUrl, receivngUserPageContent);
         }
 
-        public void UpdateUserWikiEntryUnaward(Comment comment, Comment parentComment)
-        {
-            
-        }
-
-        private string buildUserPageContent(string userUrl, string username, string toUsername, Comment commentToBuildLinkFor, bool giving)
+        private string buildUserPageContent(string userUrl, string username, string toUsername, Comment commentToBuildLinkFor, bool giving, bool isAward)
         {
             // Get page content
             var wiki = _subreddit.GetWiki;
@@ -112,11 +118,31 @@ namespace DeltaBotFour.ServiceImplementations
             // Add new info to hidden params
             if(giving)
             {
-                wikiHiddenParams.DeltasGiven.Add(getUserWikiDeltaInfo(commentToBuildLinkFor, (Post)commentToBuildLinkFor.Parent, toUsername));
+                if (isAward)
+                {
+                    // Award delta given
+                    wikiHiddenParams.DeltasGiven.Add(getUserWikiDeltaInfo(commentToBuildLinkFor, (Post)commentToBuildLinkFor.Parent, toUsername));
+                }
+                else
+                {
+                    // Unaward delta given
+                    UserWikiDeltaInfo deltaInfo = wikiHiddenParams.DeltasGiven.First(d => d.CommentId == commentToBuildLinkFor.Id);
+                    wikiHiddenParams.DeltasGiven.Remove(deltaInfo);
+                }
             }
             else
             {
-                wikiHiddenParams.DeltasReceived.Add(getUserWikiDeltaInfo(commentToBuildLinkFor, (Post)commentToBuildLinkFor.Parent, toUsername));
+                if (isAward)
+                {
+                    // Award delta received
+                    wikiHiddenParams.DeltasReceived.Add(getUserWikiDeltaInfo(commentToBuildLinkFor, (Post)commentToBuildLinkFor.Parent, toUsername));
+                }
+                else
+                {
+                    // Unaward delta received
+                    UserWikiDeltaInfo deltaInfo = wikiHiddenParams.DeltasReceived.First(d => d.CommentId == commentToBuildLinkFor.Id);
+                    wikiHiddenParams.DeltasReceived.Remove(deltaInfo);
+                }
             }
 
             // Reconstruct content based on hidden params
@@ -142,6 +168,7 @@ namespace DeltaBotFour.ServiceImplementations
 
         private string getRowsContent(List<UserWikiDeltaInfo> deltaInfos, string toUsername, string contextNumber)
         {
+            // Convert hidden params into rows of text
             string rowsContent = string.Empty;
 
             foreach (var deltaInfo in deltaInfos)
@@ -165,6 +192,8 @@ namespace DeltaBotFour.ServiceImplementations
 
             foreach (string fullname in fullnames)
             {
+                // The /r/subreddit/api/info call isn't wrapped by RedditSharp. This gets us the info
+                // we need but is chatty. This is a rare edge case anyhow (where the HiddenParams don't exist)
                 Comment unqualifiedComment = (Comment)_reddit.GetThingByFullnameAsync(fullname).Result;
                 Post parentPost = (Post)_reddit.GetThingByFullnameAsync(unqualifiedComment.LinkId).Result;
                 deltaInfos.Add(getUserWikiDeltaInfo(unqualifiedComment, parentPost, toUsername));
