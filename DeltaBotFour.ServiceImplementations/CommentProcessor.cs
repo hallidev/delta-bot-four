@@ -30,62 +30,67 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void Process(DB4Comment comment)
         {
-            // Comments and edits need to be checked for replies and edits.
-            // qualifiedComment will have all children populated
-            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.ShortLink)).Result;
-            var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
-
             // Check for a delta
-            if (_appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d)))
+            bool hasDeltas = _appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d));
+
+            if (hasDeltas || comment.IsEdited)
             {
-                string edited = string.Empty;
+                // Comments and edits need to be checked for replies and edits.
+                // qualifiedComment will have all children populated
+                var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.ShortLink)).Result;
+                var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
 
-                // Check to see if db4 has already replied
-                var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
-
-                // If DB4 hasn't replied, or if it did but this is an edit, perform comment logic
-                if (!db4ReplyResult.HasDB4Replied)
+                if (hasDeltas)
                 {
-                    // Validate comment and award delta if successful
-                    var commentValidationResult = validateAndAward(qualifiedComment, parentThing);
+                    string edited = string.Empty;
 
-                    // Post a reply with the result
-                    _commentReplier.Reply(qualifiedComment, commentValidationResult);
-                }
-                else
-                {
-                    // DB4 already replied. If DB4's reply was a fail reply, check to see if this delta
-                    // now passes validation. If it does, edit the old reply to be a success reply
-                    if(!db4ReplyResult.WasSuccessReply)
+                    // Check to see if db4 has already replied
+                    var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
+
+                    // If DB4 hasn't replied, or if it did but this is an edit, perform comment logic
+                    if (!db4ReplyResult.HasDB4Replied)
                     {
                         // Validate comment and award delta if successful
                         var commentValidationResult = validateAndAward(qualifiedComment, parentThing);
 
-                        // Edit the result to reflect new delta comment
-                        _commentReplier.EditReply(db4ReplyResult.Comment, commentValidationResult);
+                        // Post a reply with the result
+                        _commentReplier.Reply(qualifiedComment, commentValidationResult);
+                    }
+                    else
+                    {
+                        // DB4 already replied. If DB4's reply was a fail reply, check to see if this delta
+                        // now passes validation. If it does, edit the old reply to be a success reply
+                        if (!db4ReplyResult.WasSuccessReply)
+                        {
+                            // Validate comment and award delta if successful
+                            var commentValidationResult = validateAndAward(qualifiedComment, parentThing);
+
+                            // Edit the result to reflect new delta comment
+                            _commentReplier.EditReply(db4ReplyResult.Comment, commentValidationResult);
+                        }
                     }
                 }
-            }
-            else if(comment.IsEdited)
-            {
-                // There is no delta. Check if DB4 replied. This means that
-                // there was a delta previously. If the comment is less than HoursToRemoveDelta hours old, the delta
-                // can be removed.
-
-                // Check to see if db4 has replied
-                var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
-
-                // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
-                if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && qualifiedComment.CreatedUTC < DateTime.Now.AddHours(-_appConfiguration.HoursToUnawardDelta))
+                else if (comment.IsEdited)
                 {
-                    // Unaward
-                    // parentThing can safely be cast to Comment here - we could have only
-                    // gotten here if a delta was previously awarded, meaning the parent of this
-                    // Comment is a Comment also
-                    _deltaAwarder.Unaward(qualifiedComment, (Comment)parentThing);
+                    // There is no delta. Check if DB4 replied. This means that
+                    // there was a delta previously. If the comment is less than HoursToRemoveDelta hours old, the delta
+                    // can be removed.
 
-                    // Delete award comment
-                    _commentReplier.DeleteReply(db4ReplyResult.Comment);
+                    // Check to see if db4 has replied
+                    var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
+
+                    // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
+                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && qualifiedComment.CreatedUTC < DateTime.Now.AddHours(-_appConfiguration.HoursToUnawardDelta))
+                    {
+                        // Unaward
+                        // parentThing can safely be cast to Comment here - we could have only
+                        // gotten here if a delta was previously awarded, meaning the parent of this
+                        // Comment is a Comment also
+                        _deltaAwarder.Unaward(qualifiedComment, (Comment)parentThing);
+
+                        // Delete award comment
+                        _commentReplier.DeleteReply(db4ReplyResult.Comment);
+                    }
                 }
             }
         }

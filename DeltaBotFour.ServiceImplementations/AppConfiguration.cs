@@ -17,7 +17,6 @@ namespace DeltaBotFour.ServiceImplementations
         public string DB4ClientSecret => _configuration["db4_client_secret"];
         public string RedditBaseUrl => _configuration["reddit_base_url"];
         public string SubredditName => _configuration["subreddit_name"];
-        public bool ReadonlyMode => bool.Parse(_configuration["readonly_mode"]);
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
         public string WikiUrlUser => _configuration["wiki_url_user"];

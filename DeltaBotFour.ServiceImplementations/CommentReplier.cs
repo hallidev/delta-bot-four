@@ -18,8 +18,6 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void Reply(Comment comment, DeltaCommentValidationResult deltaCommentValidationResult)
         {
-            if (_appConfiguration.ReadonlyMode) { return; }
-
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             comment.ReplyAsync(replyMessage);
@@ -29,8 +27,6 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void EditReply(Comment commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
         {
-            if (_appConfiguration.ReadonlyMode) { return; }
-
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
             commentToEdit.EditTextAsync(replyMessage);
@@ -40,8 +36,6 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void DeleteReply(Comment commentToDelete)
         {
-            if (_appConfiguration.ReadonlyMode) { return; }
-
             commentToDelete.DelAsync();
 
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");

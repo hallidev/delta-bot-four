@@ -7,21 +7,17 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class DeltaAwarder : IDeltaAwarder
     {
-        private readonly AppConfiguration _appConfiguration;
         private readonly IUserWikiEditor _wikiEditor;
         private readonly Subreddit _subreddit;
 
-        public DeltaAwarder(AppConfiguration appConfiguration, IUserWikiEditor wikiEditor, Subreddit subreddit)
+        public DeltaAwarder(IUserWikiEditor wikiEditor, Subreddit subreddit)
         {
-            _appConfiguration = appConfiguration;
             _wikiEditor = wikiEditor;
             _subreddit = subreddit;
         }
 
         public void Award(Comment comment, Comment parentComment)
         {
-            if(_appConfiguration.ReadonlyMode) { return; }
-
             string newFlairText = DeltaHelper.GetIncrementedFlairText(parentComment.AuthorFlairText);
 
             // Award to the parent comment
@@ -36,8 +32,6 @@ namespace DeltaBotFour.ServiceImplementations
 
         public void Unaward(Comment comment, Comment parentComment)
         {
-            if (_appConfiguration.ReadonlyMode) { return; }
-
             string newFlairText = DeltaHelper.GetDecrementedFlairText(parentComment.AuthorFlairText);
 
             // Unaward from the parent comment
