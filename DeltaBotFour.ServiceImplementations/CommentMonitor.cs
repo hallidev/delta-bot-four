@@ -3,6 +3,7 @@ using RedditSharp.Things;
 using System.Threading;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Core.Foundation.Helpers;
 
 namespace DeltaBotFour.ServiceImplementations
@@ -55,6 +56,10 @@ namespace DeltaBotFour.ServiceImplementations
                 {
                     await commentsStream.Enumerate(_cancellationTokenSource.Token);
                 }
+                catch (TaskCanceledException)
+                {
+                    // User cancelled, swallow
+                }
                 catch (Exception ex)
                 {
                     // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
@@ -74,6 +79,10 @@ namespace DeltaBotFour.ServiceImplementations
                 try
                 {
                     await editsStream.Enumerate(_cancellationTokenSource.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    // User cancelled, swallow
                 }
                 catch (Exception ex)
                 {

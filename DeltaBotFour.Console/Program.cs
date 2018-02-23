@@ -23,6 +23,8 @@ namespace DeltaBotFour.Console
                 .FirstOrDefault(arg => arg.ToLower().Trim().Contains(ModeArg))?
                 .Split(ArgDelimiter)[1];
 
+            mode = CommentMonitorMode;
+
             if (string.IsNullOrEmpty(mode))
             {
                 System.Console.WriteLine("The 'mode' argument must be specified. Valid modes are 'commentmonitor', 'deltaboard'.");
@@ -49,8 +51,10 @@ namespace DeltaBotFour.Console
                         {
                             commentMonitor.Stop();
                             queueDispatcher.Stop();
+                            break;
                         }
                     }
+                    break;
                 case DeltaboardMode:
                     break;
                 default:
