@@ -9,7 +9,7 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class AppConfiguration
     {
-        private IConfigurationRoot _configuration;
+        private readonly IConfigurationRoot _configuration;
 
         public string DB4Username => _configuration["db4_username"];
         public string DB4Password => _configuration["db4_password"];
@@ -28,10 +28,10 @@ namespace DeltaBotFour.ServiceImplementations
                 .Replace(ReplaceTokens.SubredditToken, subredditName)
                 .Replace(ReplaceTokens.ContextNumberToken, contextNumber));
         }
-        public DeltaBotTemplateFiles TemplateFiles { get; private set; }
-        public DeltaBotReplaceTokens ReplaceTokens { get; private set; }
-        public DeltaBotReplies Replies { get; private set; }
-        public DeltaBotValidationValues ValidationValues { get; private set; }
+        public DeltaBotTemplateFiles TemplateFiles { get; }
+        public DeltaBotReplaceTokens ReplaceTokens { get; }
+        public DeltaBotReplies Replies { get; }
+        public DeltaBotValidationValues ValidationValues { get; }
 
         public AppConfiguration()
         {
@@ -88,7 +88,6 @@ namespace DeltaBotFour.ServiceImplementations
             public string IssueCountToken => _configuration["replace_tokens:issue_count_token"];
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
             public string ContextNumberToken => _configuration["replace_tokens:context_number_token"];
-
 
             public void Initialize(IConfigurationRoot configuration)
             {

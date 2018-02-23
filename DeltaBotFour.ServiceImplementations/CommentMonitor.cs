@@ -1,6 +1,5 @@
 ﻿using DeltaBotFour.ServiceInterfaces;
 using RedditSharp.Things;
-using RedditSharp;
 using System.Threading;
 using System;
 using System.Linq;
@@ -10,17 +9,14 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentMonitor : ICommentMonitor
     {
-        private Reddit _reddit;
-        private Subreddit _subreddit;
-        private IObserver<VotableThing> _commentObserver;
-        private ICommentDispatcher _commentDispatcher;
+        private readonly Subreddit _subreddit;
+        private readonly IObserver<VotableThing> _commentObserver;
+        private readonly ICommentDispatcher _commentDispatcher;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-
-        public CommentMonitor(Reddit reddit, Subreddit subreddit, IObserver<VotableThing> commentObserver,
+        public CommentMonitor(Subreddit subreddit, IObserver<VotableThing> commentObserver,
             ICommentDispatcher commentDispatcher)
         {
-            _reddit = reddit;
             _subreddit = subreddit;
             _commentObserver = commentObserver;
             _commentDispatcher = commentDispatcher;
