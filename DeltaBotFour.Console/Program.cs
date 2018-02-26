@@ -2,6 +2,7 @@
 using DeltaBotFour.ServiceInterfaces;
 using System;
 using System.Linq;
+using DeltaBotFour.Models;
 
 namespace DeltaBotFour.Console
 {
@@ -23,7 +24,7 @@ namespace DeltaBotFour.Console
                 .FirstOrDefault(arg => arg.ToLower().Trim().Contains(ModeArg))?
                 .Split(ArgDelimiter)[1];
 
-            mode = CommentMonitorMode;
+            mode = DeltaboardMode;
 
             if (string.IsNullOrEmpty(mode))
             {
@@ -56,6 +57,8 @@ namespace DeltaBotFour.Console
                     }
                     break;
                 case DeltaboardMode:
+                    var deltaboardBuilder = _container.Resolve<IDeltaboardBuilder>();
+                    deltaboardBuilder.Build(DeltaboardType.Daily);
                     break;
                 default:
                     System.Console.WriteLine($"Unknown mode '{mode}'.");
