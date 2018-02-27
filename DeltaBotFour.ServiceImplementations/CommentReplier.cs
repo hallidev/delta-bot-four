@@ -8,7 +8,7 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentReplier : ICommentReplier
     {
-        private AppConfiguration _appConfiguration;
+        private readonly AppConfiguration _appConfiguration;
         private string _replyTemplate;
 
         public CommentReplier(AppConfiguration appConfiguration)

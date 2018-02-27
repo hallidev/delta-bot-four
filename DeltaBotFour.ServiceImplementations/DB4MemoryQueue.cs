@@ -7,12 +7,7 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class DB4MemoryQueue : IDB4Queue
     {
-        private Queue _queue = new Queue();
-
-        public DB4MemoryQueue()
-        {
-
-        }
+        private readonly Queue _queue = new Queue();
 
         public void Push(QueueMessage message)
         {

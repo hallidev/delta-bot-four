@@ -9,12 +9,12 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentProcessor : ICommentProcessor
     {
-        private AppConfiguration _appConfiguration;
-        private Reddit _reddit;
-        private ICommentValidator _commentValidator;
-        private ICommentReplyDetector _commentReplyDetector;
-        private IDeltaAwarder _deltaAwarder;
-        private ICommentReplier _commentReplier;
+        private readonly AppConfiguration _appConfiguration;
+        private readonly Reddit _reddit;
+        private readonly ICommentValidator _commentValidator;
+        private readonly ICommentReplyDetector _commentReplyDetector;
+        private readonly IDeltaAwarder _deltaAwarder;
+        private readonly ICommentReplier _commentReplier;
 
         public CommentProcessor(AppConfiguration appConfiguration, Reddit reddit,
             ICommentValidator commentValidator, ICommentReplyDetector commentReplyDetector,
@@ -42,8 +42,6 @@ namespace DeltaBotFour.ServiceImplementations
 
                 if (hasDeltas)
                 {
-                    string edited = string.Empty;
-
                     // Check to see if db4 has already replied
                     var db4ReplyResult = _commentReplyDetector.DidDB4Reply(qualifiedComment);
 

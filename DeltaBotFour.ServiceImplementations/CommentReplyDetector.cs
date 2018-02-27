@@ -10,23 +10,23 @@ namespace DeltaBotFour.ServiceImplementations
     {
         private const string TOKEN_MATCH_REGEX = ".+";
 
-        private AppConfiguration _appConfiguration;
-        private List<Regex> _successReplyRegexes = new List<Regex>();
-        private List<Regex> _failReplyRegexes = new List<Regex>();
+        private readonly AppConfiguration _appConfiguration;
+        private readonly List<Regex> _successReplyRegexes = new List<Regex>();
+        private readonly List<Regex> _failReplyRegexes = new List<Regex>();
 
         public CommentReplyDetector(AppConfiguration appConfiguration)
         {
             _appConfiguration = appConfiguration;
 
             // Replace all possible replies with a regex for matching
-            foreach (string db4reply in _appConfiguration.Replies.SuccessReplies)
+            foreach (string db4Reply in _appConfiguration.Replies.SuccessReplies)
             {
-                _successReplyRegexes.Add(new Regex(getPattern(db4reply)));
+                _successReplyRegexes.Add(new Regex(getPattern(db4Reply)));
             }
 
-            foreach (string db4reply in _appConfiguration.Replies.FailReplies)
+            foreach (string db4Reply in _appConfiguration.Replies.FailReplies)
             {
-                _failReplyRegexes.Add(new Regex(getPattern(db4reply)));
+                _failReplyRegexes.Add(new Regex(getPattern(db4Reply)));
             }
         }
 

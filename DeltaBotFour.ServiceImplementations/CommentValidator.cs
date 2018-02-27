@@ -7,7 +7,7 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class CommentValidator : ICommentValidator
     {
-        private AppConfiguration _appConfiguration;
+        private readonly AppConfiguration _appConfiguration;
 
         public CommentValidator(AppConfiguration appConfiguration)
         {

@@ -1,13 +1,14 @@
 ﻿using DeltaBotFour.Models;
 using DeltaBotFour.ServiceInterfaces;
 using Newtonsoft.Json;
-using RedditSharp;
-using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Linq;
+using DeltaBotFour.ServiceInterfaces.RedditServices;
+using RedditSharp;
+using RedditSharp.Things;
 
 namespace DeltaBotFour.ServiceImplementations
 {
@@ -18,13 +19,13 @@ namespace DeltaBotFour.ServiceImplementations
 
         private readonly AppConfiguration _appConfiguration;
         private readonly Reddit _reddit;
-        private readonly Subreddit _subreddit;
+        private readonly IWikiEditor _wikiEditor;
 
-        public UserWikiEditor(AppConfiguration appConfiguration, Reddit reddit, Subreddit subreddit)
+        public UserWikiEditor(AppConfiguration appConfiguration, Reddit reddit, IWikiEditor wikiEditor)
         {
             _appConfiguration = appConfiguration;
             _reddit = reddit;
-            _subreddit = subreddit;
+            _wikiEditor = wikiEditor;
         }
 
         public void UpdateUserWikiEntryAward(Comment comment, Comment parentComment)
@@ -59,27 +60,26 @@ namespace DeltaBotFour.ServiceImplementations
             string receivngUserPageContent = buildUserPageContent(receivingUserUrl, parentComment.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
-            _subreddit.GetWiki.EditPageAsync(givingUserUrl, givingUserPageContent);
-            _subreddit.GetWiki.EditPageAsync(receivingUserUrl, receivngUserPageContent);
+            _wikiEditor.EditPage(givingUserUrl, givingUserPageContent);
+            _wikiEditor.EditPage(receivingUserUrl, receivngUserPageContent);
         }
 
         private string buildUserPageContent(string userUrl, string username, string toUsername, Comment commentToBuildLinkFor, bool giving, bool isAward)
         {
             // Get page content
-            var wiki = _subreddit.GetWiki;
-            var userPage = wiki.GetPageAsync(userUrl).Result;
+            string pageContent = _wikiEditor.GetPage(userUrl);
 
             // Find and deserialize hidden params
-            var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(userPage.MarkdownContent);
+            var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
 
-            UserWikiHiddenParams wikiHiddenParams = null;
+            UserWikiHiddenParams wikiHiddenParams;
 
             // If a hidden params section wasn't found, make one
             // Note: the second group is actually the hidden params, so count == 1 means it wasn't found
             if(hiddenParamsMatch.Groups.Count == 1)
             {
-                var givenLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "3").Matches(userPage.MarkdownContent); // 3 = Given
-                var receivedLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "2").Matches(userPage.MarkdownContent); // 2 = Received
+                var givenLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "3").Matches(pageContent); // 3 = Given
+                var receivedLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "2").Matches(pageContent); // 2 = Received
 
                 // Get fullnames of given links
                 List<string> givenLinkFullnames = new List<string>();

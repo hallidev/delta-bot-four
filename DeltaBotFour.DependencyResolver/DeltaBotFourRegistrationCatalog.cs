@@ -4,6 +4,8 @@ using DeltaBotFour.ServiceInterfaces;
 using RedditSharp;
 using RedditSharp.Things;
 using System;
+using DeltaBotFour.ServiceImplementations.RedditServices;
+using DeltaBotFour.ServiceInterfaces.RedditServices;
 
 namespace DeltaBotFour.DependencyResolver
 {
@@ -31,12 +33,15 @@ namespace DeltaBotFour.DependencyResolver
             container.RegisterSingleton(reddit);
             container.RegisterSingleton(subreddit);
 
+            // Register Reddit Services
+            container.Register<ICommentDispatcher, RedditSharpCommentDispatcher>();
+            container.Register<ICommentMonitor, RedditSharpCommentMonitor>();
+            container.Register<IFlairEditor, RedditSharpFlairEditor>();
+            container.Register<IWikiEditor, RedditSharpWikiEditor>();
+
             // Register functionality implementations
             container.Register<IDB4Queue, DB4MemoryQueue>();
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
-            container.Register<ICommentMonitor, CommentMonitor>();
-            container.Register<ICommentDispatcher, CommentDispatcher>();
-            container.Register<IObserver<VotableThing>, IncomingCommentObserver>();
             container.Register<ICommentProcessor, CommentProcessor>();
             container.Register<ICommentReplyDetector, CommentReplyDetector>();
             container.Register<ICommentValidator, CommentValidator>();

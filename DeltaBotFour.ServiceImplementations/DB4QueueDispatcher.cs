@@ -10,9 +10,9 @@ namespace DeltaBotFour.ServiceImplementations
 {
     public class DB4QueueDispatcher : IDB4QueueDispatcher
     {
-        private IDB4Queue _queue;
-        private ICommentProcessor _commentProcessor;
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly IDB4Queue _queue;
+        private readonly ICommentProcessor _commentProcessor;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public DB4QueueDispatcher(IDB4Queue queue, ICommentProcessor commentProcessor)
         {

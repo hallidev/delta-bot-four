@@ -1,18 +1,18 @@
-﻿using DeltaBotFour.ServiceInterfaces;
-using RedditSharp.Things;
-using DeltaBotFour.Models;
+﻿using DeltaBotFour.Models;
+using DeltaBotFour.ServiceInterfaces;
 using Newtonsoft.Json;
+using RedditSharp.Things;
 
-namespace DeltaBotFour.ServiceImplementations
+namespace DeltaBotFour.ServiceImplementations.RedditServices
 {
-    public class CommentDispatcher : ICommentDispatcher
+    public class RedditSharpCommentDispatcher : ICommentDispatcher
     {
         private string SHORT_LINK_FROM = "www.reddit.com";
         private string SHORT_LINK_TO = "oauth.reddit.com";
 
-        private IDB4Queue _queue;
+        private readonly IDB4Queue _queue;
 
-        public CommentDispatcher(IDB4Queue queue)
+        public RedditSharpCommentDispatcher(IDB4Queue queue)
         {
             _queue = queue;
         }

@@ -1,26 +1,26 @@
-﻿using DeltaBotFour.ServiceInterfaces;
-using RedditSharp.Things;
-using System.Threading;
-using System;
+﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Core.Foundation.Helpers;
+using DeltaBotFour.ServiceInterfaces;
+using RedditSharp.Things;
 
-namespace DeltaBotFour.ServiceImplementations
+namespace DeltaBotFour.ServiceImplementations.RedditServices
 {
-    public class CommentMonitor : ICommentMonitor
+    public class RedditSharpCommentMonitor : ICommentMonitor
     {
         private readonly Subreddit _subreddit;
-        private readonly IObserver<VotableThing> _commentObserver;
         private readonly ICommentDispatcher _commentDispatcher;
+        private readonly IObserver<VotableThing> _commentObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        
 
-        public CommentMonitor(Subreddit subreddit, IObserver<VotableThing> commentObserver,
-            ICommentDispatcher commentDispatcher)
+        public RedditSharpCommentMonitor(Subreddit subreddit, ICommentDispatcher commentDispatcher)
         {
             _subreddit = subreddit;
-            _commentObserver = commentObserver;
             _commentDispatcher = commentDispatcher;
+            _commentObserver = new IncomingCommentObserver(commentDispatcher);
         }
 
         public void Start()
@@ -89,6 +89,34 @@ namespace DeltaBotFour.ServiceImplementations
                     // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
                     ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
                 }
+            }
+        }
+
+        private class IncomingCommentObserver : IObserver<VotableThing>
+        {
+            private readonly ICommentDispatcher _commentDispatcher;
+
+            public IncomingCommentObserver(ICommentDispatcher commentDispatcher)
+            {
+                _commentDispatcher = commentDispatcher;
+            }
+
+            public void OnCompleted()
+            {
+
+            }
+
+            public void OnError(Exception error)
+            {
+
+            }
+
+            public void OnNext(VotableThing votableThing)
+            {
+                // We are only observing comments
+                if (!(votableThing is Comment comment)) { return; }
+
+                _commentDispatcher.SendToQueue(comment);
             }
         }
     }
