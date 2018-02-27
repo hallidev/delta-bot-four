@@ -1,9 +1,9 @@
-﻿using DeltaBotFour.Models;
-using DeltaBotFour.ServiceInterfaces;
+﻿using System.Collections;
+using DeltaBotFour.Models;
+using DeltaBotFour.Shared.Interface;
 using Newtonsoft.Json;
-using System.Collections;
 
-namespace DeltaBotFour.ServiceImplementations
+namespace DeltaBotFour.Shared.Implementation
 {
     public class DB4MemoryQueue : IDB4Queue
     {

@@ -1,10 +1,9 @@
 ﻿using DeltaBotFour.Models;
-using RedditSharp.Things;
 
 namespace DeltaBotFour.ServiceInterfaces
 {
     public interface ICommentValidator
     {
-        DeltaCommentValidationResult Validate(Comment comment, Thing parentThing);
+        DeltaCommentValidationResult Validate(DB4Thing comment, DB4Thing parentThing);
     }
 }

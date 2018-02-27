@@ -1,6 +1,6 @@
 ﻿using RedditSharp.Things;
 
-namespace DeltaBotFour.ServiceInterfaces
+namespace DeltaBotFour.Reddit.Interface
 {
     public interface ICommentDispatcher
     {

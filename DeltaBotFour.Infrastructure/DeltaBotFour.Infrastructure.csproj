@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
   </ItemGroup>
@@ -14,7 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
-    <ProjectReference Include="..\DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj" />
   </ItemGroup>
 
 </Project>

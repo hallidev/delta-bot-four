@@ -1,12 +1,13 @@
-﻿using Core.Foundation.Helpers;
-using DeltaBotFour.Models;
-using DeltaBotFour.ServiceInterfaces;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Foundation.Helpers;
+using DeltaBotFour.Infrastructure.Interface;
+using DeltaBotFour.Models;
+using DeltaBotFour.Shared.Interface;
+using Newtonsoft.Json;
 
-namespace DeltaBotFour.ServiceImplementations
+namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class DB4QueueDispatcher : IDB4QueueDispatcher
     {

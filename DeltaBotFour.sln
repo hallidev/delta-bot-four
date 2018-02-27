@@ -15,11 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{47E2F6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Models", "DeltaBotFour.Models\DeltaBotFour.Models.csproj", "{B0C635FC-A97D-482F-9E41-2C7CE095857F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.ServiceInterfaces", "DeltaBotFour.ServiceInterfaces\DeltaBotFour.ServiceInterfaces.csproj", "{D7AA7CB6-F0D2-4D2F-A796-A6B43A89DDA2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.ServiceImplementations", "DeltaBotFour.ServiceImplementations\DeltaBotFour.ServiceImplementations.csproj", "{547C487A-3D4E-428F-A5D7-BB986D84675C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.DependencyResolver", "DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj", "{70D357B4-68F1-4277-91B7-04E3B1BA2B48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Reddit", "DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj", "{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Infrastructure", "DeltaBotFour.Infrastructure\DeltaBotFour.Infrastructure.csproj", "{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Shared", "DeltaBotFour.Shared\DeltaBotFour.Shared.csproj", "{7C6E2364-6794-475D-9F83-7F1C138CEA97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,18 +45,22 @@ Global
 		{B0C635FC-A97D-482F-9E41-2C7CE095857F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0C635FC-A97D-482F-9E41-2C7CE095857F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0C635FC-A97D-482F-9E41-2C7CE095857F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7AA7CB6-F0D2-4D2F-A796-A6B43A89DDA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7AA7CB6-F0D2-4D2F-A796-A6B43A89DDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7AA7CB6-F0D2-4D2F-A796-A6B43A89DDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7AA7CB6-F0D2-4D2F-A796-A6B43A89DDA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{547C487A-3D4E-428F-A5D7-BB986D84675C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{547C487A-3D4E-428F-A5D7-BB986D84675C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{547C487A-3D4E-428F-A5D7-BB986D84675C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{547C487A-3D4E-428F-A5D7-BB986D84675C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70D357B4-68F1-4277-91B7-04E3B1BA2B48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

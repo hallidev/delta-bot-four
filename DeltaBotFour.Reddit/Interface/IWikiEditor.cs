@@ -1,4 +1,4 @@
-﻿namespace DeltaBotFour.ServiceInterfaces.RedditServices
+﻿namespace DeltaBotFour.Reddit.Interface
 {
     public interface IWikiEditor
     {

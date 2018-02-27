@@ -1,4 +1,4 @@
-﻿namespace DeltaBotFour.ServiceInterfaces
+﻿namespace DeltaBotFour.Reddit.Interface
 {
     public interface ICommentMonitor
     {

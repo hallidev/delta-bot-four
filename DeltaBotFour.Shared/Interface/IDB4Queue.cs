@@ -1,6 +1,6 @@
 ﻿using DeltaBotFour.Models;
 
-namespace DeltaBotFour.ServiceInterfaces
+namespace DeltaBotFour.Shared.Interface
 {
     public interface IDB4Queue
     {

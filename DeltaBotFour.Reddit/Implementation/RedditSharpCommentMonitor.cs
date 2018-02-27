@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Foundation.Helpers;
-using DeltaBotFour.ServiceInterfaces;
+using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
 
-namespace DeltaBotFour.ServiceImplementations.RedditServices
+namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpCommentMonitor : ICommentMonitor
     {
@@ -14,7 +14,6 @@ namespace DeltaBotFour.ServiceImplementations.RedditServices
         private readonly ICommentDispatcher _commentDispatcher;
         private readonly IObserver<VotableThing> _commentObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        
 
         public RedditSharpCommentMonitor(Subreddit subreddit, ICommentDispatcher commentDispatcher)
         {

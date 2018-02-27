@@ -1,8 +1,9 @@
 ﻿using DeltaBotFour.DependencyResolver;
-using DeltaBotFour.ServiceInterfaces;
 using System;
 using System.Linq;
+using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
+using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Console
 {

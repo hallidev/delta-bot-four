@@ -1,6 +1,6 @@
 ﻿using DeltaBotFour.Models;
 
-namespace DeltaBotFour.ServiceInterfaces
+namespace DeltaBotFour.Infrastructure.Interface
 {
     public interface ICommentReplier
     {

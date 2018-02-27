@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using DeltaBotFour.ServiceInterfaces.RedditServices;
+using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
 
-namespace DeltaBotFour.ServiceImplementations.RedditServices
+namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpFlairEditor : IFlairEditor
     {

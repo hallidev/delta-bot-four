@@ -1,10 +1,10 @@
-﻿using RedditSharp.Things;
+﻿using DeltaBotFour.Models;
 
 namespace DeltaBotFour.ServiceInterfaces
 {
     public interface IUserWikiEditor
     {
-        void UpdateUserWikiEntryAward(Comment comment, Comment parentComment);
-        void UpdateUserWikiEntryUnaward(Comment comment, Comment parentComment);
+        void UpdateUserWikiEntryAward(DB4Thing comment, DB4Thing parentComment);
+        void UpdateUserWikiEntryUnaward(DB4Thing comment, DB4Thing parentComment);
     }
 }
