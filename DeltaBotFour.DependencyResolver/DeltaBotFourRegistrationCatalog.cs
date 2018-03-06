@@ -16,13 +16,15 @@ namespace DeltaBotFour.DependencyResolver
         {
             var appConfiguration = new AppConfiguration();
 
+            // Actual login is performed here.
+            // TODO: This should be abstracted away as well
             var botWebAgent = new BotWebAgent
             (
-                username: appConfiguration.DB4Username,
-                password: appConfiguration.DB4Password,
-                clientID: appConfiguration.DB4ClientId,
-                clientSecret: appConfiguration.DB4ClientSecret,
-                redirectURI: "http://localhost"
+                appConfiguration.DB4Username,
+                appConfiguration.DB4Password,
+                appConfiguration.DB4ClientId,
+                appConfiguration.DB4ClientSecret,
+                 "http://localhost"
             );
 
             var reddit = new RedditSharp.Reddit(botWebAgent, false);

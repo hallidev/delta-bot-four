@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
@@ -21,36 +22,45 @@ namespace DeltaBotFour.Reddit.Implementation
             var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
 
             // Set parent post
-            comment.ParentPost = CommentConverter.Convert(qualifiedComment.Parent);
+            comment.ParentPost = RedditThingConverter.Convert(qualifiedComment.Parent);
 
             // Convert immediate children only
             var childComments = new List<DB4Thing>();
 
             foreach (Comment childComment in qualifiedComment.Comments)
             {
-                childComments.Add(CommentConverter.Convert(childComment));
+                childComments.Add(RedditThingConverter.Convert(childComment));
             }
 
             comment.Comments = childComments;
 
             // Get the parent thing - this could be the same as ParentPost above or it could be a comment
             var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
-            comment.ParentThing = CommentConverter.Convert(parentThing);
+            comment.ParentThing = RedditThingConverter.Convert(parentThing);
+        }
+
+        public DB4Thing GetThingByFullname(string fullname)
+        {
+            var unqualifiedComment = _reddit.GetThingByFullnameAsync(fullname).Result;
+            return RedditThingConverter.Convert(unqualifiedComment);
         }
 
         public void ReplyToComment(DB4Thing comment, string reply)
         {
-            throw new System.NotImplementedException();
+            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            Task.Run(async () => await qualifiedComment.ReplyAsync(reply));
         }
 
         public void EditComment(DB4Thing comment, string editedComment)
         {
-            throw new System.NotImplementedException();
+            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment));
         }
 
         public void DeleteComment(DB4Thing comment)
         {
-            throw new System.NotImplementedException();
+            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            Task.Run(async () => await qualifiedComment.DelAsync());
         }
     }
 }

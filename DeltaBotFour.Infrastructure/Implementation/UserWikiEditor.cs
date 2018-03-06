@@ -16,11 +16,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private string _userWikiRowTemplate;
 
         private readonly AppConfiguration _appConfiguration;
+        private readonly IRedditThingService _redditThingService;
         private readonly IWikiEditor _wikiEditor;
 
-        public UserWikiEditor(AppConfiguration appConfiguration, IWikiEditor wikiEditor)
+        public UserWikiEditor(AppConfiguration appConfiguration, IRedditThingService redditThingService, IWikiEditor wikiEditor)
         {
             _appConfiguration = appConfiguration;
+            _redditThingService = redditThingService;
             _wikiEditor = wikiEditor;
         }
 
@@ -190,9 +192,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 // The /r/subreddit/api/info call isn't wrapped by RedditSharp. This gets us the info
                 // we need but is chatty. This is a rare edge case anyhow (where the HiddenParams don't exist)
-                //Comment unqualifiedComment = (Comment)_reddit.GetThingByFullnameAsync(fullname).Result;
-                //Post parentPost = (Post)_reddit.GetThingByFullnameAsync(unqualifiedComment.LinkId).Result;
-                //deltaInfos.Add(getUserWikiDeltaInfo(unqualifiedComment, parentPost, toUsername));
+                var unqualifiedComment = _redditThingService.GetThingByFullname(fullname);
+                var parentPost = _redditThingService.GetThingByFullname(unqualifiedComment.LinkId);
+                deltaInfos.Add(getUserWikiDeltaInfo(unqualifiedComment, parentPost, toUsername));
             }
 
             return deltaInfos;

@@ -4,7 +4,7 @@ using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit
 {
-    public static class CommentConverter
+    public static class RedditThingConverter
     {
         private const string SHORT_LINK_FROM = "www.reddit.com";
         private const string SHORT_LINK_TO = "oauth.reddit.com";
@@ -42,6 +42,7 @@ namespace DeltaBotFour.Reddit
                     Created = comment.Created,
                     CreatedUTC = comment.CreatedUTC,
                     IsEdited = comment.Edited,
+                    LinkId = comment.LinkId,
                     Shortlink = comment.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO)
                 };
             }

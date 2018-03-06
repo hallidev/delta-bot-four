@@ -17,7 +17,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void SendToQueue(Comment comment)
         {
-            var db4Comment = CommentConverter.Convert(comment);
+            var db4Comment = RedditThingConverter.Convert(comment);
             pushCommentToQueue(db4Comment);
         }
 
