@@ -19,6 +19,7 @@ namespace DeltaBotFour.Infrastructure
         public string SubredditName => _configuration["subreddit_name"];
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
+        public string WikiUrlDeltaboards => _configuration["wiki_url_deltaboards"];
         public string WikiUrlUser => _configuration["wiki_url_user"];
         public Regex HiddenParamsRegex => new Regex(_configuration["hidden_params_regex"], RegexOptions.Singleline);
         public string DefaultHiddenParamsComment => _configuration["default_hidden_params_comment"];

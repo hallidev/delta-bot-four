@@ -25,7 +25,7 @@ namespace DeltaBotFour.Console
                 .FirstOrDefault(arg => arg.ToLower().Trim().Contains(ModeArg))?
                 .Split(ArgDelimiter)[1];
 
-            //mode = DeltaboardMode;
+            mode = DeltaboardMode;
 
             if (string.IsNullOrEmpty(mode))
             {
