@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using DeltaBotFour.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace DeltaBotFour.Infrastructure
@@ -11,6 +12,7 @@ namespace DeltaBotFour.Infrastructure
     {
         private readonly IConfigurationRoot _configuration;
 
+        public List<DB4Mode> DB4Modes => _configuration["db4_modes"].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<DB4Mode>).ToList();
         public string DB4Username => _configuration["db4_username"];
         public string DB4Password => _configuration["db4_password"];
         public string DB4ClientId => _configuration["db4_client_id"];
@@ -60,6 +62,9 @@ namespace DeltaBotFour.Infrastructure
             private IConfigurationRoot _configuration;
 
             public string DB4ReplyTemplateFile => _configuration["template_files:db4_reply_template_file"];
+            public string DeltaboardsTemplateFile => _configuration["template_files:deltaboards_template_file"];
+            public string DeltaboardTemplateFile => _configuration["template_files:deltaboard_template_file"];
+            public string DeltaboardRowTemplateFile => _configuration["template_files:deltaboard_row_template_file"];
             public string UserWikiTemplateFile => _configuration["template_files:user_wiki_template_file"];
             public string UserWikiRowTemplateFile => _configuration["template_files:user_wiki_row_template_file"];
 
@@ -75,6 +80,11 @@ namespace DeltaBotFour.Infrastructure
 
             public string UsernameToken => _configuration["replace_tokens:username_token"];
             public string HiddenParamsToken => _configuration["replace_tokens:hidden_params_token"];
+            public string DailyDeltaboardToken => _configuration["replace_tokens:daily_deltaboard_token"];
+            public string WeeklyDeltaboardToken => _configuration["replace_tokens:weekly_deltaboard_token"];
+            public string MonthlyDeltaboardToken => _configuration["replace_tokens:monthly_deltaboard_token"];
+            public string DeltaboardTypeToken => _configuration["replace_tokens:deltaboard_type_token"];
+            public string DeltaboardRowsToken => _configuration["replace_tokens:deltaboard_rows_token"];
             public string DeltasGivenCountToken => _configuration["replace_tokens:deltas_given_count_token"];
             public string DeltasReceivedCountToken => _configuration["replace_tokens:deltas_received_count_token"];
             public string WikiRowsGivenToken => _configuration["replace_tokens:wiki_rows_given_token"];
@@ -113,15 +123,16 @@ namespace DeltaBotFour.Infrastructure
             {
                 _configuration = configuration;
 
-                SuccessReplies = new List<string>();
-                SuccessReplies.Add(DeltaAwarded);
+                SuccessReplies = new List<string> { DeltaAwarded };
 
-                FailReplies = new List<string>();
-                FailReplies.Add(CommentTooShort);
-                FailReplies.Add(CannotAwardOP);
-                FailReplies.Add(CannotAwardDeltaBot);
-                FailReplies.Add(CannotAwardSelf);
-                FailReplies.Add(WithIssues);
+                FailReplies = new List<string>
+                {
+                    CommentTooShort,
+                    CannotAwardOP,
+                    CannotAwardDeltaBot,
+                    CannotAwardSelf,
+                    WithIssues
+                };
             }
         }
 

@@ -1,0 +1,5 @@
+﻿##{{deltaboardtype}}
+
+| Rank | Username | Deltas |
+| :------: | :------: | :------: |
+{{deltaboardrows}}
