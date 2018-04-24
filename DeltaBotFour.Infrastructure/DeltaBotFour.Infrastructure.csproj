@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
+    <ProjectReference Include="..\DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj" />
   </ItemGroup>
 

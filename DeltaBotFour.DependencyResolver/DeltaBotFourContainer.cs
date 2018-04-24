@@ -22,16 +22,6 @@ namespace DeltaBotFour.DependencyResolver
             return this;
         }
 
-        public IDisposable BeginLifestyleScope()
-        {
-            return AsyncScopedLifestyle.BeginScope(_container);
-        }
-
-        public T Resolve<T>(Type controllerType)
-        {
-            return (T)_container.GetInstance(controllerType);
-        }
-
         public T Resolve<T>()
         {
             return (T)_container.GetInstance(typeof(T));

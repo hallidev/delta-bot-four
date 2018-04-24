@@ -1,7 +1,4 @@
-﻿[​](HTTP://DB3PARAMSSTART
-{{hiddenparams}}
-DB3PARAMSEND)
-#Deltaboards
+﻿#Deltaboards
 
 {{dailydeltaboard}}
 

@@ -1,6 +1,4 @@
-﻿using DeltaBotFour.Models;
-
-namespace DeltaBotFour.Infrastructure.Interface
+﻿namespace DeltaBotFour.Infrastructure.Interface
 {
     public interface IDeltaboardEditor
     {

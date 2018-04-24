@@ -17,11 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Models", "Delt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.DependencyResolver", "DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj", "{70D357B4-68F1-4277-91B7-04E3B1BA2B48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Reddit", "DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj", "{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Reddit", "DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj", "{96D969AB-8FCF-4F43-B245-8D996AFF5FF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Infrastructure", "DeltaBotFour.Infrastructure\DeltaBotFour.Infrastructure.csproj", "{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Infrastructure", "DeltaBotFour.Infrastructure\DeltaBotFour.Infrastructure.csproj", "{0F6DB3DF-4175-4841-86C7-DDC2EACB81E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Shared", "DeltaBotFour.Shared\DeltaBotFour.Shared.csproj", "{7C6E2364-6794-475D-9F83-7F1C138CEA97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Shared", "DeltaBotFour.Shared\DeltaBotFour.Shared.csproj", "{7C6E2364-6794-475D-9F83-7F1C138CEA97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Persistence", "DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj", "{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,10 @@ Global
 		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C6E2364-6794-475D-9F83-7F1C138CEA97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

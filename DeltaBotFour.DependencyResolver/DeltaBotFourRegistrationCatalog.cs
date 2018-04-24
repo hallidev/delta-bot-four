@@ -2,6 +2,8 @@
 using DeltaBotFour.Infrastructure;
 using DeltaBotFour.Infrastructure.Implementation;
 using DeltaBotFour.Infrastructure.Interface;
+using DeltaBotFour.Persistence.Implementation;
+using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Implementation;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared.Implementation;
@@ -38,6 +40,9 @@ namespace DeltaBotFour.DependencyResolver
 
             // Register shared services
             container.Register<IDB4Queue, DB4MemoryQueue>();
+
+            // Register persistence services
+            container.Register<IDeltaboardRepository, DeltaboardRepository>();
 
             // Register Reddit Services
             container.Register<ICommentDispatcher, RedditSharpCommentDispatcher>();
