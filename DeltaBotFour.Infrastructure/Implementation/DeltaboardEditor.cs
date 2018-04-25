@@ -1,49 +1,127 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
-using Newtonsoft.Json;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class DeltaboardEditor : IDeltaboardEditor
     {
+        private const int RanksToShow = 10;
+
         private readonly AppConfiguration _appConfiguration;
-        private readonly IDeltaboardRepository _deltaDeltaboardRepository;
+        private readonly IDB4Repository _deltaDeltaboardRepository;
         private readonly IWikiEditor _wikiEditor;
+        private readonly string _deltaboardsTemplate;
+        private readonly string _deltaboardTemplate;
+        private readonly string _deltaboardRowTemplate;
 
         public DeltaboardEditor(AppConfiguration appConfiguration, 
-            IDeltaboardRepository deltaDeltaboardRepository, 
+            IDB4Repository deltaDeltaboardRepository, 
             IWikiEditor wikiEditor)
         {
             _appConfiguration = appConfiguration;
             _deltaDeltaboardRepository = deltaDeltaboardRepository;
             _wikiEditor = wikiEditor;
+
+            _deltaboardsTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardsTemplateFile);
+            _deltaboardTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardTemplateFile);
+            _deltaboardRowTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardRowTemplateFile);
         }
 
         public void AddDelta(string username)
         {
+            // Add an entry for this user to the deltaboards
+            _deltaDeltaboardRepository.AddDeltaboardEntry(username);
 
+            // Build and update wiki
+            buildAndUpdateDeltaboards();
         }
 
         public void RemoveDelta(string username)
         {
-            
+            // Add an entry for this user to the deltaboards
+            _deltaDeltaboardRepository.RemoveDeltaboardEntry(username);
+
+            // Build and update wiki
+            buildAndUpdateDeltaboards();
         }
 
         private List<Deltaboard> getDeltaboards()
         {
             return _deltaDeltaboardRepository.GetCurrentDeltaboards();
-            //string deltaboardsUrl = _wikiEditor.GetPage(_appConfiguration.WikiUrlDeltaboards);
+        }
 
-            //// Get page content
-            //string pageContent = _wikiEditor.GetPage(deltaboardsUrl);
+        private void buildAndUpdateDeltaboards()
+        {
+            // Get the updated deltaboards
+            var deltaboards = getDeltaboards();
 
-            //// Find and deserialize hidden params (the actual deltaboards)
-            //var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
+            // Build the actual string content
+            string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
-            //return JsonConvert.DeserializeObject<List<Deltaboard>>(hiddenParamsMatch.Groups[1].Value);
+            // Update the wiki page
+            _wikiEditor.EditPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
+        }
+
+        private string buildDeltaboardsContent(List<Deltaboard> deltaboards)
+        {
+            string deltaboardsContent = _deltaboardsTemplate;
+
+            // Build out daily
+            deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.DailyDeltaboardToken,
+                buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Daily)));
+
+            // Build out weekly
+            deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.WeeklyDeltaboardToken,
+                buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Weekly)));
+
+            // Build out monthly
+            deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.MonthlyDeltaboardToken,
+                buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Monthly)));
+
+            return deltaboardsContent;
+        }
+
+        private string buildDeltaboard(Deltaboard deltaboard)
+        {
+            string deltaboardContent = _deltaboardTemplate;
+
+            deltaboardContent = deltaboardContent
+                .Replace(_appConfiguration.ReplaceTokens.DeltaboardTypeToken, deltaboard.DeltaboardType.ToString())
+                .Replace(_appConfiguration.ReplaceTokens.DeltaboardRowsToken,
+                    buildDeltaboardRows(deltaboard.Entries.OrderBy(e => e.Rank).Take(RanksToShow).ToList()))
+                .Replace(_appConfiguration.ReplaceTokens.DateToken, DateTime.UtcNow.ToString("M/d/yyyy HH:mm:ss UTC"));
+
+            return deltaboardContent;
+        }
+
+        private string buildDeltaboardRows(List<DeltaboardEntry> entries)
+        {
+            string rowsContent = string.Empty;
+
+            foreach (var entry in entries)
+            {
+                string rowContent = _deltaboardRowTemplate
+                    .Replace(_appConfiguration.ReplaceTokens.RankToken, entry.Rank.ToString())
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, entry.Username)
+                    .Replace(_appConfiguration.ReplaceTokens.UserWikiLinkToken, getUserWikiUrl(entry.Username))
+                    .Replace(_appConfiguration.ReplaceTokens.CountToken, entry.Count.ToString());
+
+                rowsContent = $"{rowsContent}{rowContent}\r\n";
+            }
+
+            return rowsContent.TrimEnd("\r\n".ToCharArray());
+        }
+
+        private string getUserWikiUrl(string username)
+        {
+            string userUrl = _appConfiguration.WikiUrlUser.Replace(_appConfiguration.ReplaceTokens.UsernameToken, username);
+            return $"{_appConfiguration.RedditBaseUrl}{_wikiEditor.GetWikiUrl()}{userUrl}";
         }
     }
 }

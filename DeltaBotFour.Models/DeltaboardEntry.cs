@@ -1,8 +1,11 @@
-﻿namespace DeltaBotFour.Models
+﻿using System;
+
+namespace DeltaBotFour.Models
 {
     public class DeltaboardEntry
     {
+        public int Rank { get; set; }
         public string Username { get; set; }
-        public int DeltaCount { get; set; }
+        public int Count { get; set; }
     }
 }

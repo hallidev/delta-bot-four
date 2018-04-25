@@ -42,7 +42,7 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<IDB4Queue, DB4MemoryQueue>();
 
             // Register persistence services
-            container.Register<IDeltaboardRepository, DeltaboardRepository>();
+            container.Register<IDB4Repository, DB4Repository>();
 
             // Register Reddit Services
             container.Register<ICommentDispatcher, RedditSharpCommentDispatcher>();

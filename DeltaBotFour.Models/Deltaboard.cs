@@ -5,6 +5,7 @@ namespace DeltaBotFour.Models
 {
     public class Deltaboard
     {
+        public string Id { get; set; }
         public DeltaboardType DeltaboardType { get; set; }
         public DateTime CreatedUtc { get; set; }
         public DateTime LastUpdatedUtc { get; set; }

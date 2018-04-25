@@ -15,7 +15,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void SetUserFlair(string username, string cssClass, string flairText)
         {
-            Task.Run(async () => await _subreddit.SetUserFlairAsync(username, cssClass, flairText));
+            Task.Run(async () => await _subreddit.SetUserFlairAsync(username, cssClass, flairText)).Wait();
         }
     }
 }

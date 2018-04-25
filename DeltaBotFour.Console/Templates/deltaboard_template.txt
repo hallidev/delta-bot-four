@@ -3,3 +3,4 @@
 | Rank | Username | Deltas |
 | :------: | :------: | :------: |
 {{deltaboardrows}}
+||As of {{date}}||

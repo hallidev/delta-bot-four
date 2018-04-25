@@ -78,13 +78,17 @@ namespace DeltaBotFour.Infrastructure
         {
             private IConfigurationRoot _configuration;
 
+            public string DateToken => _configuration["replace_tokens:date_token"];
             public string UsernameToken => _configuration["replace_tokens:username_token"];
+            public string UserWikiLinkToken => _configuration["replace_tokens:user_wiki_link_token"];
             public string HiddenParamsToken => _configuration["replace_tokens:hidden_params_token"];
             public string DailyDeltaboardToken => _configuration["replace_tokens:daily_deltaboard_token"];
             public string WeeklyDeltaboardToken => _configuration["replace_tokens:weekly_deltaboard_token"];
             public string MonthlyDeltaboardToken => _configuration["replace_tokens:monthly_deltaboard_token"];
             public string DeltaboardTypeToken => _configuration["replace_tokens:deltaboard_type_token"];
             public string DeltaboardRowsToken => _configuration["replace_tokens:deltaboard_rows_token"];
+            public string RankToken => _configuration["replace_tokens:rank_token"];
+            public string CountToken => _configuration["replace_tokens:count_token"];
             public string DeltasGivenCountToken => _configuration["replace_tokens:deltas_given_count_token"];
             public string DeltasReceivedCountToken => _configuration["replace_tokens:deltas_received_count_token"];
             public string WikiRowsGivenToken => _configuration["replace_tokens:wiki_rows_given_token"];

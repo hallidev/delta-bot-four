@@ -3,9 +3,10 @@ using DeltaBotFour.Models;
 
 namespace DeltaBotFour.Persistence.Interface
 {
-    public interface IDeltaboardRepository
+    public interface IDB4Repository
     {
         List<Deltaboard> GetCurrentDeltaboards();
-        List<DeltaboardEntry> GetCurrentEntriesForUser(string username);
+        void AddDeltaboardEntry(string username);
+        void RemoveDeltaboardEntry(string username);
     }
 }

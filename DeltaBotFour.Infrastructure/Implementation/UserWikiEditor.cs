@@ -209,7 +209,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Create new hidden param entry from comment
             return new UserWikiDeltaInfo
             {
-                PostLink = postLink, PostTitle = postTitle, CommentId = comment.Id, Username = toUsername, CreatedUTC = createdUTC
+                PostLink = postLink,
+                PostTitle = postTitle,
+                CommentId = comment.Id,
+                Username = toUsername,
+                CreatedUTC = createdUTC
             };
         }
 

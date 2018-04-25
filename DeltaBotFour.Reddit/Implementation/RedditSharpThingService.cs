@@ -48,13 +48,13 @@ namespace DeltaBotFour.Reddit.Implementation
         public void ReplyToComment(DB4Thing comment, string reply)
         {
             var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
-            Task.Run(async () => await qualifiedComment.ReplyAsync(reply));
+            Task.Run(async () => await qualifiedComment.ReplyAsync(reply)).Wait();
         }
 
         public void EditComment(DB4Thing comment, string editedComment)
         {
             var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
-            Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment));
+            Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment)).Wait();
         }
 
         public void DeleteComment(DB4Thing comment)

@@ -13,9 +13,14 @@ namespace DeltaBotFour.Reddit.Implementation
             _subreddit = subreddit;
         }
 
+        public string GetWikiUrl()
+        {
+            return $"{_subreddit.Url}wiki";
+        }
+
         public void EditPage(string url, string content)
         {
-            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(url, content));
+            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(url, content)).Wait();
         }
 
         public string GetPage(string url)

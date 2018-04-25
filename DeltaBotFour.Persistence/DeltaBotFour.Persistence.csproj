@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core.Foundation\Core.Foundation.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Models\DeltaBotFour.Models.csproj" />
   </ItemGroup>
 
