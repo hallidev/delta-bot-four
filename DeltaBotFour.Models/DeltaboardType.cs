@@ -1,9 +1,14 @@
-﻿namespace DeltaBotFour.Models
+﻿using System.ComponentModel;
+
+namespace DeltaBotFour.Models
 {
     public enum DeltaboardType
     {
         Daily,
         Weekly,
-        Monthly
+        Monthly,
+        Yearly,
+        [Description("All Time")]
+        AllTime
     }
 }

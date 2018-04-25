@@ -14,5 +14,10 @@ namespace Core.Foundation.Extensions
         {
             return new DateTime(dateTime.Year, dateTime.Month, 1);
         }
+
+        public static DateTime StartOfYear(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, 1, 1);
+        }
     }
 }

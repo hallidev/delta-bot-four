@@ -16,7 +16,7 @@ namespace DeltaBotFour.Console
             // Perform DI Container registrations. From this point on all dependencies are available
             _container = new DeltaBotFourContainer().Install(new RegistrationCatalogFactory().GetRegistrationCatalog());
 
-            // TODO: Remove when deltaboard implementation is complete
+            //// TODO: Remove when deltaboard implementation is complete
             //var deltaboardEditor = _container.Resolve<IDeltaboardEditor>();
 
             //deltaboardEditor.AddDelta("addsix");

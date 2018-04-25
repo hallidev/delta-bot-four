@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Core.Foundation.Extensions;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
@@ -72,17 +73,25 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             string deltaboardsContent = _deltaboardsTemplate;
 
-            // Build out daily
+            // Build daily deltaboard
             deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.DailyDeltaboardToken,
                 buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Daily)));
 
-            // Build out weekly
+            // Build weekly deltaboard
             deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.WeeklyDeltaboardToken,
                 buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Weekly)));
 
-            // Build out monthly
+            // Build montly deltaboard
             deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.MonthlyDeltaboardToken,
                 buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Monthly)));
+
+            // Build yearly deltaboard
+            deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.YearlyDeltaboardToken,
+                buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Yearly)));
+
+            // Build all time deltaboard
+            deltaboardsContent = deltaboardsContent.Replace(_appConfiguration.ReplaceTokens.AllTimeDeltaboardToken,
+                buildDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.AllTime)));
 
             return deltaboardsContent;
         }
@@ -92,7 +101,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string deltaboardContent = _deltaboardTemplate;
 
             deltaboardContent = deltaboardContent
-                .Replace(_appConfiguration.ReplaceTokens.DeltaboardTypeToken, deltaboard.DeltaboardType.ToString())
+                .Replace(_appConfiguration.ReplaceTokens.DeltaboardTypeToken, deltaboard.DeltaboardType.GetDescription())
                 .Replace(_appConfiguration.ReplaceTokens.DeltaboardRowsToken,
                     buildDeltaboardRows(deltaboard.Entries.OrderBy(e => e.Rank).Take(RanksToShow).ToList()))
                 .Replace(_appConfiguration.ReplaceTokens.DateToken, DateTime.UtcNow.ToString("M/d/yyyy HH:mm:ss UTC"));

@@ -117,6 +117,12 @@ namespace DeltaBotFour.Persistence.Implementation
                 case DeltaboardType.Monthly:
                     startUtc = DateTime.Now.StartOfMonth().ToUniversalTime();
                     break;
+                case DeltaboardType.Yearly:
+                    startUtc = DateTime.Now.StartOfYear().ToUniversalTime();
+                    break;
+                case DeltaboardType.AllTime:
+                    startUtc = DateTime.MinValue.ToUniversalTime();
+                    break;
                 default:
                     throw new UnhandledEnumException<DeltaboardType>(type);
             }

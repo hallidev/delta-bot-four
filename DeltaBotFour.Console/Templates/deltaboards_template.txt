@@ -5,3 +5,7 @@
 {{weeklydeltaboard}}
 
 {{monthlydeltaboard}}
+
+{{yearlydeltaboard}}
+
+{{alltimedeltaboard}}

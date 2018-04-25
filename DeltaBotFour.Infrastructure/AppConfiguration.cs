@@ -85,6 +85,8 @@ namespace DeltaBotFour.Infrastructure
             public string DailyDeltaboardToken => _configuration["replace_tokens:daily_deltaboard_token"];
             public string WeeklyDeltaboardToken => _configuration["replace_tokens:weekly_deltaboard_token"];
             public string MonthlyDeltaboardToken => _configuration["replace_tokens:monthly_deltaboard_token"];
+            public string YearlyDeltaboardToken => _configuration["replace_tokens:yearly_deltaboard_token"];
+            public string AllTimeDeltaboardToken => _configuration["replace_tokens:all_time_deltaboard_token"];
             public string DeltaboardTypeToken => _configuration["replace_tokens:deltaboard_type_token"];
             public string DeltaboardRowsToken => _configuration["replace_tokens:deltaboard_rows_token"];
             public string RankToken => _configuration["replace_tokens:rank_token"];
