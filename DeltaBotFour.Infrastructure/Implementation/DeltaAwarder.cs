@@ -10,17 +10,17 @@ namespace DeltaBotFour.Infrastructure.Implementation
     {
         private readonly AppConfiguration _appConfiguration;
         private readonly IUserWikiEditor _wikiEditor;
-        private readonly IFlairEditor _flairEditor;
+        private readonly ISubredditService _subredditService;
         private readonly IDeltaboardEditor _deltaboardEditor;
 
         public DeltaAwarder(AppConfiguration appConfiguration,
-            IUserWikiEditor wikiEditor, 
-            IFlairEditor flairEditor, 
+            IUserWikiEditor wikiEditor,
+            ISubredditService subredditService, 
             IDeltaboardEditor deltaboardEditor)
         {
             _appConfiguration = appConfiguration;
             _wikiEditor = wikiEditor;
-            _flairEditor = flairEditor;
+            _subredditService = subredditService;
             _deltaboardEditor = deltaboardEditor;
         }
 
@@ -31,7 +31,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 string newFlairText = DeltaHelper.GetIncrementedFlairText(comment.ParentThing.AuthorFlairText);
 
                 // Award to the parent comment
-                _flairEditor.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
+                _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
                     newFlairText);
 
                 // Update wiki
@@ -54,7 +54,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 string newFlairText = DeltaHelper.GetDecrementedFlairText(comment.ParentThing.AuthorFlairText);
 
                 // Unaward from the parent comment
-                _flairEditor.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
+                _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
                     newFlairText);
 
                 // Update wiki

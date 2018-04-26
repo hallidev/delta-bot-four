@@ -16,14 +16,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private string _userWikiRowTemplate;
 
         private readonly AppConfiguration _appConfiguration;
-        private readonly IRedditThingService _redditThingService;
-        private readonly IWikiEditor _wikiEditor;
+        private readonly IRedditService _redditService;
+        private readonly ISubredditService _subredditService;
 
-        public UserWikiEditor(AppConfiguration appConfiguration, IRedditThingService redditThingService, IWikiEditor wikiEditor)
+        public UserWikiEditor(AppConfiguration appConfiguration, IRedditService redditService, ISubredditService subredditService)
         {
             _appConfiguration = appConfiguration;
-            _redditThingService = redditThingService;
-            _wikiEditor = wikiEditor;
+            _redditService = redditService;
+            _subredditService = subredditService;
         }
 
         public void UpdateUserWikiEntryAward(DB4Thing comment)
@@ -58,14 +58,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string receivngUserPageContent = buildUserPageContent(receivingUserUrl, comment.ParentThing.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
-            _wikiEditor.EditPage(givingUserUrl, givingUserPageContent);
-            _wikiEditor.EditPage(receivingUserUrl, receivngUserPageContent);
+            _subredditService.EditPage(givingUserUrl, givingUserPageContent);
+            _subredditService.EditPage(receivingUserUrl, receivngUserPageContent);
         }
 
         private string buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)
         {
             // Get page content
-            string pageContent = _wikiEditor.GetPage(userUrl);
+            string pageContent = _subredditService.GetPage(userUrl);
 
             // Find and deserialize hidden params
             var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
@@ -192,8 +192,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 // The /r/subreddit/api/info call isn't wrapped by RedditSharp. This gets us the info
                 // we need but is chatty. This is a rare edge case anyhow (where the HiddenParams don't exist)
-                var unqualifiedComment = _redditThingService.GetThingByFullname(fullname);
-                var parentPost = _redditThingService.GetThingByFullname(unqualifiedComment.LinkId);
+                var unqualifiedComment = _redditService.GetThingByFullname(fullname);
+                var parentPost = _redditService.GetThingByFullname(unqualifiedComment.LinkId);
                 deltaInfos.Add(getUserWikiDeltaInfo(unqualifiedComment, parentPost, toUsername));
             }
 

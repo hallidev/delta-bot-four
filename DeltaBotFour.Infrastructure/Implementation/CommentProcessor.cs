@@ -10,18 +10,18 @@ namespace DeltaBotFour.Infrastructure.Implementation
     public class CommentProcessor : ICommentProcessor
     {
         private readonly AppConfiguration _appConfiguration;
-        private readonly IRedditThingService _redditThingService;
+        private readonly IRedditService _redditService;
         private readonly ICommentValidator _commentValidator;
         private readonly ICommentReplyDetector _commentReplyDetector;
         private readonly IDeltaAwarder _deltaAwarder;
         private readonly ICommentReplier _commentReplier;
 
-        public CommentProcessor(AppConfiguration appConfiguration, IRedditThingService redditThingService,
+        public CommentProcessor(AppConfiguration appConfiguration, IRedditService redditService,
             ICommentValidator commentValidator, ICommentReplyDetector commentReplyDetector,
             IDeltaAwarder deltaAwarder, ICommentReplier commentReplier)
         {
             _appConfiguration = appConfiguration;
-            _redditThingService = redditThingService;
+            _redditService = redditService;
             _commentValidator = commentValidator;
             _commentReplyDetector = commentReplyDetector;
             _deltaAwarder = deltaAwarder;
@@ -37,7 +37,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 // There is a delta or this comment is edited
                 // We need to get more info for processing
-                _redditThingService.PopulateParentAndChildren(comment);
+                _redditService.PopulateParentAndChildren(comment);
 
                 if (hasDeltas)
                 {

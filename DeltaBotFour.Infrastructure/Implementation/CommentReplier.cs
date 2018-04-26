@@ -9,20 +9,20 @@ namespace DeltaBotFour.Infrastructure.Implementation
     public class CommentReplier : ICommentReplier
     {
         private readonly AppConfiguration _appConfiguration;
-        private readonly IRedditThingService _redditThingService;
+        private readonly IRedditService _redditService;
         private string _replyTemplate;
 
-        public CommentReplier(AppConfiguration appConfiguration, IRedditThingService redditThingService)
+        public CommentReplier(AppConfiguration appConfiguration, IRedditService redditService)
         {
             _appConfiguration = appConfiguration;
-            _redditThingService = redditThingService;
+            _redditService = redditService;
         }
 
         public void Reply(DB4Thing comment, DeltaCommentValidationResult deltaCommentValidationResult)
         {
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
-            _redditThingService.ReplyToComment(comment, replyMessage);
+            _redditService.ReplyToComment(comment, replyMessage);
 
             ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {comment.Shortlink}");
         }
@@ -31,14 +31,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             string replyMessage = getReplyMessage(deltaCommentValidationResult);
 
-            _redditThingService.EditComment(commentToEdit, replyMessage);
+            _redditService.EditComment(commentToEdit, replyMessage);
 
             ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public void DeleteReply(DB4Thing commentToDelete)
         {
-            _redditThingService.DeleteComment(commentToDelete);
+            _redditService.DeleteComment(commentToDelete);
 
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }

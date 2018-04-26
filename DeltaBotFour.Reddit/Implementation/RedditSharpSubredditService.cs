@@ -1,21 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation
 {
-    public class RedditSharpWikiEditor : IWikiEditor
+    public class RedditSharpSubredditService : ISubredditService
     {
         private readonly Subreddit _subreddit;
 
-        public RedditSharpWikiEditor(Subreddit subreddit)
+        public RedditSharpSubredditService(Subreddit subreddit)
         {
             _subreddit = subreddit;
-        }
-
-        public string GetWikiUrl()
-        {
-            return $"{_subreddit.Url}wiki";
         }
 
         public void EditPage(string url, string content)
@@ -27,6 +23,16 @@ namespace DeltaBotFour.Reddit.Implementation
         {
             var wiki = _subreddit.GetWiki;
             return wiki.GetPageAsync(url).Result.MarkdownContent;
+        }
+
+        public string GetWikiUrl()
+        {
+            return $"{_subreddit.Url}wiki";
+        }
+
+        public void SetUserFlair(string username, string cssClass, string flairText)
+        {
+            Task.Run(async () => await _subreddit.SetUserFlairAsync(username, cssClass, flairText)).Wait();
         }
     }
 }

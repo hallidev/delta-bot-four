@@ -7,11 +7,11 @@ using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation
 {
-    public class RedditSharpThingService : IRedditThingService
+    public class RedditSharpRedditService : IRedditService
     {
         private readonly RedditSharp.Reddit _reddit;
 
-        public RedditSharpThingService(RedditSharp.Reddit reddit)
+        public RedditSharpRedditService(RedditSharp.Reddit reddit)
         {
             _reddit = reddit;
         }

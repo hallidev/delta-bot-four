@@ -47,9 +47,8 @@ namespace DeltaBotFour.DependencyResolver
             // Register Reddit Services
             container.Register<ICommentDispatcher, RedditSharpCommentDispatcher>();
             container.Register<ICommentMonitor, RedditSharpCommentMonitor>();
-            container.Register<IFlairEditor, RedditSharpFlairEditor>();
-            container.Register<IRedditThingService, RedditSharpThingService>();
-            container.Register<IWikiEditor, RedditSharpWikiEditor>();
+            container.Register<IRedditService, RedditSharpRedditService>();
+            container.Register<ISubredditService, RedditSharpSubredditService>();
 
             // Register functionality implementations
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();

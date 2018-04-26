@@ -2,7 +2,7 @@
 
 namespace DeltaBotFour.Reddit.Interface
 {
-    public interface IRedditThingService
+    public interface IRedditService
     {
         void PopulateParentAndChildren(DB4Thing comment);
         DB4Thing GetThingByFullname(string fullname);

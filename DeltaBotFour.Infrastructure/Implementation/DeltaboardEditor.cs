@@ -16,18 +16,18 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IDB4Repository _deltaDeltaboardRepository;
-        private readonly IWikiEditor _wikiEditor;
+        private readonly ISubredditService _subredditService;
         private readonly string _deltaboardsTemplate;
         private readonly string _deltaboardTemplate;
         private readonly string _deltaboardRowTemplate;
 
         public DeltaboardEditor(AppConfiguration appConfiguration, 
-            IDB4Repository deltaDeltaboardRepository, 
-            IWikiEditor wikiEditor)
+            IDB4Repository deltaDeltaboardRepository,
+            ISubredditService subredditService)
         {
             _appConfiguration = appConfiguration;
             _deltaDeltaboardRepository = deltaDeltaboardRepository;
-            _wikiEditor = wikiEditor;
+            _subredditService = subredditService;
 
             _deltaboardsTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardsTemplateFile);
             _deltaboardTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardTemplateFile);
@@ -66,7 +66,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
             // Update the wiki page
-            _wikiEditor.EditPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
+            _subredditService.EditPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
         }
 
         private string buildDeltaboardsContent(List<Deltaboard> deltaboards)
@@ -130,7 +130,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private string getUserWikiUrl(string username)
         {
             string userUrl = _appConfiguration.WikiUrlUser.Replace(_appConfiguration.ReplaceTokens.UsernameToken, username);
-            return $"{_appConfiguration.RedditBaseUrl}{_wikiEditor.GetWikiUrl()}{userUrl}";
+            return $"{_appConfiguration.RedditBaseUrl}{_subredditService.GetWikiUrl()}{userUrl}";
         }
     }
 }

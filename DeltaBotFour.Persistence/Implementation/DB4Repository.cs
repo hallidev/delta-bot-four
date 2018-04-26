@@ -11,7 +11,7 @@ namespace DeltaBotFour.Persistence.Implementation
 {
     public class DB4Repository : IDB4Repository
     {
-        private const string DbFileName = "Deltaboards.db";
+        private const string DbFileName = "DeltaBotFour.db";
         private const string DeltaboardsCollectionName = "deltaboards";
 
         private readonly LiteDatabase _liteDatabase;
