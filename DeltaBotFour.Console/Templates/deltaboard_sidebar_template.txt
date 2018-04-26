@@ -1,0 +1,7 @@
+﻿###### Monthly Deltaboard
+
+| Rank | Username | Deltas |
+| :------: | :------: | :------: |
+{{deltaboardrows}}
+||As of {{date}}||
+||[More Deltaboards](/r/{{subreddit}}/wiki/deltaboards)||

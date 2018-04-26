@@ -32,6 +32,9 @@
     <None Update="Templates\deltaboard_row_template.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\deltaboard_sidebar_template.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\deltaboard_template.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -6,5 +6,7 @@
         string GetPage(string url);
         void EditPage(string url, string content);
         string GetWikiUrl();
+        string GetSidebar();
+        void UpdateSidebar(string sidebarContent);
     }
 }

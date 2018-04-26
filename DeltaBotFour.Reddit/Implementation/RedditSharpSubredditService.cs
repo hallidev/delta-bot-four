@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
 
@@ -33,6 +32,21 @@ namespace DeltaBotFour.Reddit.Implementation
         public void SetUserFlair(string username, string cssClass, string flairText)
         {
             Task.Run(async () => await _subreddit.SetUserFlairAsync(username, cssClass, flairText)).Wait();
+        }
+
+        public string GetSidebar()
+        {
+            var settings = _subreddit.GetSettingsAsync().Result;
+
+            return settings.Sidebar;
+        }
+
+        public void UpdateSidebar(string sidebarContent)
+        {
+            var settings = _subreddit.GetSettingsAsync().Result;
+            settings.Sidebar = sidebarContent;
+
+            Task.Run(async () => await settings.UpdateSettings()).Wait();
         }
     }
 }

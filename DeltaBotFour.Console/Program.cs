@@ -19,33 +19,7 @@ namespace DeltaBotFour.Console
             //// TODO: Remove when deltaboard implementation is complete
             //var deltaboardEditor = _container.Resolve<IDeltaboardEditor>();
 
-            //deltaboardEditor.AddDelta("addsix");
-            //deltaboardEditor.AddDelta("addsix");
-            //deltaboardEditor.AddDelta("addsix");
-            //deltaboardEditor.AddDelta("addsix");
-            //deltaboardEditor.AddDelta("addsix");
-            //deltaboardEditor.AddDelta("addsix");
-
-            //deltaboardEditor.AddDelta("addtwo");
-            //deltaboardEditor.AddDelta("addtwo");
-
-            //deltaboardEditor.AddDelta("addfour");
-            //deltaboardEditor.AddDelta("addfour");
-            //deltaboardEditor.AddDelta("addfour");
-            //deltaboardEditor.AddDelta("addfour");
-
-            //deltaboardEditor.AddDelta("a");
-            //deltaboardEditor.AddDelta("b");
-            //deltaboardEditor.AddDelta("c");
-            //deltaboardEditor.AddDelta("d");
-            //deltaboardEditor.AddDelta("e");
-            //deltaboardEditor.AddDelta("f");
-            //deltaboardEditor.AddDelta("g");
-            //deltaboardEditor.AddDelta("h");
-            //deltaboardEditor.AddDelta("i");
-            //deltaboardEditor.AddDelta("j");
-            //deltaboardEditor.AddDelta("a");
-            //deltaboardEditor.AddDelta("b");
+            //deltaboardEditor.AddDelta("hallidev");
 
             // Start comment monitor
             var commentMonitor = _container.Resolve<ICommentMonitor>();
