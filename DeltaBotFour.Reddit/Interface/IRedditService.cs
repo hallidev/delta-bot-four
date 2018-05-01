@@ -9,5 +9,6 @@ namespace DeltaBotFour.Reddit.Interface
         void ReplyToComment(DB4Thing comment, string reply);
         void EditComment(DB4Thing comment, string editedComment);
         void DeleteComment(DB4Thing comment);
+        void SendPrivateMessage(string subject, string body, string to, string fromSubreddit = "");
     }
 }

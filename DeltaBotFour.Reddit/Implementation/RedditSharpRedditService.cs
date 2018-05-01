@@ -9,6 +9,7 @@ namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpRedditService : IRedditService
     {
+        private const string RedditBaseUrl = "https://oauth.reddit.com";
         private readonly RedditSharp.Reddit _reddit;
 
         public RedditSharpRedditService(RedditSharp.Reddit reddit)
@@ -19,7 +20,7 @@ namespace DeltaBotFour.Reddit.Implementation
         public void PopulateParentAndChildren(DB4Thing comment)
         {
             // Get comment with children and parent post populated
-            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            var qualifiedComment = getQualifiedComment(comment);
 
             // Set parent post
             comment.ParentPost = RedditThingConverter.Convert(qualifiedComment.Parent);
@@ -47,20 +48,43 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void ReplyToComment(DB4Thing comment, string reply)
         {
-            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            var qualifiedComment = getQualifiedComment(comment);
             Task.Run(async () => await qualifiedComment.ReplyAsync(reply)).Wait();
         }
 
         public void EditComment(DB4Thing comment, string editedComment)
         {
-            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
+            var qualifiedComment = getQualifiedComment(comment);
             Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment)).Wait();
         }
 
         public void DeleteComment(DB4Thing comment)
         {
-            var qualifiedComment = _reddit.GetCommentAsync(new Uri(comment.Shortlink)).Result;
-            Task.Run(async () => await qualifiedComment.DelAsync());
+            var qualifiedComment = getQualifiedComment(comment);
+            Task.Run(async () => await qualifiedComment.DelAsync()).Wait();
+        }
+
+        public void SendPrivateMessage(string subject, string body, string to, string fromSubreddit = "")
+        {
+            // This seems to be a RedditSharp quirk? I looked at the RedditSharp
+            // codebase and it appears that you need to do this
+            Task.Run(async () =>
+            {
+                if (_reddit.User == null)
+                {
+                    await _reddit.InitOrUpdateUserAsync();
+                }
+
+                await _reddit.ComposePrivateMessageAsync(subject, body, to, fromSubreddit);
+            }).Wait();
+        }
+
+        private Comment getQualifiedComment(DB4Thing comment)
+        {
+            string commentUrl = $"{RedditBaseUrl}{comment.Shortlink}".TrimEnd('/');
+
+            // Get comment with children and parent post populated
+            return _reddit.GetCommentAsync(new Uri(commentUrl)).Result;
         }
     }
 }

@@ -14,9 +14,11 @@ namespace DeltaBotFour.Models
         public string Body { get; set; }
         public DateTime Created { get; set; }
         public DateTime CreatedUTC { get; set; }
+        public string FullName { get; set; }
         public bool IsEdited { get; set; }
         public string LinkId { get; set; }
         public string Permalink { get; set; }
+        public string Subreddit { get; set; }
         public string Shortlink { get; set; }
         public string Title { get; set; }
         public DB4Thing ParentPost { get; set; }

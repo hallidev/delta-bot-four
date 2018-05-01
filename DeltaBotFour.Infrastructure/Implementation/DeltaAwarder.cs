@@ -10,16 +10,19 @@ namespace DeltaBotFour.Infrastructure.Implementation
     {
         private readonly AppConfiguration _appConfiguration;
         private readonly IUserWikiEditor _wikiEditor;
+        private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
         private readonly IDeltaboardEditor _deltaboardEditor;
 
         public DeltaAwarder(AppConfiguration appConfiguration,
             IUserWikiEditor wikiEditor,
+            IRedditService redditService,
             ISubredditService subredditService, 
             IDeltaboardEditor deltaboardEditor)
         {
             _appConfiguration = appConfiguration;
             _wikiEditor = wikiEditor;
+            _redditService = redditService;
             _subredditService = subredditService;
             _deltaboardEditor = deltaboardEditor;
         }
@@ -28,6 +31,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             if (_appConfiguration.DB4Modes.Contains(DB4Mode.DeltaMonitor))
             {
+                // Get the user's current delta count from flair
+                int currentDeltaCount = DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText);
+
+                // Get new flair with incremented delta count
                 string newFlairText = DeltaHelper.GetIncrementedFlairText(comment.ParentThing.AuthorFlairText);
 
                 // Award to the parent comment
@@ -36,6 +43,17 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update wiki
                 _wikiEditor.UpdateUserWikiEntryAward(comment);
+
+                // If this was the user's first delta, send the first delta PM
+                if (currentDeltaCount == 0)
+                {
+                    string subject = _appConfiguration.PrivateMessages.FirstDeltaSubject;
+                    string body = _appConfiguration.PrivateMessages.FirstDeltaMessage
+                        .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
+                        .Replace(_appConfiguration.ReplaceTokens.UsernameToken, comment.ParentThing.AuthorName);
+
+                    _redditService.SendPrivateMessage(subject, body, comment.ParentThing.AuthorName);
+                }
             }
 
             if (_appConfiguration.DB4Modes.Contains(DB4Mode.Deltaboard))

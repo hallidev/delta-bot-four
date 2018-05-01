@@ -22,6 +22,7 @@ namespace DeltaBotFour.Reddit
                     AuthorFlairCssClass = post.AuthorFlairCssClass,
                     Created = post.Created,
                     CreatedUTC = post.CreatedUTC,
+                    FullName = post.FullName,
                     Permalink = post.Permalink.OriginalString,
                     Title = post.Title,
                     Shortlink = post.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO),
@@ -41,9 +42,11 @@ namespace DeltaBotFour.Reddit
                     Body = comment.Body,
                     Created = comment.Created,
                     CreatedUTC = comment.CreatedUTC,
+                    FullName = comment.FullName,
                     IsEdited = comment.Edited,
                     LinkId = comment.LinkId,
-                    Shortlink = comment.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO)
+                    Shortlink = comment.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO),
+                    Subreddit = comment.Subreddit
                 };
             }
 

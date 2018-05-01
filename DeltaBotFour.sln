@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Shared", "DeltaBotFour.Shared\DeltaBotFour.Shared.csproj", "{7C6E2364-6794-475D-9F83-7F1C138CEA97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaBotFour.Persistence", "DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj", "{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Persistence", "DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj", "{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
