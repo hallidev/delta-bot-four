@@ -15,7 +15,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private const int RanksToShow = 10;
 
         private readonly AppConfiguration _appConfiguration;
-        private readonly IDB4Repository _deltaBotRepository;
+        private readonly IDB4Repository _db4Repository;
         private readonly ISubredditService _subredditService;
         private readonly string _deltaboardsTemplate;
         private readonly string _deltaboardTemplate;
@@ -23,11 +23,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly string _deltaboardSidebarTemplate;
 
         public DeltaboardEditor(AppConfiguration appConfiguration, 
-            IDB4Repository deltaBotRepository,
+            IDB4Repository db4Repository,
             ISubredditService subredditService)
         {
             _appConfiguration = appConfiguration;
-            _deltaBotRepository = deltaBotRepository;
+            _db4Repository = db4Repository;
             _subredditService = subredditService;
 
             _deltaboardsTemplate = File.ReadAllText(appConfiguration.TemplateFiles.DeltaboardsTemplateFile);
@@ -39,7 +39,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         public void AddDelta(string username)
         {
             // Add an entry for this user to the local db
-            _deltaBotRepository.AddDeltaboardEntry(username);
+            _db4Repository.AddDeltaboardEntry(username);
 
             // Build and update wiki
             buildAndUpdateDeltaboards();
@@ -48,7 +48,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         public void RemoveDelta(string username)
         {
             // Remove an entry for this user from the local db
-            _deltaBotRepository.RemoveDeltaboardEntry(username);
+            _db4Repository.RemoveDeltaboardEntry(username);
 
             // Build and update wiki
             buildAndUpdateDeltaboards();
@@ -56,7 +56,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         private List<Deltaboard> getDeltaboards()
         {
-            return _deltaBotRepository.GetCurrentDeltaboards();
+            return _db4Repository.GetCurrentDeltaboards();
         }
 
         private void buildAndUpdateDeltaboards()

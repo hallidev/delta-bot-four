@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Foundation.Helpers;
+using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
 
@@ -12,20 +13,26 @@ namespace DeltaBotFour.Reddit.Implementation
     {
         private readonly Subreddit _subreddit;
         private readonly ICommentDispatcher _commentDispatcher;
+        private readonly IDB4Repository _db4Repository;
         private readonly IObserver<VotableThing> _commentObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public RedditSharpCommentMonitor(Subreddit subreddit, ICommentDispatcher commentDispatcher)
+        public RedditSharpCommentMonitor(Subreddit subreddit, 
+            ICommentDispatcher commentDispatcher, IDB4Repository db4Repository)
         {
             _subreddit = subreddit;
             _commentDispatcher = commentDispatcher;
+            _db4Repository = db4Repository;
             _commentObserver = new IncomingCommentObserver(commentDispatcher);
         }
 
         public void Start()
         {
+            // Get the time of the last processed comment
+            var lastProcessedCommentTimeUtc = _db4Repository.GetLastProcessedCommentTimeUtc();
+
             // Process comments from the last week
-            _subreddit.GetComments().Take(500).Where(c => c.CreatedUTC > DateTime.UtcNow.AddDays(-7))
+            _subreddit.GetComments().Where(c => c.CreatedUTC > lastProcessedCommentTimeUtc)
                 .ForEachAsync(c => _commentDispatcher.SendToQueue(c));
 
             // Start monitoring

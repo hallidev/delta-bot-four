@@ -12,7 +12,11 @@ namespace DeltaBotFour.Persistence.Implementation
     public class DB4Repository : IDB4Repository
     {
         private const string DbFileName = "DeltaBotFour.db";
+        private const string DeltaBotStateCollectionName = "deltabotstate";
         private const string DeltaboardsCollectionName = "deltaboards";
+        private const string BsonIdField = "_id";
+        private const string BsonValueField = "value";
+        private const string LastProcessedCommentTimeUtcKey = "last_processed_comment_time_utc";
 
         private readonly LiteDatabase _liteDatabase;
 
@@ -21,6 +25,22 @@ namespace DeltaBotFour.Persistence.Implementation
             // DI Conttainer registers this as a singleton, so
             // we want to hold onto this instance
             _liteDatabase = new LiteDatabase(DbFileName);
+        }
+
+        public DateTime GetLastProcessedCommentTimeUtc()
+        {
+            var stateCollection = getState();
+
+            return stateCollection.FindById(LastProcessedCommentTimeUtcKey)[BsonValueField];
+        }
+
+        public void SetLastProcessedCommentTimeUtc()
+        {
+            var stateCollection = getState();
+
+            var lastProcessedCommentTimeUtcDocument = stateCollection.FindById(LastProcessedCommentTimeUtcKey);
+            lastProcessedCommentTimeUtcDocument[BsonValueField] = DateTime.UtcNow;
+            stateCollection.Update(lastProcessedCommentTimeUtcDocument);
         }
 
         public List<Deltaboard> GetCurrentDeltaboards()
@@ -36,6 +56,22 @@ namespace DeltaBotFour.Persistence.Implementation
             }
 
             return deltaboards;
+        }
+
+        private LiteCollection<BsonDocument> getState()
+        {
+            var stateCollection = _liteDatabase.GetCollection<BsonDocument>(DeltaBotStateCollectionName);
+
+            // Ensure that state key / value pairs exist
+            if (stateCollection.FindById(LastProcessedCommentTimeUtcKey) == null)
+            {
+                var lastProcessedCommentTimeUtcDocument = new BsonDocument();
+                lastProcessedCommentTimeUtcDocument[BsonIdField] = LastProcessedCommentTimeUtcKey;
+                lastProcessedCommentTimeUtcDocument[BsonValueField] = DateTime.UtcNow;
+                stateCollection.Insert(lastProcessedCommentTimeUtcDocument);
+            }
+
+            return stateCollection;
         }
 
         public void AddDeltaboardEntry(string username)

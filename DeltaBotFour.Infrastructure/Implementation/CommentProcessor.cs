@@ -3,6 +3,7 @@ using System.Linq;
 using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
+using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Infrastructure.Implementation
@@ -15,10 +16,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly ICommentReplyDetector _commentReplyDetector;
         private readonly IDeltaAwarder _deltaAwarder;
         private readonly ICommentReplier _commentReplier;
+        private readonly IDB4Repository _db4Repository;
 
         public CommentProcessor(AppConfiguration appConfiguration, IRedditService redditService,
             ICommentValidator commentValidator, ICommentReplyDetector commentReplyDetector,
-            IDeltaAwarder deltaAwarder, ICommentReplier commentReplier)
+            IDeltaAwarder deltaAwarder, ICommentReplier commentReplier, IDB4Repository db4Repository)
         {
             _appConfiguration = appConfiguration;
             _redditService = redditService;
@@ -26,10 +28,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _commentReplyDetector = commentReplyDetector;
             _deltaAwarder = deltaAwarder;
             _commentReplier = commentReplier;
+            _db4Repository = db4Repository;
         }
 
         public void Process(DB4Thing comment)
         {
+            // Record the time when this comment was processed.
+            // Whenever DeltaBot stops, it's going to read this time
+            // and query / process all comments starting from this time
+            _db4Repository.SetLastProcessedCommentTimeUtc();
+
             // Check for a delta
             bool hasDeltas = _appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d));
 
