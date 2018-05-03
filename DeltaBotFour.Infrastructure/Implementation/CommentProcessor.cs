@@ -39,15 +39,15 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _db4Repository.SetLastProcessedCommentTimeUtc();
 
             // Check for a delta
-            bool hasDeltas = _appConfiguration.ValidDeltaIndicators.Any(d => comment.Body.Contains(d));
+            bool hasDelta = commentHasDelta(comment.Body);
 
-            if (hasDeltas || comment.IsEdited)
+            if (hasDelta || comment.IsEdited)
             {
                 // There is a delta or this comment is edited
                 // We need to get more info for processing
                 _redditService.PopulateParentAndChildren(comment);
 
-                if (hasDeltas)
+                if (hasDelta)
                 {
                     // Check to see if db4 has already replied
                     var db4ReplyResult = _commentReplyDetector.DidDB4Reply(comment);
@@ -99,6 +99,26 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     }
                 }
             }
+        }
+
+        private bool commentHasDelta(string commentBody)
+        {
+            // First split the comment up on newlines
+            var commentLines = commentBody.Split(
+                new[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.RemoveEmptyEntries
+            );
+
+            // For each line that isn't a reddit quote, check for a delta
+            foreach (var commentLine in commentLines)
+            {
+                if (!commentLine.StartsWith("&gt;") && _appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private DeltaCommentValidationResult validateAndAward(DB4Thing qualifiedComment)
