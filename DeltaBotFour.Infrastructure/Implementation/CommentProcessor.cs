@@ -39,7 +39,19 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _db4Repository.SetLastProcessedCommentTimeUtc();
 
             // Check for a delta
-            bool hasDelta = commentHasDelta(comment.Body);
+            bool hasDelta = commentHasDelta(comment.Body, out bool hadDeltaInQuotes);
+
+            // If there was no legitimate delta, but there was a delta in quotes, PM
+            // the user to let them know in case they made a mistake with reddit quoting
+            if (!hasDelta && hadDeltaInQuotes)
+            {
+                string subject = _appConfiguration.PrivateMessages.DeltaInQuoteSubject;
+                string body = _appConfiguration.PrivateMessages.DeltaInQuoteMessage
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, comment.AuthorName)
+                    .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
+
+                _redditService.SendPrivateMessage(subject, body, comment.AuthorName);
+            }
 
             if (hasDelta || comment.IsEdited)
             {
@@ -101,10 +113,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
         }
 
-        private bool commentHasDelta(string commentBody)
+        private bool commentHasDelta(string commentBody, out bool hadDeltaInQuotes)
         {
-            // First split the comment up on newlines
-            var commentLines = commentBody.Split(
+            hadDeltaInQuotes = false;
+
+                // First split the comment up on newlines
+                var commentLines = commentBody.Split(
                 new[] { "\r\n", "\r", "\n" },
                 StringSplitOptions.RemoveEmptyEntries
             );
@@ -112,9 +126,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // For each line that isn't a reddit quote, check for a delta
             foreach (var commentLine in commentLines)
             {
-                if (!commentLine.StartsWith("&gt;") && _appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d)))
+                if (_appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d)))
                 {
-                    return true;
+                    if (!commentLine.StartsWith("&gt;"))
+                    {
+                        // This line has a delta that wasn't in a quote - it's good
+                        return true;
+                    }
+
+                    // Line had a quoted delta
+                    hadDeltaInQuotes = true;
                 }
             }
 

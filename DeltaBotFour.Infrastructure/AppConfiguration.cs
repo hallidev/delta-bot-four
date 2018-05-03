@@ -119,6 +119,8 @@ namespace DeltaBotFour.Infrastructure
 
             public string FirstDeltaSubject => _configuration["private_messages:first_delta_subject"];
             public string FirstDeltaMessage => _configuration["private_messages:first_delta_message"];
+            public string DeltaInQuoteSubject => _configuration["private_messages:delta_in_quote_subject"];
+            public string DeltaInQuoteMessage => _configuration["private_messages:delta_in_quote_message"];
 
             public DeltaBotPrivateMessages(IConfigurationRoot configuration)
             {
