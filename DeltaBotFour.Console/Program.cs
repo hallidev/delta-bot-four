@@ -17,8 +17,8 @@ namespace DeltaBotFour.Console
             _container = new DeltaBotFourContainer().Install(new RegistrationCatalogFactory().GetRegistrationCatalog());
 
             // Start comment monitor
-            var commentMonitor = _container.Resolve<ICommentMonitor>();
-            commentMonitor.Start();
+            var activityMonitor = _container.Resolve<IActivityMonitor>();
+            activityMonitor.Start();
 
             // Start queue dispatcher
             var queueDispatcher = _container.Resolve<IDB4QueueDispatcher>();
@@ -28,7 +28,7 @@ namespace DeltaBotFour.Console
             {
                 if (System.Console.KeyAvailable && System.Console.ReadKey(true).Key == ConsoleKey.Escape)
                 {
-                    commentMonitor.Stop();
+                    activityMonitor.Stop();
                     queueDispatcher.Stop();
                     break;
                 }

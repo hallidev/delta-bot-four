@@ -13,12 +13,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
     {
         private readonly IDB4Queue _queue;
         private readonly ICommentProcessor _commentProcessor;
+        private readonly IPrivateMessageProcessor _privateMessageProcessor;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public DB4QueueDispatcher(IDB4Queue queue, ICommentProcessor commentProcessor)
+        public DB4QueueDispatcher(IDB4Queue queue, 
+            ICommentProcessor commentProcessor,
+            IPrivateMessageProcessor privateMessageProcessor)
         {
             _queue = queue;
             _commentProcessor = commentProcessor;
+            _privateMessageProcessor = privateMessageProcessor;
         }
 
         public async void Start()
@@ -44,6 +48,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
                                 case QueueMessageType.Comment:
                                     var comment = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
                                     _commentProcessor.Process(comment);
+                                    break;
+                                case QueueMessageType.PrivateMessage:
+                                    var privateMessage = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
+                                    _privateMessageProcessor.Process(privateMessage);
                                     break;
                                 default:
                                     throw new InvalidOperationException($"Unhandled enum value: {message.Type}");

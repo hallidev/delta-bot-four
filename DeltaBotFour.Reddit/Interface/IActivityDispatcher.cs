@@ -2,8 +2,9 @@
 
 namespace DeltaBotFour.Reddit.Interface
 {
-    public interface ICommentDispatcher
+    public interface IActivityDispatcher
     {
         void SendToQueue(Comment comment);
+        void SendToQueue(PrivateMessage privateMessage);
     }
 }

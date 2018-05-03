@@ -1,6 +1,6 @@
 ﻿namespace DeltaBotFour.Reddit.Interface
 {
-    public interface ICommentMonitor
+    public interface IActivityMonitor
     {
         void Start();
         void Stop();

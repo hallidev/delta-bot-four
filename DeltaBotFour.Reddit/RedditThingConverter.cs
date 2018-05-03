@@ -50,6 +50,16 @@ namespace DeltaBotFour.Reddit
                 };
             }
 
+            if (thing is PrivateMessage privateMessage)
+            {
+                return new DB4Thing
+                {
+                    Id = privateMessage.Id,
+                    ParentId = privateMessage.ParentID,
+                    Body = privateMessage.Body,
+                };
+            }
+
             throw new Exception($"Trying to convert unknown Reddit Thing Type: {thing.GetType()}");
         }
     }

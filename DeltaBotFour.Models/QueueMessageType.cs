@@ -6,6 +6,7 @@ namespace DeltaBotFour.Models
     [JsonConverter(typeof(StringEnumConverter))]
     public enum QueueMessageType
     {
-        Comment
+        Comment,
+        PrivateMessage
     }
 }

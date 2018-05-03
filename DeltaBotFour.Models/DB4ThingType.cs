@@ -3,6 +3,7 @@
     public enum DB4ThingType
     {
         Post,
-        Comment
+        Comment,
+        PrivateMessage
     }
 }
