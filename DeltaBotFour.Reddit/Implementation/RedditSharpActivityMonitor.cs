@@ -26,17 +26,36 @@ namespace DeltaBotFour.Reddit.Implementation
             _subreddit = subreddit;
             _activityDispatcher = activityDispatcher;
             _db4Repository = db4Repository;
-            _commentObserver = new IncomingCommentObserver(activityDispatcher);
-            _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher);
+            _commentObserver = new IncomingCommentObserver(activityDispatcher, db4Repository);
+            _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher, db4Repository);
         }
 
         public void Start()
         {
             // Get the time of the last processed comment
-            var lastProcessedCommentTimeUtc = _db4Repository.GetLastProcessedCommentTimeUtc();
+            var lastActivityTimeUtc = _db4Repository.GetLastActivityTimeUtc();
 
-            // Process comments from the last week
-            _subreddit.GetComments().Where(c => c.CreatedUTC > lastProcessedCommentTimeUtc)
+            // Process comments since last activity
+            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc)
+                .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
+
+            // Process edits since last activity
+            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc)
+                .ForEachAsync(c =>
+                {
+                    if (c is Comment editedComment)
+                    {
+                        _activityDispatcher.SendToQueue(editedComment);
+                    }
+                });
+
+            if (_reddit.User == null)
+            {
+                Task.Run(async () => await _reddit.InitOrUpdateUserAsync()).Wait();
+            }
+
+            // Process private messages since last activity
+            _reddit.User.GetInbox().Where(c => c.CreatedUTC > lastActivityTimeUtc)
                 .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
 
             // Start comment monitoring
@@ -110,12 +129,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
         private async void monitorPrivateMessages()
         {
-            if (_reddit.User == null)
-            {
-                await _reddit.InitOrUpdateUserAsync();
-            }
-
-            var privateMessageStream = _reddit.User.GetPrivateMessages().Stream();
+            var privateMessageStream = _reddit.User.GetInbox().Stream();
 
             // Get all new comments as they are posted
             // This will run as long as the application is running
@@ -140,10 +154,13 @@ namespace DeltaBotFour.Reddit.Implementation
         private class IncomingCommentObserver : IObserver<VotableThing>
         {
             private readonly IActivityDispatcher _activityDispatcher;
+            private readonly IDB4Repository _db4Repository;
 
-            public IncomingCommentObserver(IActivityDispatcher activityDispatcher)
+            public IncomingCommentObserver(IActivityDispatcher activityDispatcher,
+                IDB4Repository db4Repository)
             {
                 _activityDispatcher = activityDispatcher;
+                _db4Repository = db4Repository;
             }
 
             public void OnCompleted()
@@ -161,6 +178,12 @@ namespace DeltaBotFour.Reddit.Implementation
                 // We are only observing comments
                 if (!(votableThing is Comment comment)) { return; }
 
+                // Record the time when this was processed.
+                // Whenever DeltaBot stops, it's going to read this time
+                // and query / process all things starting from this time
+                _db4Repository.SetLastActivityTimeUtc();
+
+                // Send to queue for processing
                 _activityDispatcher.SendToQueue(comment);
             }
         }
@@ -168,10 +191,13 @@ namespace DeltaBotFour.Reddit.Implementation
         private class IncomingPrivateMessageObserver : IObserver<PrivateMessage>
         {
             private readonly IActivityDispatcher _activityDispatcher;
+            private readonly IDB4Repository _db4Repository;
 
-            public IncomingPrivateMessageObserver(IActivityDispatcher activityDispatcher)
+            public IncomingPrivateMessageObserver(IActivityDispatcher activityDispatcher,
+                IDB4Repository db4Repository)
             {
                 _activityDispatcher = activityDispatcher;
+                _db4Repository = db4Repository;
             }
 
             public void OnCompleted()
@@ -186,6 +212,12 @@ namespace DeltaBotFour.Reddit.Implementation
 
             public void OnNext(PrivateMessage privateMessage)
             {
+                // Record the time when this was processed.
+                // Whenever DeltaBot stops, it's going to read this time
+                // and query / process all things starting from this time
+                _db4Repository.SetLastActivityTimeUtc();
+
+                // Send to queue for processing
                 _activityDispatcher.SendToQueue(privateMessage);
             }
         }

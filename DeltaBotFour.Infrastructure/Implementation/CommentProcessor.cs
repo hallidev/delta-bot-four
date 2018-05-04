@@ -33,17 +33,15 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public void Process(DB4Thing comment)
         {
-            // Record the time when this comment was processed.
-            // Whenever DeltaBot stops, it's going to read this time
-            // and query / process all comments starting from this time
-            _db4Repository.SetLastProcessedCommentTimeUtc();
+            // If we got here with a PM or post, that's a problem
+            Assert.That(comment.Type == DB4ThingType.Comment, $"CommentProcessor received type: {comment.Type}");
 
             // Check for a delta
             bool hasDelta = commentHasDelta(comment.Body, out bool hadDeltaInQuotes);
 
             // If there was no legitimate delta, but there was a delta in quotes, PM
             // the user to let them know in case they made a mistake with reddit quoting
-            if (!hasDelta && hadDeltaInQuotes)
+            if (!hasDelta && hadDeltaInQuotes && !_db4Repository.GetIgnoreQuotedDeltaPMUserList().Contains(comment.AuthorName))
             {
                 string subject = _appConfiguration.PrivateMessages.DeltaInQuoteSubject;
                 string body = _appConfiguration.PrivateMessages.DeltaInQuoteMessage

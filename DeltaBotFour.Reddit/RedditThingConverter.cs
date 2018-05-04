@@ -15,8 +15,8 @@ namespace DeltaBotFour.Reddit
             {
                 return new DB4Thing
                 {
-                    Id = post.Id,
                     Type = DB4ThingType.Post,
+                    Id = post.Id,
                     AuthorName = post.AuthorName,
                     AuthorFlairText = post.AuthorFlairText,
                     AuthorFlairCssClass = post.AuthorFlairCssClass,
@@ -33,9 +33,9 @@ namespace DeltaBotFour.Reddit
             {
                 return new DB4Thing
                 {
+                    Type = DB4ThingType.Comment,
                     Id = comment.Id,
                     ParentId = comment.ParentId,
-                    Type = DB4ThingType.Comment,
                     AuthorName = comment.AuthorName,
                     AuthorFlairText = comment.AuthorFlairText,
                     AuthorFlairCssClass = comment.AuthorFlairCssClass,
@@ -54,8 +54,11 @@ namespace DeltaBotFour.Reddit
             {
                 return new DB4Thing
                 {
+                    Type = DB4ThingType.PrivateMessage,
                     Id = privateMessage.Id,
                     ParentId = privateMessage.ParentID,
+                    AuthorName = privateMessage.AuthorName,
+                    Subject = privateMessage.Subject,
                     Body = privateMessage.Body,
                 };
             }

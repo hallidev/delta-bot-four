@@ -11,6 +11,7 @@ namespace DeltaBotFour.Models
         public string AuthorName { get; set; }
         public string AuthorFlairText { get; set; }
         public string AuthorFlairCssClass { get; set; }
+        public string Subject { get; set; }
         public string Body { get; set; }
         public DateTime Created { get; set; }
         public DateTime CreatedUTC { get; set; }
