@@ -58,6 +58,7 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<ICommentReplier, CommentReplier>();
             container.Register<IDeltaAwarder, DeltaAwarder>();
             container.Register<IPrivateMessageProcessor, PrivateMessageProcessor>();
+            container.Register<IPrivateMessageHandlerFactory, PrivateMessageHandlerFactory>();
             container.Register<IUserWikiEditor, UserWikiEditor>();
             container.Register<IDeltaboardEditor, DeltaboardEditor>();
         }
