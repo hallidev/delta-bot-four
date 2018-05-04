@@ -3,9 +3,9 @@
     public interface ISubredditService
     {
         void SetUserFlair(string username, string cssClass, string flairText);
-        string GetPage(string url);
-        void EditPage(string url, string content);
         string GetWikiUrl();
+        string GetWikiPage(string url);
+        void EditPage(string url, string content);
         string GetSidebar();
         void UpdateSidebar(string sidebarContent);
     }

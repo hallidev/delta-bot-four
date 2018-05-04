@@ -65,7 +65,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private string buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)
         {
             // Get page content
-            string pageContent = _subredditService.GetPage(userUrl);
+            string pageContent = _subredditService.GetWikiPage(userUrl);
+
+            // If the page wasn't found, consider it empty
+            if (string.IsNullOrEmpty(pageContent))
+            {
+                pageContent = string.Empty;
+            }
 
             // Find and deserialize hidden params
             var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
