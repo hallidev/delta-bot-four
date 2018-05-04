@@ -1,4 +1,6 @@
-﻿using DeltaBotFour.Reddit.Interface;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Reddit.Implementation
 {
@@ -12,10 +14,24 @@ namespace DeltaBotFour.Reddit.Implementation
             _reddit = reddit;
         }
 
-        public void SetAsRead(string fullName, string id)
+        public void SetAsRead(string id)
         {
-            var privateMessage = _reddit.GetThingByFullnameAsync(id).Result;
-            //_reddit.gett
+            Task.Run(async () =>
+            {
+                if (_reddit.User == null)
+                {
+                    await _reddit.InitOrUpdateUserAsync();
+                }
+
+                // Get private message with the specified id
+                await _reddit.User.GetInbox().Where(pm => pm.Id == id && pm.Unread)
+                    .ForEachAsync(async pm =>
+                    {
+                        // Set as read
+                        await pm.SetAsReadAsync();
+                    });
+
+            }).Wait();
         }
     }
 }

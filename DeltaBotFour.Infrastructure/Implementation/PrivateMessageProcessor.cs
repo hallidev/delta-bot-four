@@ -29,7 +29,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             handler?.Handle(privateMessage);
 
             // After handling the private message, set it to read
-            _privateMessageService.SetAsRead(privateMessage.FullName, privateMessage.Id);
+            _privateMessageService.SetAsRead(privateMessage.Id);
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IPrivateMessageService
     {
-        void SetAsRead(string fullName, string id);
+        void SetAsRead(string id);
     }
 }
