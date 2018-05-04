@@ -178,6 +178,14 @@ namespace DeltaBotFour.Reddit.Implementation
                 // We are only observing comments
                 if (!(votableThing is Comment comment)) { return; }
 
+                // There is a known bug in RedditSharp where this observer can attempt
+                // to process a few very old comments where it starts up. I'm arbitrarily picking 6 months
+                // here. I'm not sure if there's a better way to fix this
+                if ((DateTime.UtcNow - comment.CreatedUTC).TotalDays > 180)
+                {
+                    return;
+                }
+
                 // Record the time when this was processed.
                 // Whenever DeltaBot stops, it's going to read this time
                 // and query / process all things starting from this time
