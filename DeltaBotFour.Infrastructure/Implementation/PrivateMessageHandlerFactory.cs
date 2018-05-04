@@ -20,9 +20,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
         public IPrivateMessageHandler Create(DB4Thing privateMessage)
         {
             // Handle PMs based on subject
-            if (privateMessage.Subject == _appConfiguration.PrivateMessages.DeltaInQuoteSubject)
+            if (privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
             {
-                return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository);
+                return new StopQuotedDeltaWarningsPMHandler(_db4Repository);
             }
 
             return null;

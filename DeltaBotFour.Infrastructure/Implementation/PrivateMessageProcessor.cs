@@ -1,16 +1,20 @@
 ﻿using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
+using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class PrivateMessageProcessor : IPrivateMessageProcessor
     {
         private readonly IPrivateMessageHandlerFactory _privateMessageHandlerFactory;
+        private readonly IPrivateMessageService _privateMessageService;
 
-        public PrivateMessageProcessor(IPrivateMessageHandlerFactory privateMessageHandlerFactory)
+        public PrivateMessageProcessor(IPrivateMessageHandlerFactory privateMessageHandlerFactory, 
+            IPrivateMessageService privateMessageService)
         {
             _privateMessageHandlerFactory = privateMessageHandlerFactory;
+            _privateMessageService = privateMessageService;
         }
 
         public void Process(DB4Thing privateMessage)
@@ -23,6 +27,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // The handler could be null if this kind of private message doesn't have handler
             handler?.Handle(privateMessage);
+
+            // After handling the private message, set it to read
+            _privateMessageService.SetAsRead(privateMessage.FullName, privateMessage.Id);
         }
     }
 }

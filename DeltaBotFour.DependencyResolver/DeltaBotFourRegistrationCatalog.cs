@@ -47,6 +47,7 @@ namespace DeltaBotFour.DependencyResolver
             // Register Reddit Services
             container.Register<IActivityDispatcher, RedditSharpActivityDispatcher>();
             container.Register<IActivityMonitor, RedditSharpActivityMonitor>();
+            container.Register<IPrivateMessageService, RedditSharpPrivateMessageService>();
             container.Register<IRedditService, RedditSharpRedditService>();
             container.Register<ISubredditService, RedditSharpSubredditService>();
 

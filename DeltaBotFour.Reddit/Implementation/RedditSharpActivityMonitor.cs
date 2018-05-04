@@ -54,8 +54,8 @@ namespace DeltaBotFour.Reddit.Implementation
                 Task.Run(async () => await _reddit.InitOrUpdateUserAsync()).Wait();
             }
 
-            // Process private messages since last activity
-            _reddit.User.GetInbox().Where(c => c.CreatedUTC > lastActivityTimeUtc)
+            // Process unread private messages
+            _reddit.User.GetInbox().Where(pm => pm.Unread)
                 .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
 
             // Start comment monitoring
@@ -217,8 +217,11 @@ namespace DeltaBotFour.Reddit.Implementation
                 // and query / process all things starting from this time
                 _db4Repository.SetLastActivityTimeUtc();
 
-                // Send to queue for processing
-                _activityDispatcher.SendToQueue(privateMessage);
+                // Only send unread messages to queue for processing
+                if (privateMessage.Unread)
+                {
+                    _activityDispatcher.SendToQueue(privateMessage);
+                }
             }
         }
     }

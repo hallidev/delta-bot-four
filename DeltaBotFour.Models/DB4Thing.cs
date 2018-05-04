@@ -5,9 +5,10 @@ namespace DeltaBotFour.Models
 {
     public class DB4Thing
     {
+        public DB4ThingType Type { get; set; }
+        public string Kind { get; set; }
         public string Id { get; set; }
         public string ParentId { get; set; }
-        public DB4ThingType Type { get; set; }
         public string AuthorName { get; set; }
         public string AuthorFlairText { get; set; }
         public string AuthorFlairCssClass { get; set; }

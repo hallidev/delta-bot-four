@@ -16,13 +16,14 @@ namespace DeltaBotFour.Reddit
                 return new DB4Thing
                 {
                     Type = DB4ThingType.Post,
+                    Kind = post.Kind,
                     Id = post.Id,
+                    FullName = post.FullName,
                     AuthorName = post.AuthorName,
                     AuthorFlairText = post.AuthorFlairText,
                     AuthorFlairCssClass = post.AuthorFlairCssClass,
                     Created = post.Created,
                     CreatedUTC = post.CreatedUTC,
-                    FullName = post.FullName,
                     Permalink = post.Permalink.OriginalString,
                     Title = post.Title,
                     Shortlink = post.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO),
@@ -34,15 +35,16 @@ namespace DeltaBotFour.Reddit
                 return new DB4Thing
                 {
                     Type = DB4ThingType.Comment,
+                    Kind = comment.Kind,
                     Id = comment.Id,
                     ParentId = comment.ParentId,
+                    FullName = comment.FullName,
                     AuthorName = comment.AuthorName,
                     AuthorFlairText = comment.AuthorFlairText,
                     AuthorFlairCssClass = comment.AuthorFlairCssClass,
                     Body = comment.Body,
                     Created = comment.Created,
                     CreatedUTC = comment.CreatedUTC,
-                    FullName = comment.FullName,
                     IsEdited = comment.Edited,
                     LinkId = comment.LinkId,
                     Shortlink = comment.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO),
@@ -55,8 +57,10 @@ namespace DeltaBotFour.Reddit
                 return new DB4Thing
                 {
                     Type = DB4ThingType.PrivateMessage,
+                    Kind = privateMessage.Kind,
                     Id = privateMessage.Id,
                     ParentId = privateMessage.ParentID,
+                    FullName = privateMessage.FullName,
                     AuthorName = privateMessage.AuthorName,
                     Subject = privateMessage.Subject,
                     Body = privateMessage.Body,

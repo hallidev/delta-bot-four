@@ -31,7 +31,7 @@ namespace DeltaBotFour.Persistence.Implementation
         public DateTime GetLastActivityTimeUtc()
         {
             var stateCollection = getState();
-            return stateCollection.FindById(LastActivityTimeUtcKey)[BsonValueField];
+            return ((DateTime)stateCollection.FindById(LastActivityTimeUtcKey)[BsonValueField]).ToUniversalTime();
         }
 
         public void SetLastActivityTimeUtc()
