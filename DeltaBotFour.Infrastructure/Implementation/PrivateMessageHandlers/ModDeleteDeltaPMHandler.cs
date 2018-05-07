@@ -8,7 +8,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
     public class ModDeleteDeltaPMHandler : IPrivateMessageHandler
     {
         private const string DeleteSucceededMessage = "Delta has been deleted.";
-        private const string DeleteFailedNeverAwardedMessage = "A delta was never awarded for this comment. Nothing was removed.";
+        private const string DeleteFailedNeverAwardedMessage = "I never awarded a delta for this comment, so there's nothing for me to delete!";
         private const string DeleteFailedErrorMessageFormat = "Delete failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
         private readonly IRedditService _redditService;
@@ -45,6 +45,9 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
                     return;
                 }
+
+                // A delta was awarded, unaward it
+
 
                 // Reply indicating success
                 _redditService.ReplyToPrivateMessage(privateMessage.Id, 

@@ -75,7 +75,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     body = _appConfiguration.Replies.DeltaAwarded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
                         .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
-                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText).ToString() + 1);
+                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
                     break;
                 default:
                     throw new InvalidOperationException($"Unhandled DeltaCommentValidationResult: {resultType}");

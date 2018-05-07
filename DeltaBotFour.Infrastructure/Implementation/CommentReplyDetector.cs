@@ -54,6 +54,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 }
             }
 
+            // DB4 hasn't replied yet
             return new DB4ReplyResult { HasDB4Replied = false, WasSuccessReply = false };
         }
 

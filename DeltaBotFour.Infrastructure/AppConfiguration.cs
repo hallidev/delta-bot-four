@@ -135,14 +135,15 @@ namespace DeltaBotFour.Infrastructure
         {
             private readonly IConfigurationRoot _configuration;
 
-            public string DeltaAwarded => _configuration["validation_replies:delta_awarded"];
-            public string CommentTooShort => _configuration["validation_replies:comment_too_short"];
-            public string CannotAwardOP => _configuration["validation_replies:cannot_award_op"];
-            public string CannotAwardDeltaBot => _configuration["validation_replies:cannot_award_deltabot"];
-            public string CannotAwardSelf => _configuration["validation_replies:cannot_award_self"];
-            public string WithIssues => _configuration["validation_replies:fail_with_issues"];
-            public List<string> SuccessReplies { get; private set; }
-            public List<string> FailReplies { get; private set; }
+            public string DeltaAwarded => _configuration["comment_replies:delta_awarded"];
+            public string CommentTooShort => _configuration["comment_replies:comment_too_short"];
+            public string CannotAwardOP => _configuration["comment_replies:cannot_award_op"];
+            public string CannotAwardDeltaBot => _configuration["comment_replies:cannot_award_deltabot"];
+            public string CannotAwardSelf => _configuration["comment_replies:cannot_award_self"];
+            public string ModeratorRemoved => _configuration["comment_replies:moderator_removed"];
+            public string WithIssues => _configuration["comment_replies:fail_with_issues"];
+            public List<string> SuccessReplies { get; }
+            public List<string> FailReplies { get; }
 
             public DeltaBotReplies(IConfigurationRoot configuration)
             {
@@ -156,6 +157,7 @@ namespace DeltaBotFour.Infrastructure
                     CannotAwardOP,
                     CannotAwardDeltaBot,
                     CannotAwardSelf,
+                    ModeratorRemoved,
                     WithIssues
                 };
             }

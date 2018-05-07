@@ -36,6 +36,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // If we got here with a PM or post, that's a problem
             Assert.That(comment.Type == DB4ThingType.Comment, $"CommentProcessor received type: {comment.Type}");
 
+            // DB4 shouldn't process its own comments
+            if (comment.AuthorName == _appConfiguration.DB4Username)
+            {
+                return;
+            }
+
             // Check for a delta
             bool hasDelta = commentHasDelta(comment.Body, out bool hadDeltaInQuotes);
 
