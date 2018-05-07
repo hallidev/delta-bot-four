@@ -139,7 +139,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
         private PrivateMessage getPrivateMessageById(string privateMessageId)
         {
-            return _reddit.User.GetInbox().Where(pm => pm.Id == privateMessageId && pm.Unread).FirstOrDefault().Result;
+            return _reddit.User.GetInbox().Where(pm => pm != null && pm.Id == privateMessageId && pm.Unread).FirstOrDefault().Result;
         }
     }
 }

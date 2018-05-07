@@ -7,22 +7,24 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
     public class ModDeleteDeltaPMHandler : IPrivateMessageHandler
     {
-        private const string DeleteSucceededMessage = "Delta has been deleted.";
         private const string DeleteFailedNeverAwardedMessage = "I never awarded a delta for this comment, so there's nothing for me to delete!";
         private const string DeleteFailedErrorMessageFormat = "Delete failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
+        private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
         private readonly ICommentReplyDetector _replyDetector;
         private readonly ICommentReplyBuilder _replyBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
-        public ModDeleteDeltaPMHandler(IRedditService redditService,
+        public ModDeleteDeltaPMHandler(AppConfiguration appConfiguration,
+            IRedditService redditService,
             ICommentReplyDetector replyDetector, 
             ICommentReplyBuilder replyBuilder,
             ICommentReplier replier,
             IDeltaAwarder deltaAwarder)
         {
+            _appConfiguration = appConfiguration;
             _redditService = redditService;
             _replyDetector = replyDetector;
             _replyBuilder = replyBuilder;
@@ -65,9 +67,11 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.DeleteReply(db4ReplyResult.Comment);
                 _replier.Reply(comment, reply);
 
-                // Reply to moderator indicating success
-                _redditService.ReplyToPrivateMessage(privateMessage.Id, 
-                    DeleteSucceededMessage);
+                // Reply with modmail indicating success
+                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModDeletedDeltaNotificationSubject,
+                    _appConfiguration.PrivateMessages.ModDeletedDeltaNotificationMessage
+                        .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl),
+                    _appConfiguration.SubredditName, _appConfiguration.SubredditName);
 
             }
             catch (Exception ex)

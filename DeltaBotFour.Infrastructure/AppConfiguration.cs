@@ -119,6 +119,10 @@ namespace DeltaBotFour.Infrastructure
 
             public string ModAddDeltaSubject => _configuration["private_messages:mod_add_delta_subject"];
             public string ModDeleteDeltaSubject => _configuration["private_messages:mod_delete_delta_subject"];
+            public string ModAddedDeltaNotificationSubject => _configuration["private_messages:mod_added_delta_notification_subject"];
+            public string ModAddedDeltaNotificationMessage => _configuration["private_messages:mod_added_delta_notification_message"];
+            public string ModDeletedDeltaNotificationSubject => _configuration["private_messages:mod_deleted_delta_notification_subject"];
+            public string ModDeletedDeltaNotificationMessage => _configuration["private_messages:mod_deleted_delta_notification_message"];
             public string FirstDeltaSubject => _configuration["private_messages:first_delta_subject"];
             public string FirstDeltaMessage => _configuration["private_messages:first_delta_message"];
             public string DeltaInQuoteSubject => _configuration["private_messages:delta_in_quote_subject"];

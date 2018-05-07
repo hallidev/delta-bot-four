@@ -7,22 +7,24 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
     public class ModAddDeltaPMHandler : IPrivateMessageHandler
     {
-        private const string AddSucceededMessage = "Delta has been added.";
         private const string AddFailedAlreadyAwardedMessage = "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
         private const string AddFailedErrorMessageFormat = "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
+        private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
         private readonly ICommentReplyDetector _replyDetector;
         private readonly ICommentReplyBuilder _replyBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
-        public ModAddDeltaPMHandler(IRedditService redditService,
+        public ModAddDeltaPMHandler(AppConfiguration appConfiguration,
+            IRedditService redditService,
             ICommentReplyDetector replyDetector,
             ICommentReplyBuilder replyBuilder,
             ICommentReplier replier,
             IDeltaAwarder deltaAwarder)
         {
+            _appConfiguration = appConfiguration;
             _redditService = redditService;
             _replyDetector = replyDetector;
             _replyBuilder = replyBuilder;
@@ -65,9 +67,11 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.DeleteReply(db4ReplyResult.Comment);
                 _replier.Reply(comment, reply);
 
-                // Reply to moderator indicating success
-                _redditService.ReplyToPrivateMessage(privateMessage.Id,
-                    AddSucceededMessage);
+                // Reply with modmail indicating success
+                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModAddedDeltaNotificationSubject,
+                    _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
+                        .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl),
+                    _appConfiguration.SubredditName, _appConfiguration.SubredditName);
             }
             catch (Exception ex)
             {

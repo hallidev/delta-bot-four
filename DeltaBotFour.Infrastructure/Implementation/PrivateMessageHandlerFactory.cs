@@ -42,14 +42,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModAddDeltaSubject.ToLower()))
             {
-                return new ModAddDeltaPMHandler(_redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
+                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModDeleteDeltaSubject.ToLower()))
             {
-                return new ModDeleteDeltaPMHandler(_redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
+                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
             }
 
             // Stop quoted deltas warning

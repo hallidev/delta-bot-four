@@ -56,7 +56,7 @@ namespace DeltaBotFour.Reddit.Implementation
             }
 
             // Process unread private messages
-            _reddit.User.GetInbox().Where(pm => pm.Unread)
+            _reddit.User.GetInbox().Where(pm => pm != null && pm.Unread)
                 .ForEachAsync(pm => _activityDispatcher.SendToQueue(pm));
 
             // Start comment monitoring
