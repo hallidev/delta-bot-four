@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
@@ -9,7 +10,8 @@ namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpRedditService : IRedditService
     {
-        private const string RedditBaseUrl = "https://oauth.reddit.com";
+        private const string WwwRedditBaseUrl = "https://www.reddit.com";
+        private const string OAuthRedditBaseUrl = "https://oauth.reddit.com";
         private readonly RedditSharp.Reddit _reddit;
 
         public RedditSharpRedditService(RedditSharp.Reddit reddit)
@@ -46,6 +48,17 @@ namespace DeltaBotFour.Reddit.Implementation
             return RedditThingConverter.Convert(unqualifiedComment);
         }
 
+        public DB4Thing GetCommentByUrl(string url)
+        {
+            if (url.StartsWith(WwwRedditBaseUrl))
+            {
+                url = url.Replace(WwwRedditBaseUrl, OAuthRedditBaseUrl);
+            }
+
+            var qualifiedComment = _reddit.GetCommentAsync(new Uri(url)).Result;
+            return RedditThingConverter.Convert(qualifiedComment);
+        }
+
         public void ReplyToComment(DB4Thing comment, string reply)
         {
             var qualifiedComment = getQualifiedComment(comment);
@@ -79,12 +92,49 @@ namespace DeltaBotFour.Reddit.Implementation
             }).Wait();
         }
 
+        public void ReplyToPrivateMessage(string privateMessageId, string body)
+        {
+            Task.Run(async () =>
+            {
+                if (_reddit.User == null)
+                {
+                    await _reddit.InitOrUpdateUserAsync();
+                }
+
+                // Get private message with the specified id
+                var privateMessage = getPrivateMessageById(privateMessageId);
+                await privateMessage.ReplyAsync(body);
+
+            }).Wait();
+        }
+
+        public void SetPrivateMessageAsRead(string privateMessageId)
+        {
+            Task.Run(async () =>
+            {
+                if (_reddit.User == null)
+                {
+                    await _reddit.InitOrUpdateUserAsync();
+                }
+
+                // Get private message with the specified id
+                var privateMessage = getPrivateMessageById(privateMessageId);
+                await privateMessage.SetAsReadAsync();
+
+            }).Wait();
+        }
+
         private Comment getQualifiedComment(DB4Thing comment)
         {
-            string commentUrl = $"{RedditBaseUrl}{comment.Shortlink}".TrimEnd('/');
+            string commentUrl = $"{OAuthRedditBaseUrl}{comment.Shortlink}".TrimEnd('/');
 
             // Get comment with children and parent post populated
             return _reddit.GetCommentAsync(new Uri(commentUrl)).Result;
+        }
+
+        private PrivateMessage getPrivateMessageById(string privateMessageId)
+        {
+            return _reddit.User.GetInbox().Where(pm => pm.Id == privateMessageId && pm.Unread).FirstOrDefault().Result;
         }
     }
 }

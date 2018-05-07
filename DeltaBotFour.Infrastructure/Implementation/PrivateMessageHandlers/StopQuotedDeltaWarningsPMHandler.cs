@@ -30,8 +30,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _db4Repository.AddIgnoredQuotedDeltaPMUser(privateMessage.AuthorName);
 
                 // Send confirmation message
-                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ConfirmStopQuotedDeltaWarningSubject,
-                    _appConfiguration.PrivateMessages.ConfirmStopQuotedDeltaWarningMessage, privateMessage.AuthorName);
+                _redditService.ReplyToPrivateMessage(privateMessage.Id, _appConfiguration.PrivateMessages.ConfirmStopQuotedDeltaWarningMessage);
             }
         }
     }

@@ -123,7 +123,6 @@ namespace DeltaBotFour.Infrastructure
             public string FirstDeltaMessage => _configuration["private_messages:first_delta_message"];
             public string DeltaInQuoteSubject => _configuration["private_messages:delta_in_quote_subject"];
             public string DeltaInQuoteMessage => _configuration["private_messages:delta_in_quote_message"];
-            public string ConfirmStopQuotedDeltaWarningSubject => _configuration["private_messages:confirm_stop_quoted_delta_warning_subject"];
             public string ConfirmStopQuotedDeltaWarningMessage => _configuration["private_messages:confirm_stop_quoted_delta_warning_message"];
 
             public DeltaBotPrivateMessages(IConfigurationRoot configuration)
