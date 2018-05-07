@@ -144,6 +144,7 @@ namespace DeltaBotFour.Infrastructure
             public string WithIssues => _configuration["comment_replies:fail_with_issues"];
             public List<string> SuccessReplies { get; }
             public List<string> FailReplies { get; }
+            public List<string> ModeratorReplies { get; }
 
             public DeltaBotReplies(IConfigurationRoot configuration)
             {
@@ -157,9 +158,10 @@ namespace DeltaBotFour.Infrastructure
                     CannotAwardOP,
                     CannotAwardDeltaBot,
                     CannotAwardSelf,
-                    ModeratorRemoved,
                     WithIssues
                 };
+
+                ModeratorReplies = new List<string> { ModeratorRemoved };
             }
         }
 

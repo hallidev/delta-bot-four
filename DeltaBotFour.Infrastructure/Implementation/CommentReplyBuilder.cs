@@ -32,7 +32,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 case DeltaCommentReplyType.FailCannotAwardSelf:
                     body = _appConfiguration.Replies.CannotAwardSelf;
                     break;
-                case DeltaCommentReplyType.FailModeratorRemoved:
+                case DeltaCommentReplyType.ModeratorRemoved:
                     body = _appConfiguration.Replies.ModeratorRemoved;
                     break;
                 case DeltaCommentReplyType.SuccessDeltaAwarded:

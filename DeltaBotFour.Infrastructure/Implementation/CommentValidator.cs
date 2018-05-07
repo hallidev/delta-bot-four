@@ -1,5 +1,4 @@
-﻿using System;
-using DeltaBotFour.Infrastructure.Interface;
+﻿using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 
 namespace DeltaBotFour.Infrastructure.Implementation

@@ -12,6 +12,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly AppConfiguration _appConfiguration;
         private readonly List<Regex> _successReplyRegexes = new List<Regex>();
         private readonly List<Regex> _failReplyRegexes = new List<Regex>();
+        private readonly List<Regex> _moderatorReplyRegexes = new List<Regex>();
 
         public CommentReplyDetector(AppConfiguration appConfiguration)
         {
@@ -27,6 +28,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 _failReplyRegexes.Add(new Regex(getPattern(db4Reply)));
             }
+
+            foreach (string db4Reply in _appConfiguration.Replies.ModeratorReplies)
+            {
+                _moderatorReplyRegexes.Add(new Regex(getPattern(db4Reply)));
+            }
         }
 
         public DB4ReplyResult DidDB4Reply(DB4Thing comment)
@@ -40,7 +46,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     {
                         if (regex.IsMatch(childComment.Body))
                         {
-                            return new DB4ReplyResult { HasDB4Replied = true, WasSuccessReply = true, Comment = childComment };
+                            return new DB4ReplyResult
+                            {
+                                HasDB4Replied = true,
+                                WasSuccessReply = true,
+                                WasModeratorReply = false,
+                                Comment = childComment
+                            };
                         }
                     }
 
@@ -48,14 +60,39 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     {
                         if (regex.IsMatch(childComment.Body))
                         {
-                            return new DB4ReplyResult { HasDB4Replied = true, WasSuccessReply = false, Comment = childComment };
+                            return new DB4ReplyResult
+                            {
+                                HasDB4Replied = true,
+                                WasSuccessReply = false,
+                                WasModeratorReply = false,
+                                Comment = childComment
+                            };
+                        }
+                    }
+
+                    foreach (Regex regex in _moderatorReplyRegexes)
+                    {
+                        if (regex.IsMatch(childComment.Body))
+                        {
+                            return new DB4ReplyResult
+                            {
+                                HasDB4Replied = true,
+                                WasSuccessReply = false,
+                                WasModeratorReply = true,
+                                Comment = childComment
+                            };
                         }
                     }
                 }
             }
 
             // DB4 hasn't replied yet
-            return new DB4ReplyResult { HasDB4Replied = false, WasSuccessReply = false };
+            return new DB4ReplyResult
+            {
+                HasDB4Replied = false,
+                WasSuccessReply = false,
+                WasModeratorReply = false
+            };
         }
 
         private string getPattern(string db4reply)

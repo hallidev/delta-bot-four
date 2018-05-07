@@ -6,7 +6,7 @@
         FailCannotAwardOP,
         FailCannotAwardDeltaBot,
         FailCannotAwardSelf,
-        FailModeratorRemoved,
+        ModeratorRemoved,
         SuccessDeltaAwarded
     }
 }

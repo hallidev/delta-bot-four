@@ -13,12 +13,21 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
         private readonly IRedditService _redditService;
         private readonly ICommentReplyDetector _replyDetector;
+        private readonly ICommentReplyBuilder _replyBuilder;
+        private readonly ICommentReplier _replier;
+        private readonly IDeltaAwarder _deltaAwarder;
 
         public ModDeleteDeltaPMHandler(IRedditService redditService,
-            ICommentReplyDetector replyDetector)
+            ICommentReplyDetector replyDetector, 
+            ICommentReplyBuilder replyBuilder,
+            ICommentReplier replier,
+            IDeltaAwarder deltaAwarder)
         {
             _redditService = redditService;
             _replyDetector = replyDetector;
+            _replyBuilder = replyBuilder;
+            _replier = replier;
+            _deltaAwarder = deltaAwarder;
         }
 
         public void Handle(DB4Thing privateMessage)
@@ -35,10 +44,10 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _redditService.PopulateParentAndChildren(comment);
 
                 // Check for replies
-                var result = _replyDetector.DidDB4Reply(comment);
+                var db4ReplyResult = _replyDetector.DidDB4Reply(comment);
 
                 // If a delta was never awarded in the first place, bail
-                if (!result.HasDB4Replied || !result.WasSuccessReply)
+                if (!db4ReplyResult.HasDB4Replied || !db4ReplyResult.WasSuccessReply)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id,
                         DeleteFailedNeverAwardedMessage);
@@ -47,8 +56,14 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 }
 
                 // A delta was awarded, unaward it
+                _deltaAwarder.Unaward(comment);
 
-                // Reply to the comment indicating moderator removal
+                // Build moderator removal message
+                var reply = _replyBuilder.Build(DeltaCommentReplyType.ModeratorRemoved, comment);
+
+                // Don't edit the success comment - delete it and reply with the mod deleted reply
+                _replier.DeleteReply(db4ReplyResult.Comment);
+                _replier.Reply(comment, reply);
 
                 // Reply to moderator indicating success
                 _redditService.ReplyToPrivateMessage(privateMessage.Id, 
@@ -64,9 +79,6 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Rethrow for logging purposes
                 throw;
             }
-
-            // Make sure DeltaBot had actually awarded a delta
-
         }
     }
 }

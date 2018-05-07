@@ -13,18 +13,27 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
         private readonly ICommentReplyDetector _replyDetector;
+        private readonly ICommentReplyBuilder _replyBuilder;
+        private readonly ICommentReplier _replier;
+        private readonly IDeltaAwarder _deltaAwarder;
 
         public PrivateMessageHandlerFactory(AppConfiguration appConfiguration,
             IDB4Repository db4Repository, 
             IRedditService redditService, 
             ISubredditService subredditService,
-            ICommentReplyDetector replyDetector)
+            ICommentReplyDetector replyDetector,
+            ICommentReplyBuilder replyBuilder,
+            ICommentReplier replier,
+            IDeltaAwarder deltaAwarder)
         {
             _appConfiguration = appConfiguration;
             _db4Repository = db4Repository;
             _redditService = redditService;
             _subredditService = subredditService;
             _replyDetector = replyDetector;
+            _replyBuilder = replyBuilder;
+            _replier = replier;
+            _deltaAwarder = deltaAwarder;
         }
 
         public IPrivateMessageHandler Create(DB4Thing privateMessage)
@@ -40,7 +49,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModDeleteDeltaSubject.ToLower()))
             {
-                return new ModDeleteDeltaPMHandler(_redditService, _replyDetector);
+                return new ModDeleteDeltaPMHandler(_redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
             }
 
             // Stop quoted deltas warning

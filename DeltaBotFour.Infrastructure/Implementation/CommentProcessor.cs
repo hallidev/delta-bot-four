@@ -80,8 +80,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     else
                     {
                         // DB4 already replied. If DB4's reply was a fail reply, check to see if this delta
-                        // now passes validation. If it does, edit the old reply to be a success reply
-                        if (!db4ReplyResult.WasSuccessReply)
+                        // now passes validation (re-check edits). If it does, edit the old reply to be a success reply
+                        // NOTE: Moderator replies (force add / remove) won't be processed
+                        if (!db4ReplyResult.WasSuccessReply && !db4ReplyResult.WasModeratorReply)
                         {
                             // Validate comment and award delta if successful
                             var commentValidationResult = validateAndAward(comment);
