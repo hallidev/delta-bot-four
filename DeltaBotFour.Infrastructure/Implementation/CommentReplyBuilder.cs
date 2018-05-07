@@ -32,6 +32,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 case DeltaCommentReplyType.FailCannotAwardSelf:
                     body = _appConfiguration.Replies.CannotAwardSelf;
                     break;
+                case DeltaCommentReplyType.ModeratorAdded:
+                    body = _appConfiguration.Replies.ModeratorAdded
+                        .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
+                        .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
+                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
+                    break;
                 case DeltaCommentReplyType.ModeratorRemoved:
                     body = _appConfiguration.Replies.ModeratorRemoved;
                     break;

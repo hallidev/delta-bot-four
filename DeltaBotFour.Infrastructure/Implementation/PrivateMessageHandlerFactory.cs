@@ -42,7 +42,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModAddDeltaSubject.ToLower()))
             {
-                return new ModAddDeltaPMHandler();
+                return new ModAddDeltaPMHandler(_redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)

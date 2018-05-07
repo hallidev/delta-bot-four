@@ -33,12 +33,12 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         public void Handle(DB4Thing privateMessage)
         {
             // The body should be the URL to a comment
-            string url = privateMessage.Body.Trim();
+            string commentUrl = privateMessage.Body.Trim();
 
             try
             {
                 // Get comment by url
-                var comment = _redditService.GetCommentByUrl(url);
+                var comment = _redditService.GetCommentByUrl(commentUrl);
 
                 // If that succeeded, we need the full comment with children to check for replies
                 _redditService.PopulateParentAndChildren(comment);

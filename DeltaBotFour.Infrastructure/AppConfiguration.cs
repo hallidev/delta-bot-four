@@ -140,6 +140,7 @@ namespace DeltaBotFour.Infrastructure
             public string CannotAwardOP => _configuration["comment_replies:cannot_award_op"];
             public string CannotAwardDeltaBot => _configuration["comment_replies:cannot_award_deltabot"];
             public string CannotAwardSelf => _configuration["comment_replies:cannot_award_self"];
+            public string ModeratorAdded => _configuration["comment_replies:moderator_added"];
             public string ModeratorRemoved => _configuration["comment_replies:moderator_removed"];
             public string WithIssues => _configuration["comment_replies:fail_with_issues"];
             public List<string> SuccessReplies { get; }
@@ -150,7 +151,10 @@ namespace DeltaBotFour.Infrastructure
             {
                 _configuration = configuration;
 
-                SuccessReplies = new List<string> { DeltaAwarded };
+                SuccessReplies = new List<string>
+                {
+                    DeltaAwarded
+                };
 
                 FailReplies = new List<string>
                 {
@@ -161,7 +165,11 @@ namespace DeltaBotFour.Infrastructure
                     WithIssues
                 };
 
-                ModeratorReplies = new List<string> { ModeratorRemoved };
+                ModeratorReplies = new List<string>
+                {
+                    ModeratorAdded,
+                    ModeratorRemoved
+                };
             }
         }
 
