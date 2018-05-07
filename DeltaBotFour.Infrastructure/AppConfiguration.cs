@@ -117,6 +117,8 @@ namespace DeltaBotFour.Infrastructure
         {
             private readonly IConfigurationRoot _configuration;
 
+            public string ModAddDeltaSubject => _configuration["private_messages:mod_add_delta_subject"];
+            public string ModDeleteDeltaSubject => _configuration["private_messages:mod_delete_delta_subject"];
             public string FirstDeltaSubject => _configuration["private_messages:first_delta_subject"];
             public string FirstDeltaMessage => _configuration["private_messages:first_delta_message"];
             public string DeltaInQuoteSubject => _configuration["private_messages:delta_in_quote_subject"];

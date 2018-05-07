@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using DeltaBotFour.Reddit.Interface;
@@ -14,6 +15,13 @@ namespace DeltaBotFour.Reddit.Implementation
         public RedditSharpSubredditService(Subreddit subreddit)
         {
             _subreddit = subreddit;
+        }
+
+        public bool IsUserModerator(string username)
+        {
+            var moderators = _subreddit.GetModeratorsAsync().Result;
+
+            return moderators.Any(m => m.Name == username);
         }
 
         public void SetUserFlair(string username, string cssClass, string flairText)

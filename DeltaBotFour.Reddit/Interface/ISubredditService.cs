@@ -2,6 +2,7 @@
 {
     public interface ISubredditService
     {
+        bool IsUserModerator(string username);
         void SetUserFlair(string username, string cssClass, string flairText);
         string GetWikiUrl();
         string GetWikiPage(string url);
