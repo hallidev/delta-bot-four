@@ -53,7 +53,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(Environment.NewLine, "\n");
             }
 
-            return _replyTemplate.Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentReply.ReplyCommentBody);
+            return _replyTemplate
+                .Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentReply.ReplyCommentBody)
+                .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
         }
     }
 }

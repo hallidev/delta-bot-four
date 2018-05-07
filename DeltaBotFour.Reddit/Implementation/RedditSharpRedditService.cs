@@ -62,7 +62,12 @@ namespace DeltaBotFour.Reddit.Implementation
         public void ReplyToComment(DB4Thing comment, string reply)
         {
             var qualifiedComment = getQualifiedComment(comment);
-            Task.Run(async () => await qualifiedComment.ReplyAsync(reply)).Wait();
+            Task.Run(async () =>
+            {
+                // All DB4 replies should be distinguished
+                var newComment = await qualifiedComment.ReplyAsync(reply);
+                await newComment.DistinguishAsync(ModeratableThing.DistinguishType.Moderator);
+            }).Wait();
         }
 
         public void EditComment(DB4Thing comment, string editedComment)
