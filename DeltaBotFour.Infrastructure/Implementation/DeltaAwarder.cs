@@ -69,7 +69,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             if (_appConfiguration.DB4Modes.Contains(DB4Mode.DeltaMonitor))
             {
-                string newFlairText = DeltaHelper.GetDecrementedFlairText(comment.ParentThing.AuthorFlairText);
+                // Get the user's current delta count from flair
+                int currentDeltaCount = DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText);
+
+                string newFlairText = string.Empty;
+
+                // If we are removing the user's only delta, we don't want the text to read "0∆"
+                if (currentDeltaCount != 1)
+                {
+                    newFlairText = DeltaHelper.GetDecrementedFlairText(comment.ParentThing.AuthorFlairText);
+                }
 
                 // Unaward from the parent comment
                 _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
