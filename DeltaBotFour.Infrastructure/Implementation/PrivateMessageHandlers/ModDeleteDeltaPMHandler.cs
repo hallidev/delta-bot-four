@@ -48,8 +48,9 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
                 // A delta was awarded, unaward it
 
+                // Reply to the comment indicating moderator removal
 
-                // Reply indicating success
+                // Reply to moderator indicating success
                 _redditService.ReplyToPrivateMessage(privateMessage.Id, 
                     DeleteSucceededMessage);
 

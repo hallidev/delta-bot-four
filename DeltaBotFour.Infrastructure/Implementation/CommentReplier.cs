@@ -19,22 +19,22 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _redditService = redditService;
         }
 
-        public void Reply(DB4Thing comment, DeltaCommentValidationResult deltaCommentValidationResult)
+        public void Reply(DB4Thing comment, DeltaCommentReply deltaCommentReply)
         {
-            string replyMessage = getReplyMessage(deltaCommentValidationResult);
+            string replyMessage = getReplyMessage(deltaCommentReply);
 
             _redditService.ReplyToComment(comment, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {comment.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentReply.ResultType.ToString()} link: {comment.Shortlink}");
         }
 
-        public void EditReply(DB4Thing commentToEdit, DeltaCommentValidationResult deltaCommentValidationResult)
+        public void EditReply(DB4Thing commentToEdit, DeltaCommentReply deltaCommentReply)
         {
-            string replyMessage = getReplyMessage(deltaCommentValidationResult);
+            string replyMessage = getReplyMessage(deltaCommentReply);
 
             _redditService.EditComment(commentToEdit, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentValidationResult.ResultType.ToString()} link: {commentToEdit.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentReply.ResultType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public void DeleteReply(DB4Thing commentToDelete)
@@ -44,7 +44,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }
 
-        private string getReplyMessage(DeltaCommentValidationResult deltaCommentValidationResult)
+        private string getReplyMessage(DeltaCommentReply deltaCommentReply)
         {
             if(string.IsNullOrEmpty(_replyTemplate))
             {
@@ -53,7 +53,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(Environment.NewLine, "\n");
             }
 
-            return _replyTemplate.Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentValidationResult.ReplyCommentBody);
+            return _replyTemplate.Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentReply.ReplyCommentBody);
         }
     }
 }

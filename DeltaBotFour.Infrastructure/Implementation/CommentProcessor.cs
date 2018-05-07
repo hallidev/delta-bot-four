@@ -146,7 +146,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             return false;
         }
 
-        private DeltaCommentValidationResult validateAndAward(DB4Thing qualifiedComment)
+        private DeltaCommentReply validateAndAward(DB4Thing qualifiedComment)
         {
             // Validate comment
             var commentValidationResult = _commentValidator.Validate(qualifiedComment);

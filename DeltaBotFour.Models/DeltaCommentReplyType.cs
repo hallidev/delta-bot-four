@@ -1,11 +1,12 @@
 ﻿namespace DeltaBotFour.Models
 {
-    public enum DeltaCommentValidationResultType
+    public enum DeltaCommentReplyType
     {
         FailCommentTooShort,
         FailCannotAwardOP,
         FailCannotAwardDeltaBot,
         FailCannotAwardSelf,
+        FailModeratorRemoved,
         SuccessDeltaAwarded
     }
 }
