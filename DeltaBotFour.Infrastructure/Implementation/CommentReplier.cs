@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
@@ -48,10 +49,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if(string.IsNullOrEmpty(_replyTemplate))
             {
                 // Load reply template
-                _replyTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.DB4ReplyTemplateFile);
+                _replyTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.DB4ReplyTemplateFile)
+                    .Replace(Environment.NewLine, "\n");
             }
 
-            // TODO: Fix footer
             return _replyTemplate.Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentValidationResult.ReplyCommentBody);
         }
     }
