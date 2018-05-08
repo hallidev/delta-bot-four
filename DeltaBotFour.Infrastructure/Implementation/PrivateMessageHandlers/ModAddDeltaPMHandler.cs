@@ -64,14 +64,21 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 var reply = _replyBuilder.Build(DeltaCommentReplyType.ModeratorAdded, comment);
 
                 // Don't edit the existing comment - delete it and reply with the mod added reply
-                _replier.DeleteReply(db4ReplyResult.Comment);
+                // db4ReplyResult.Comment will be null if the mod is adding a delta directly to a comment
+                if (db4ReplyResult.Comment != null)
+                {
+                    _replier.DeleteReply(db4ReplyResult.Comment);
+                }
+                
                 _replier.Reply(comment, reply);
 
                 // Reply with modmail indicating success
+                string body = _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
+                    .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
+
+                // Reply with modmail indicating success
                 _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModAddedDeltaNotificationSubject,
-                    _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
-                        .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl),
-                    _appConfiguration.SubredditName, _appConfiguration.SubredditName);
+                    body, $"/r/{_appConfiguration.SubredditName}");
             }
             catch (Exception ex)
             {

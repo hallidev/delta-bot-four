@@ -67,11 +67,12 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.DeleteReply(db4ReplyResult.Comment);
                 _replier.Reply(comment, reply);
 
+                string body = _appConfiguration.PrivateMessages.ModDeletedDeltaNotificationMessage
+                    .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
+
                 // Reply with modmail indicating success
                 _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModDeletedDeltaNotificationSubject,
-                    _appConfiguration.PrivateMessages.ModDeletedDeltaNotificationMessage
-                        .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl),
-                    _appConfiguration.SubredditName, _appConfiguration.SubredditName);
+                    body, $"/r/{_appConfiguration.SubredditName}");
 
             }
             catch (Exception ex)
