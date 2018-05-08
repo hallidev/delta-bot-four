@@ -39,8 +39,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                         .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
                     break;
                 case DeltaCommentReplyType.ModeratorRemoved:
-                    body = _appConfiguration.Replies.ModeratorRemoved
-                        .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
+                    body = _appConfiguration.Replies.ModeratorRemoved;
                     break;
                 case DeltaCommentReplyType.SuccessDeltaAwarded:
                     body = _appConfiguration.Replies.DeltaAwarded
