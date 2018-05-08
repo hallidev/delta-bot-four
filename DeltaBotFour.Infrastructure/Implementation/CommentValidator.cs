@@ -41,13 +41,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             // Check comment length
-            // TODO: Uncomment
-            //if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
-            //{
-            //    return createValidationResult(DeltaCommentValidationResultType.FailCommentTooShort, comment, parentThing);
-            //}
-
-            // TODO: Fail with issues
+            if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
+            {
+                return _replyBuilder.Build(DeltaCommentReplyType.FailCommentTooShort, comment);
+            }
 
             // Success - valid delta
             return _replyBuilder.Build(DeltaCommentReplyType.SuccessDeltaAwarded, comment);
