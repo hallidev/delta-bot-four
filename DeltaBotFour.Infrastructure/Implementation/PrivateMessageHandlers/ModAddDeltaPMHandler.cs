@@ -12,22 +12,22 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
-        private readonly ICommentReplyDetector _replyDetector;
-        private readonly ICommentReplyBuilder _replyBuilder;
+        private readonly ICommentDetector _commentDetector;
+        private readonly ICommentBuilder _commentBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
         public ModAddDeltaPMHandler(AppConfiguration appConfiguration,
             IRedditService redditService,
-            ICommentReplyDetector replyDetector,
-            ICommentReplyBuilder replyBuilder,
+            ICommentDetector commentDetector,
+            ICommentBuilder commentBuilder,
             ICommentReplier replier,
             IDeltaAwarder deltaAwarder)
         {
             _appConfiguration = appConfiguration;
             _redditService = redditService;
-            _replyDetector = replyDetector;
-            _replyBuilder = replyBuilder;
+            _commentDetector = commentDetector;
+            _commentBuilder = commentBuilder;
             _replier = replier;
             _deltaAwarder = deltaAwarder;
         }
@@ -46,7 +46,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _redditService.PopulateParentAndChildren(comment);
 
                 // Check for replies
-                var db4ReplyResult = _replyDetector.DidDB4Reply(comment);
+                var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                 // If a delta was already awarded successfully, bail
                 if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply)
@@ -61,7 +61,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _deltaAwarder.Award(comment);
 
                 // Build moderator add message
-                var reply = _replyBuilder.Build(DeltaCommentReplyType.ModeratorAdded, comment);
+                var reply = _commentBuilder.Build(DB4CommentType.ModeratorAdded, comment);
 
                 // Don't edit the existing comment - delete it and reply with the mod added reply
                 // db4ReplyResult.Comment will be null if the mod is adding a delta directly to a comment

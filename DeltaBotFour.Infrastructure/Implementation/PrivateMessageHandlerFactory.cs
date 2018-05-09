@@ -13,8 +13,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IDB4Repository _db4Repository;
         private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
-        private readonly ICommentReplyDetector _replyDetector;
-        private readonly ICommentReplyBuilder _replyBuilder;
+        private readonly ICommentDetector _commentDetector;
+        private readonly ICommentBuilder _commentBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
@@ -22,8 +22,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             IDB4Repository db4Repository, 
             IRedditService redditService, 
             ISubredditService subredditService,
-            ICommentReplyDetector replyDetector,
-            ICommentReplyBuilder replyBuilder,
+            ICommentDetector commentDetector,
+            ICommentBuilder commentBuilder,
             ICommentReplier replier,
             IDeltaAwarder deltaAwarder)
         {
@@ -31,8 +31,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _db4Repository = db4Repository;
             _redditService = redditService;
             _subredditService = subredditService;
-            _replyDetector = replyDetector;
-            _replyBuilder = replyBuilder;
+            _commentDetector = commentDetector;
+            _commentBuilder = commentBuilder;
             _replier = replier;
             _deltaAwarder = deltaAwarder;
         }
@@ -43,14 +43,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModAddDeltaSubject.ToLower()))
             {
-                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
+                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModDeleteDeltaSubject.ToLower()))
             {
-                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _replyDetector, _replyBuilder, _replier, _deltaAwarder);
+                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Stop quoted deltas warning

@@ -12,22 +12,22 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
-        private readonly ICommentReplyDetector _replyDetector;
-        private readonly ICommentReplyBuilder _replyBuilder;
+        private readonly ICommentDetector _commentDetector;
+        private readonly ICommentBuilder _commentBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
         public ModDeleteDeltaPMHandler(AppConfiguration appConfiguration,
             IRedditService redditService,
-            ICommentReplyDetector replyDetector, 
-            ICommentReplyBuilder replyBuilder,
+            ICommentDetector commentDetector, 
+            ICommentBuilder commentBuilder,
             ICommentReplier replier,
             IDeltaAwarder deltaAwarder)
         {
             _appConfiguration = appConfiguration;
             _redditService = redditService;
-            _replyDetector = replyDetector;
-            _replyBuilder = replyBuilder;
+            _commentDetector = commentDetector;
+            _commentBuilder = commentBuilder;
             _replier = replier;
             _deltaAwarder = deltaAwarder;
         }
@@ -46,7 +46,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _redditService.PopulateParentAndChildren(comment);
 
                 // Check for replies
-                var db4ReplyResult = _replyDetector.DidDB4Reply(comment);
+                var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                 // If a delta was never awarded in the first place, bail
                 if (!db4ReplyResult.HasDB4Replied || !db4ReplyResult.WasSuccessReply)
@@ -61,7 +61,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _deltaAwarder.Unaward(comment);
 
                 // Build moderator removal message
-                var reply = _replyBuilder.Build(DeltaCommentReplyType.ModeratorRemoved, comment);
+                var reply = _commentBuilder.Build(DB4CommentType.ModeratorRemoved, comment);
 
                 // Don't edit the success comment - delete it and reply with the mod deleted reply
                 _replier.DeleteReply(db4ReplyResult.Comment);

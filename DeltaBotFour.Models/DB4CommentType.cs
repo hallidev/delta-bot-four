@@ -1,7 +1,8 @@
 ﻿namespace DeltaBotFour.Models
 {
-    public enum DeltaCommentReplyType
+    public enum DB4CommentType
     {
+        PostSticky,
         FailCommentTooShort,
         FailCannotAwardOP,
         FailCannotAwardDeltaBot,

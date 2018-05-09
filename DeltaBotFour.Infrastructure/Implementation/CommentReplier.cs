@@ -19,22 +19,22 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _redditService = redditService;
         }
 
-        public void Reply(DB4Thing comment, DeltaCommentReply deltaCommentReply)
+        public void Reply(DB4Thing comment, DB4Comment db4Comment)
         {
-            string replyMessage = getReplyMessage(deltaCommentReply);
+            string replyMessage = getReplyMessage(db4Comment);
 
             _redditService.ReplyToComment(comment, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {deltaCommentReply.ResultType.ToString()} link: {comment.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.ResultType.ToString()} link: {comment.Shortlink}");
         }
 
-        public void EditReply(DB4Thing commentToEdit, DeltaCommentReply deltaCommentReply)
+        public void EditReply(DB4Thing commentToEdit, DB4Comment db4Comment)
         {
-            string replyMessage = getReplyMessage(deltaCommentReply);
+            string replyMessage = getReplyMessage(db4Comment);
 
             _redditService.EditComment(commentToEdit, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {deltaCommentReply.ResultType.ToString()} link: {commentToEdit.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {db4Comment.ResultType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public void DeleteReply(DB4Thing commentToDelete)
@@ -44,17 +44,17 @@ namespace DeltaBotFour.Infrastructure.Implementation
             ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }
 
-        private string getReplyMessage(DeltaCommentReply deltaCommentReply)
+        private string getReplyMessage(DB4Comment db4Comment)
         {
             if(string.IsNullOrEmpty(_replyTemplate))
             {
                 // Load reply template
-                _replyTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.DB4ReplyTemplateFile)
+                _replyTemplate = File.ReadAllText(_appConfiguration.TemplateFiles.DB4CommentTemplateFile)
                     .Replace(Environment.NewLine, "\n");
             }
 
             return _replyTemplate
-                .Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, deltaCommentReply.ReplyCommentBody)
+                .Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, db4Comment.ReplyCommentBody)
                 .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
         }
     }

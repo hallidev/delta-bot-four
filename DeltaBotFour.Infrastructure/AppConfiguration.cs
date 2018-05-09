@@ -19,6 +19,7 @@ namespace DeltaBotFour.Infrastructure
         public string DB4ClientSecret => _configuration["db4_client_secret"];
         public string RedditBaseUrl => _configuration["reddit_base_url"];
         public string SubredditName => _configuration["subreddit_name"];
+        public string DeltaLogSubredditName => _configuration["deltalog_subreddit_name"];
         public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
@@ -36,7 +37,8 @@ namespace DeltaBotFour.Infrastructure
         public DeltaBotTemplateFiles TemplateFiles { get; }
         public DeltaBotReplaceTokens ReplaceTokens { get; }
         public DeltaBotPrivateMessages PrivateMessages { get; }
-        public DeltaBotReplies Replies { get; }
+        public DeltaBotComments Comments { get; }
+        public DeltaBotCommentReplies Replies { get; }
         public DeltaBotValidationValues ValidationValues { get; }
 
         public AppConfiguration()
@@ -53,7 +55,9 @@ namespace DeltaBotFour.Infrastructure
 
             PrivateMessages = new DeltaBotPrivateMessages(_configuration);
 
-            Replies = new DeltaBotReplies(_configuration);
+            Comments = new DeltaBotComments(_configuration);
+
+            Replies = new DeltaBotCommentReplies(_configuration);
 
             ValidationValues = new DeltaBotValidationValues(_configuration);
         }
@@ -62,7 +66,7 @@ namespace DeltaBotFour.Infrastructure
         {
             private readonly IConfigurationRoot _configuration;
 
-            public string DB4ReplyTemplateFile => _configuration["template_files:db4_reply_template_file"];
+            public string DB4CommentTemplateFile => _configuration["template_files:db4_comment_template_file"];
             public string DeltaboardsTemplateFile => _configuration["template_files:deltaboards_template_file"];
             public string DeltaboardTemplateFile => _configuration["template_files:deltaboard_template_file"];
             public string DeltaboardRowTemplateFile => _configuration["template_files:deltaboard_row_template_file"];
@@ -81,6 +85,7 @@ namespace DeltaBotFour.Infrastructure
             private readonly IConfigurationRoot _configuration;
 
             public string SubredditToken => _configuration["replace_tokens:subreddit_token"];
+            public string DeltaLogSubredditToken => _configuration["replace_tokens:deltalog_subreddit_token"];
             public string DateToken => _configuration["replace_tokens:date_token"];
             public string UsernameToken => _configuration["replace_tokens:username_token"];
             public string UserWikiLinkToken => _configuration["replace_tokens:user_wiki_link_token"];
@@ -137,7 +142,19 @@ namespace DeltaBotFour.Infrastructure
             }
         }
 
-        public class DeltaBotReplies
+        public class DeltaBotComments
+        {
+            private readonly IConfigurationRoot _configuration;
+
+            public string PostSticky => _configuration["comments:post_sticky"];
+
+            public DeltaBotComments(IConfigurationRoot configuration)
+            {
+                _configuration = configuration;
+            }
+        }
+
+        public class DeltaBotCommentReplies
         {
             private readonly IConfigurationRoot _configuration;
 
@@ -152,7 +169,7 @@ namespace DeltaBotFour.Infrastructure
             public List<string> FailReplies { get; }
             public List<string> ModeratorReplies { get; }
 
-            public DeltaBotReplies(IConfigurationRoot configuration)
+            public DeltaBotCommentReplies(IConfigurationRoot configuration)
             {
                 _configuration = configuration;
 

@@ -53,8 +53,8 @@ namespace DeltaBotFour.DependencyResolver
             // Register functionality implementations
             container.Register<IDB4QueueDispatcher, DB4QueueDispatcher>();
             container.Register<ICommentProcessor, CommentProcessor>();
-            container.Register<ICommentReplyBuilder, CommentReplyBuilder>();
-            container.Register<ICommentReplyDetector, CommentReplyDetector>();
+            container.Register<ICommentBuilder, CommentBuilder>();
+            container.Register<ICommentDetector, CommentDetector>();
             container.Register<ICommentValidator, CommentValidator>();
             container.Register<ICommentReplier, CommentReplier>();
             container.Register<IDeltaAwarder, DeltaAwarder>();

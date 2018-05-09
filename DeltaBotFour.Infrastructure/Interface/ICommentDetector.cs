@@ -2,7 +2,7 @@
 
 namespace DeltaBotFour.Infrastructure.Interface
 {
-    public interface ICommentReplyDetector
+    public interface ICommentDetector
     {
         DB4ReplyResult DidDB4Reply(DB4Thing comment);
     }

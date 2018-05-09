@@ -23,7 +23,7 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\db4_reply_template.txt">
+    <None Update="Templates\db4_comment_template.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\deltaboards_template.txt">

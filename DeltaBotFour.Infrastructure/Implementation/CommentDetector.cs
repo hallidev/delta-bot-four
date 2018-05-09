@@ -5,7 +5,7 @@ using DeltaBotFour.Models;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
-    public class CommentReplyDetector : ICommentReplyDetector
+    public class CommentDetector : ICommentDetector
     {
         private const string TOKEN_MATCH_REGEX = ".+";
 
@@ -14,7 +14,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly List<Regex> _failReplyRegexes = new List<Regex>();
         private readonly List<Regex> _moderatorReplyRegexes = new List<Regex>();
 
-        public CommentReplyDetector(AppConfiguration appConfiguration)
+        public CommentDetector(AppConfiguration appConfiguration)
         {
             _appConfiguration = appConfiguration;
 

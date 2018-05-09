@@ -13,19 +13,19 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
         private readonly ICommentValidator _commentValidator;
-        private readonly ICommentReplyDetector _commentReplyDetector;
+        private readonly ICommentDetector _commentDetector;
         private readonly IDeltaAwarder _deltaAwarder;
         private readonly ICommentReplier _commentReplier;
         private readonly IDB4Repository _db4Repository;
 
         public CommentProcessor(AppConfiguration appConfiguration, IRedditService redditService,
-            ICommentValidator commentValidator, ICommentReplyDetector commentReplyDetector,
+            ICommentValidator commentValidator, ICommentDetector commentDetector,
             IDeltaAwarder deltaAwarder, ICommentReplier commentReplier, IDB4Repository db4Repository)
         {
             _appConfiguration = appConfiguration;
             _redditService = redditService;
             _commentValidator = commentValidator;
-            _commentReplyDetector = commentReplyDetector;
+            _commentDetector = commentDetector;
             _deltaAwarder = deltaAwarder;
             _commentReplier = commentReplier;
             _db4Repository = db4Repository;
@@ -66,7 +66,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 if (hasDelta)
                 {
                     // Check to see if db4 has already replied
-                    var db4ReplyResult = _commentReplyDetector.DidDB4Reply(comment);
+                    var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                     // If DB4 hasn't replied, or if it did but this is an edit, perform comment logic
                     if (!db4ReplyResult.HasDB4Replied)
@@ -99,7 +99,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     // can be removed.
 
                     // Check to see if db4 has replied
-                    var db4ReplyResult = _commentReplyDetector.DidDB4Reply(comment);
+                    var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                     // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
                     if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && comment.CreatedUTC < DateTime.Now.AddHours(-_appConfiguration.HoursToUnawardDelta))
@@ -147,7 +147,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             return false;
         }
 
-        private DeltaCommentReply validateAndAward(DB4Thing qualifiedComment)
+        private DB4Comment validateAndAward(DB4Thing qualifiedComment)
         {
             // Validate comment
             var commentValidationResult = _commentValidator.Validate(qualifiedComment);
