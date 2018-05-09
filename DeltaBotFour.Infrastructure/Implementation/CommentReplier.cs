@@ -19,13 +19,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _redditService = redditService;
         }
 
-        public void Reply(DB4Thing comment, DB4Comment db4Comment)
+        public void Reply(DB4Thing thing, DB4Comment db4Comment, bool isSticky = false)
         {
             string replyMessage = getReplyMessage(db4Comment);
 
-            _redditService.ReplyToComment(comment, replyMessage);
+            _redditService.ReplyToThing(thing, replyMessage, isSticky);
 
-            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.CommentType.ToString()} link: {comment.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.CommentType.ToString()} link: {thing.Shortlink}");
         }
 
         public void EditReply(DB4Thing commentToEdit, DB4Comment db4Comment)

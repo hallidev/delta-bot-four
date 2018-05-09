@@ -19,35 +19,35 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // The immediate parent thing must be a comment (not a post) to be eligible
             if(comment.ParentThing.Type == DB4ThingType.Post)
             {
-                return _commentBuilder.Build(DB4CommentType.FailCannotAwardOP, comment);
+                return _commentBuilder.BuildReply(DB4CommentType.FailCannotAwardOP, comment);
             }
 
             // Cannot award OP
             if (comment.ParentThing.AuthorName == comment.ParentPost.AuthorName)
             {
-                return _commentBuilder.Build(DB4CommentType.FailCannotAwardOP, comment);
+                return _commentBuilder.BuildReply(DB4CommentType.FailCannotAwardOP, comment);
             }
 
             // Cannot award DeltaBot
             if (comment.ParentThing.AuthorName == _appConfiguration.DB4Username)
             {
-                return _commentBuilder.Build(DB4CommentType.FailCannotAwardDeltaBot, comment);
+                return _commentBuilder.BuildReply(DB4CommentType.FailCannotAwardDeltaBot, comment);
             }
 
             // Cannot award self
             if (comment.ParentThing.AuthorName == comment.AuthorName)
             {
-                return _commentBuilder.Build(DB4CommentType.FailCannotAwardSelf, comment);
+                return _commentBuilder.BuildReply(DB4CommentType.FailCannotAwardSelf, comment);
             }
 
             // Check comment length
             if (comment.Body.Length < _appConfiguration.ValidationValues.CommentTooShortLength)
             {
-                return _commentBuilder.Build(DB4CommentType.FailCommentTooShort, comment);
+                return _commentBuilder.BuildReply(DB4CommentType.FailCommentTooShort, comment);
             }
 
             // Success - valid delta
-            return _commentBuilder.Build(DB4CommentType.SuccessDeltaAwarded, comment);
+            return _commentBuilder.BuildReply(DB4CommentType.SuccessDeltaAwarded, comment);
         }
     }
 }

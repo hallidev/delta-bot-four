@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Foundation.Exceptions;
+using Core.Foundation.Helpers;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp.Things;
@@ -21,11 +23,30 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void PopulateParentAndChildren(DB4Thing comment)
         {
+            // We're always calling these on processed comments
+            Assert.That(comment.Type == DB4ThingType.Comment);
+
             // Get comment with children and parent post populated
-            var qualifiedComment = getQualifiedComment(comment);
+            var qualifiedComment = (Comment) getQualifiedThing(comment);
 
             // Set parent post
             comment.ParentPost = RedditThingConverter.Convert(qualifiedComment.Parent);
+
+            // We also want all of the immediate children (comments) of a Post
+            if (qualifiedComment.Parent is Post parentPost)
+            {
+                comment.ParentPost.Comments = new List<DB4Thing>();
+
+                Task.Run(async () =>
+                {
+                    var postComments = await parentPost.GetCommentsAsync();
+
+                    foreach (var postComment in postComments)
+                    {
+                        comment.ParentPost.Comments.Add(RedditThingConverter.Convert(postComment));
+                    }
+                }).Wait();
+            }
 
             // Convert immediate children only
             var childComments = new List<DB4Thing>();
@@ -59,26 +80,50 @@ namespace DeltaBotFour.Reddit.Implementation
             return RedditThingConverter.Convert(qualifiedComment);
         }
 
-        public void ReplyToComment(DB4Thing comment, string reply)
+        public void ReplyToThing(DB4Thing thing, string reply, bool isSticky = false)
         {
-            var qualifiedComment = getQualifiedComment(comment);
+            var qualifiedThing = getQualifiedThing(thing);
+
             Task.Run(async () =>
             {
+                Comment newComment = null;
+
+                if (qualifiedThing is Post post)
+                {
+                    // Make a new comment
+                    newComment = await post.CommentAsync(reply);
+                }
+                else if (qualifiedThing is Comment comment)
+                {
+                    // Reply to existing comment
+                    newComment = await comment.ReplyAsync(reply);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Tried to reply to a Thing that isn't a Post or Comment - Thing ID: {qualifiedThing.Id}");
+                }
+
                 // All DB4 replies should be distinguished
-                var newComment = await qualifiedComment.ReplyAsync(reply);
-                await newComment.DistinguishAsync(ModeratableThing.DistinguishType.Moderator);
+                await newComment.DistinguishAsync(ModeratableThing.DistinguishType.Moderator, isSticky);
+
             }).Wait();
         }
 
         public void EditComment(DB4Thing comment, string editedComment)
         {
-            var qualifiedComment = getQualifiedComment(comment);
+            // Can only edit comments
+            Assert.That(comment.Type == DB4ThingType.Comment);
+
+            var qualifiedComment = (Comment)getQualifiedThing(comment);
             Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment)).Wait();
         }
 
         public void DeleteComment(DB4Thing comment)
         {
-            var qualifiedComment = getQualifiedComment(comment);
+            // Can only delete comments
+            Assert.That(comment.Type == DB4ThingType.Comment);
+
+            var qualifiedComment = (Comment)getQualifiedThing(comment);
             Task.Run(async () => await qualifiedComment.DelAsync()).Wait();
         }
 
@@ -129,12 +174,24 @@ namespace DeltaBotFour.Reddit.Implementation
             }).Wait();
         }
 
-        private Comment getQualifiedComment(DB4Thing comment)
+        private Thing getQualifiedThing(DB4Thing thing)
         {
-            string commentUrl = $"{OAuthRedditBaseUrl}{comment.Shortlink}".TrimEnd('/');
+            var link = thing.Type == DB4ThingType.Comment ? thing.Shortlink : thing.Permalink;
 
-            // Get comment with children and parent post populated
-            return _reddit.GetCommentAsync(new Uri(commentUrl)).Result;
+            string thingUrl = $"{OAuthRedditBaseUrl}{link}".TrimEnd('/');
+            var thingUri = new Uri(thingUrl);
+
+            switch (thing.Type)
+            {
+                case DB4ThingType.Comment:
+                    // Get post
+                    return _reddit.GetCommentAsync(thingUri).Result;
+                case DB4ThingType.Post:
+                    // Get comment with children and parent post populated
+                    return _reddit.GetPostAsync(thingUri).Result;
+                default:
+                    throw new UnhandledEnumException<DB4ThingType>(thing.Type);
+            }
         }
 
         private PrivateMessage getPrivateMessageById(string privateMessageId)

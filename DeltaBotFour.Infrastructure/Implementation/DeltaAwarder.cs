@@ -13,18 +13,21 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
         private readonly IDeltaboardEditor _deltaboardEditor;
+        private readonly IStickyCommentEditor _stickyCommentEditor;
 
         public DeltaAwarder(AppConfiguration appConfiguration,
             IUserWikiEditor wikiEditor,
             IRedditService redditService,
             ISubredditService subredditService, 
-            IDeltaboardEditor deltaboardEditor)
+            IDeltaboardEditor deltaboardEditor,
+            IStickyCommentEditor stickyCommentEditor)
         {
             _appConfiguration = appConfiguration;
             _wikiEditor = wikiEditor;
             _redditService = redditService;
             _subredditService = subredditService;
             _deltaboardEditor = deltaboardEditor;
+            _stickyCommentEditor = stickyCommentEditor;
         }
 
         public void Award(DB4Thing comment)
@@ -43,6 +46,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update wiki
                 _wikiEditor.UpdateUserWikiEntryAward(comment);
+
+                // Update sticky comment
+                _stickyCommentEditor.UpsertSticky(comment.ParentPost, 1);
 
                 // If this was the user's first delta, send the first delta PM
                 if (currentDeltaCount == 0)
@@ -86,6 +92,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update wiki
                 _wikiEditor.UpdateUserWikiEntryUnaward(comment);
+
+                // Update sticky comment
+                _stickyCommentEditor.UpsertSticky(comment.ParentPost, 1);
             }
 
             if (_appConfiguration.DB4Modes.Contains(DB4Mode.Deltaboard))

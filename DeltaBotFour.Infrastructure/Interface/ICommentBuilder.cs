@@ -4,6 +4,7 @@ namespace DeltaBotFour.Infrastructure.Interface
 {
     public interface ICommentBuilder
     {
-        DB4Comment Build(DB4CommentType resultType, DB4Thing comment);
+        DB4Comment BuildSticky(DB4Thing post, int deltaCount);
+        DB4Comment BuildReply(DB4CommentType commentType, DB4Thing comment);
     }
 }

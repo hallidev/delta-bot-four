@@ -1,4 +1,5 @@
 ﻿using Core.Foundation.Exceptions;
+using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 
@@ -13,47 +14,68 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _appConfiguration = appConfiguration;
         }
 
-        public DB4Comment Build(DB4CommentType resultType, DB4Thing comment)
+        public DB4Comment BuildSticky(DB4Thing post, int deltaCount)
         {
+            // Can only call BuildSticky on posts
+            Assert.That(post.Type == DB4ThingType.Post);
+
+            string body = _appConfiguration.Comments.PostSticky
+                .Replace(_appConfiguration.ReplaceTokens.UsernameToken, post.AuthorName)
+                .Replace(_appConfiguration.ReplaceTokens.CountToken, deltaCount.ToString())
+                .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken,
+                    _appConfiguration.DeltaLogSubredditName);
+
+            return new DB4Comment
+            {
+                CommentType = DB4CommentType.PostSticky,
+                CommentBody = body
+            };
+        }
+
+        public DB4Comment BuildReply(DB4CommentType commentType, DB4Thing comment)
+        {
+            // Can only call BuildReply on comments
+            Assert.That(comment.Type == DB4ThingType.Comment);
+
             string body = string.Empty;
 
-            switch (resultType)
+            switch (commentType)
             {
                 case DB4CommentType.FailCommentTooShort:
-                    body = _appConfiguration.Replies.CommentTooShort.Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken,
+                    body = _appConfiguration.Comments.CommentTooShort.Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken,
                         comment.ParentThing.AuthorName);
                     break;
                 case DB4CommentType.FailCannotAwardOP:
-                    body = _appConfiguration.Replies.CannotAwardOP;
+                    body = _appConfiguration.Comments.CannotAwardOP;
                     break;
                 case DB4CommentType.FailCannotAwardDeltaBot:
-                    body = _appConfiguration.Replies.CannotAwardDeltaBot;
+                    body = _appConfiguration.Comments.CannotAwardDeltaBot;
                     break;
                 case DB4CommentType.FailCannotAwardSelf:
-                    body = _appConfiguration.Replies.CannotAwardSelf;
+                    body = _appConfiguration.Comments.CannotAwardSelf;
                     break;
                 case DB4CommentType.ModeratorAdded:
-                    body = _appConfiguration.Replies.ModeratorAdded
+                    body = _appConfiguration.Comments.ModeratorAdded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
                         .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
                         .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
                     break;
                 case DB4CommentType.ModeratorRemoved:
-                    body = _appConfiguration.Replies.ModeratorRemoved;
+                    body = _appConfiguration.Comments.ModeratorRemoved;
                     break;
                 case DB4CommentType.SuccessDeltaAwarded:
-                    body = _appConfiguration.Replies.DeltaAwarded
+                    body = _appConfiguration.Comments.DeltaAwarded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
                         .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
                         .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
                     break;
                 default:
-                    throw new UnhandledEnumException<DB4CommentType>(resultType);
+                    throw new UnhandledEnumException<DB4CommentType>(commentType);
             }
 
             return new DB4Comment
             {
-                CommentType = resultType,
+                CommentType = commentType,
                 CommentBody = body
             };
         }

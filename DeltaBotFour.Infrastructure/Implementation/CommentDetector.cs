@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 
@@ -11,18 +13,42 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private const string TOKEN_MATCH_REGEX = ".+";
 
         private readonly AppConfiguration _appConfiguration;
-        private readonly List<Tuple<DB4CommentType, Regex>> _allRepies = new List<Tuple<DB4CommentType, Regex>>();
+        private readonly List<Tuple<DB4CommentType, Regex>> _allComments = new List<Tuple<DB4CommentType, Regex>>();
 
         public CommentDetector(AppConfiguration appConfiguration)
         {
             _appConfiguration = appConfiguration;
 
             // Replace all possible replies with a regex for matching
-            foreach (var db4Reply in _appConfiguration.Replies.AllReplies)
+            foreach (var db4Reply in _appConfiguration.Comments.AllComments)
             {
                 var values = new Tuple<DB4CommentType, Regex>(db4Reply.Item2, new Regex(getPattern(db4Reply.Item1)));
-                _allRepies.Add(values);
+                _allComments.Add(values);
             }
+        }
+
+        public DB4ReplyResult DidDB4MakeStickyComment(DB4Thing post)
+        {
+            var sticky = _allComments.First(c => c.Item1 == DB4CommentType.PostSticky);
+
+            foreach (DB4Thing childComment in post.Comments)
+            {
+                if (childComment.AuthorName == _appConfiguration.DB4Username && sticky.Item2.IsMatch(childComment.Body))
+                {
+                    return new DB4ReplyResult
+                    {
+                        HasDB4Replied = true,
+                        CommentType = DB4CommentType.PostSticky,
+                        Comment = childComment
+                    };
+                }
+            }
+
+            // No sticky
+            return new DB4ReplyResult
+            {
+                HasDB4Replied = false
+            };
         }
 
         public DB4ReplyResult DidDB4Reply(DB4Thing comment)
@@ -32,10 +58,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 if (childComment.AuthorName == _appConfiguration.DB4Username)
                 {
-                    foreach (var reply in _allRepies)
+                    foreach (var reply in _allComments)
                     {
                         if (reply.Item2.IsMatch(childComment.Body))
                         {
+                            // The sticky comment should never be detected in a comment reply
+                            Assert.That(reply.Item1 != DB4CommentType.PostSticky);
+
                             return new DB4ReplyResult
                             {
                                 HasDB4Replied = true,
@@ -72,7 +101,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, TOKEN_MATCH_REGEX)
                 .Replace(_appConfiguration.ReplaceTokens.DeltasToken, TOKEN_MATCH_REGEX)
                 .Replace(_appConfiguration.ReplaceTokens.SubredditToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.IssueCountToken, TOKEN_MATCH_REGEX);
+                .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken, TOKEN_MATCH_REGEX)
+                .Replace(_appConfiguration.ReplaceTokens.UsernameToken, TOKEN_MATCH_REGEX)
+                .Replace(_appConfiguration.ReplaceTokens.CountToken, TOKEN_MATCH_REGEX);
 
             return $".*{pattern}.*";
         }

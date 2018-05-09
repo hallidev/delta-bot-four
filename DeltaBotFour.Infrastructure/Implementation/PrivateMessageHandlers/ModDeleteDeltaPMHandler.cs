@@ -49,7 +49,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                 // If a delta was never awarded in the first place, bail
-                if (!db4ReplyResult.HasDB4Replied || (!db4ReplyResult.WasSuccessReply && db4ReplyResult.CommentType != DB4CommentType.ModeratorAdded))
+                if (!db4ReplyResult.HasDB4Replied || !db4ReplyResult.WasSuccessReply && db4ReplyResult.CommentType != DB4CommentType.ModeratorAdded)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id,
                         DeleteFailedNeverAwardedMessage);
@@ -61,7 +61,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _deltaAwarder.Unaward(comment);
 
                 // Build moderator removal message
-                var reply = _commentBuilder.Build(DB4CommentType.ModeratorRemoved, comment);
+                var reply = _commentBuilder.BuildReply(DB4CommentType.ModeratorRemoved, comment);
 
                 // Don't edit the success comment - delete it and reply with the mod deleted reply
                 _replier.DeleteReply(db4ReplyResult.Comment);

@@ -38,7 +38,6 @@ namespace DeltaBotFour.Infrastructure
         public DeltaBotReplaceTokens ReplaceTokens { get; }
         public DeltaBotPrivateMessages PrivateMessages { get; }
         public DeltaBotComments Comments { get; }
-        public DeltaBotCommentReplies Replies { get; }
         public DeltaBotValidationValues ValidationValues { get; }
 
         public AppConfiguration()
@@ -56,8 +55,6 @@ namespace DeltaBotFour.Infrastructure
             PrivateMessages = new DeltaBotPrivateMessages(_configuration);
 
             Comments = new DeltaBotComments(_configuration);
-
-            Replies = new DeltaBotCommentReplies(_configuration);
 
             ValidationValues = new DeltaBotValidationValues(_configuration);
         }
@@ -109,7 +106,6 @@ namespace DeltaBotFour.Infrastructure
             public string CommentLink => _configuration["replace_tokens:comment_link"];
             public string ParentAuthorNameToken => _configuration["replace_tokens:parent_author_name_token"];
             public string DeltasToken => _configuration["replace_tokens:deltas_token"];
-            public string IssueCountToken => _configuration["replace_tokens:issue_count_token"];
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
             public string ContextNumberToken => _configuration["replace_tokens:context_number_token"];
 
@@ -147,32 +143,22 @@ namespace DeltaBotFour.Infrastructure
             private readonly IConfigurationRoot _configuration;
 
             public string PostSticky => _configuration["comments:post_sticky"];
+            public string DeltaAwarded => _configuration["comments:delta_awarded"];
+            public string CommentTooShort => _configuration["comments:comment_too_short"];
+            public string CannotAwardOP => _configuration["comments:cannot_award_op"];
+            public string CannotAwardDeltaBot => _configuration["comments:cannot_award_deltabot"];
+            public string CannotAwardSelf => _configuration["comments:cannot_award_self"];
+            public string ModeratorAdded => _configuration["comments:moderator_added"];
+            public string ModeratorRemoved => _configuration["comments:moderator_removed"];
+            public List<Tuple<string, DB4CommentType>> AllComments { get; }
 
             public DeltaBotComments(IConfigurationRoot configuration)
             {
                 _configuration = configuration;
-            }
-        }
 
-        public class DeltaBotCommentReplies
-        {
-            private readonly IConfigurationRoot _configuration;
-
-            public string DeltaAwarded => _configuration["comment_replies:delta_awarded"];
-            public string CommentTooShort => _configuration["comment_replies:comment_too_short"];
-            public string CannotAwardOP => _configuration["comment_replies:cannot_award_op"];
-            public string CannotAwardDeltaBot => _configuration["comment_replies:cannot_award_deltabot"];
-            public string CannotAwardSelf => _configuration["comment_replies:cannot_award_self"];
-            public string ModeratorAdded => _configuration["comment_replies:moderator_added"];
-            public string ModeratorRemoved => _configuration["comment_replies:moderator_removed"];
-            public List<Tuple<string, DB4CommentType>> AllReplies { get; }
-
-            public DeltaBotCommentReplies(IConfigurationRoot configuration)
-            {
-                _configuration = configuration;
-
-                AllReplies = new List<Tuple<string, DB4CommentType>>
+                AllComments = new List<Tuple<string, DB4CommentType>>
                 {
+                    new Tuple<string, DB4CommentType>(PostSticky, DB4CommentType.PostSticky),
                     new Tuple<string, DB4CommentType>(DeltaAwarded, DB4CommentType.SuccessDeltaAwarded),
                     new Tuple<string, DB4CommentType>(CommentTooShort, DB4CommentType.FailCommentTooShort),
                     new Tuple<string, DB4CommentType>(CannotAwardOP, DB4CommentType.FailCannotAwardOP),

@@ -61,7 +61,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _deltaAwarder.Award(comment);
 
                 // Build moderator add message
-                var reply = _commentBuilder.Build(DB4CommentType.ModeratorAdded, comment);
+                var reply = _commentBuilder.BuildReply(DB4CommentType.ModeratorAdded, comment);
 
                 // Don't edit the existing comment - delete it and reply with the mod added reply
                 // db4ReplyResult.Comment will be null if the mod is adding a delta directly to a comment
