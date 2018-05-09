@@ -25,7 +25,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             _redditService.ReplyToComment(comment, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.ResultType.ToString()} link: {comment.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.CommentType.ToString()} link: {comment.Shortlink}");
         }
 
         public void EditReply(DB4Thing commentToEdit, DB4Comment db4Comment)
@@ -34,7 +34,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             _redditService.EditComment(commentToEdit, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {db4Comment.ResultType.ToString()} link: {commentToEdit.Shortlink}");
+            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {db4Comment.CommentType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public void DeleteReply(DB4Thing commentToDelete)
@@ -54,7 +54,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             return _replyTemplate
-                .Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, db4Comment.ReplyCommentBody)
+                .Replace(_appConfiguration.ReplaceTokens.DB4ReplyToken, db4Comment.CommentBody)
                 .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName);
         }
     }

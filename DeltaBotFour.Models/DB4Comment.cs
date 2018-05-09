@@ -2,9 +2,9 @@
 {
     public class DB4Comment
     {
-        public DB4CommentType ResultType { get; set; }
-        public string ReplyCommentBody { get; set; }
-        public bool IsValidDelta => ResultType == DB4CommentType.SuccessDeltaAwarded;
-        public bool IsModeratorReply => ResultType == DB4CommentType.ModeratorAdded || ResultType == DB4CommentType.ModeratorRemoved;
+        public DB4CommentType CommentType { get; set; }
+        public string CommentBody { get; set; }
+        public bool IsValidDelta => CommentType == DB4CommentType.SuccessDeltaAwarded;
+        public bool IsModeratorReply => CommentType == DB4CommentType.ModeratorAdded || CommentType == DB4CommentType.ModeratorRemoved;
     }
 }

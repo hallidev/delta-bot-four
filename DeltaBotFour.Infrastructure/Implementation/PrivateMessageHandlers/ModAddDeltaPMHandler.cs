@@ -49,7 +49,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                 // If a delta was already awarded successfully, bail
-                if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply)
+                if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply || db4ReplyResult.CommentType == DB4CommentType.ModeratorAdded)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id,
                         AddFailedAlreadyAwardedMessage);

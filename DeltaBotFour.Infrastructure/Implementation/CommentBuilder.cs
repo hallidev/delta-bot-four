@@ -53,8 +53,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             return new DB4Comment
             {
-                ResultType = resultType,
-                ReplyCommentBody = body
+                CommentType = resultType,
+                CommentBody = body
             };
         }
     }

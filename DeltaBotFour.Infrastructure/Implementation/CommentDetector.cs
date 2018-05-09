@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
@@ -10,28 +11,31 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private const string TOKEN_MATCH_REGEX = ".+";
 
         private readonly AppConfiguration _appConfiguration;
-        private readonly List<Regex> _successReplyRegexes = new List<Regex>();
-        private readonly List<Regex> _failReplyRegexes = new List<Regex>();
-        private readonly List<Regex> _moderatorReplyRegexes = new List<Regex>();
+        private readonly List<Tuple<DB4CommentType, Regex>> _successRepies = new List<Tuple<DB4CommentType, Regex>>();
+        private readonly List<Tuple<DB4CommentType, Regex>> _failReplies = new List<Tuple<DB4CommentType, Regex>>();
+        private readonly List<Tuple<DB4CommentType, Regex>> _moderatorRepies = new List<Tuple<DB4CommentType, Regex>>();
 
         public CommentDetector(AppConfiguration appConfiguration)
         {
             _appConfiguration = appConfiguration;
 
             // Replace all possible replies with a regex for matching
-            foreach (string db4Reply in _appConfiguration.Replies.SuccessReplies)
+            foreach (var db4Reply in _appConfiguration.Replies.SuccessReplies)
             {
-                _successReplyRegexes.Add(new Regex(getPattern(db4Reply)));
+                var values = new Tuple<DB4CommentType, Regex>(db4Reply.Item2, new Regex(getPattern(db4Reply.Item1)));
+                _successRepies.Add(values);
             }
 
-            foreach (string db4Reply in _appConfiguration.Replies.FailReplies)
+            foreach (var db4Reply in _appConfiguration.Replies.FailReplies)
             {
-                _failReplyRegexes.Add(new Regex(getPattern(db4Reply)));
+                var values = new Tuple<DB4CommentType, Regex>(db4Reply.Item2, new Regex(getPattern(db4Reply.Item1)));
+                _failReplies.Add(values);
             }
 
-            foreach (string db4Reply in _appConfiguration.Replies.ModeratorReplies)
+            foreach (var db4Reply in _appConfiguration.Replies.ModeratorReplies)
             {
-                _moderatorReplyRegexes.Add(new Regex(getPattern(db4Reply)));
+                var values = new Tuple<DB4CommentType, Regex>(db4Reply.Item2, new Regex(getPattern(db4Reply.Item1)));
+                _moderatorRepies.Add(values);
             }
         }
 
@@ -42,43 +46,46 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 if (childComment.AuthorName == _appConfiguration.DB4Username)
                 {
-                    foreach (Regex regex in _successReplyRegexes)
+                    foreach (var reply in _successRepies)
                     {
-                        if (regex.IsMatch(childComment.Body))
+                        if (reply.Item2.IsMatch(childComment.Body))
                         {
                             return new DB4ReplyResult
                             {
                                 HasDB4Replied = true,
                                 WasSuccessReply = true,
                                 WasModeratorReply = false,
+                                CommentType = reply.Item1,
                                 Comment = childComment
                             };
                         }
                     }
 
-                    foreach (Regex regex in _failReplyRegexes)
+                    foreach (var reply in _failReplies)
                     {
-                        if (regex.IsMatch(childComment.Body))
+                        if (reply.Item2.IsMatch(childComment.Body))
                         {
                             return new DB4ReplyResult
                             {
                                 HasDB4Replied = true,
                                 WasSuccessReply = false,
                                 WasModeratorReply = false,
+                                CommentType = reply.Item1,
                                 Comment = childComment
                             };
                         }
                     }
 
-                    foreach (Regex regex in _moderatorReplyRegexes)
+                    foreach (var reply in _moderatorRepies)
                     {
-                        if (regex.IsMatch(childComment.Body))
+                        if (reply.Item2.IsMatch(childComment.Body))
                         {
                             return new DB4ReplyResult
                             {
                                 HasDB4Replied = true,
                                 WasSuccessReply = false,
                                 WasModeratorReply = true,
+                                CommentType = reply.Item1,
                                 Comment = childComment
                             };
                         }
