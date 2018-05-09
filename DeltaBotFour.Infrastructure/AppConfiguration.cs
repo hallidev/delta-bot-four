@@ -19,6 +19,7 @@ namespace DeltaBotFour.Infrastructure
         public string DB4ClientSecret => _configuration["db4_client_secret"];
         public string RedditBaseUrl => _configuration["reddit_base_url"];
         public string SubredditName => _configuration["subreddit_name"];
+        public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
         public string WikiUrlDeltaboards => _configuration["wiki_url_deltaboards"];
@@ -117,6 +118,7 @@ namespace DeltaBotFour.Infrastructure
         {
             private readonly IConfigurationRoot _configuration;
 
+            public string WATTArticleCreatedSubject => _configuration["private_messages:watt_article_created_subject"];
             public string ModAddDeltaSubject => _configuration["private_messages:mod_add_delta_subject"];
             public string ModDeleteDeltaSubject => _configuration["private_messages:mod_delete_delta_subject"];
             public string ModAddedDeltaNotificationSubject => _configuration["private_messages:mod_added_delta_notification_subject"];

@@ -1,4 +1,5 @@
-﻿using DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers;
+﻿using System.Linq;
+using DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
@@ -57,6 +58,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
             {
                 return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository, _redditService);
+            }
+
+            // WATT Article created (author must be in ValidWATTUsers list)
+            if (_appConfiguration.ValidWATTUsers.Any(u => u.ToLower() == privateMessage.AuthorName.ToLower()) &&
+                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.WATTArticleCreatedSubject.ToLower()))
+            {
+                return new WATTArticleCreatedPMHandler();
             }
 
             return null;
