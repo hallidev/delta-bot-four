@@ -165,29 +165,19 @@ namespace DeltaBotFour.Infrastructure
             public string CannotAwardSelf => _configuration["comment_replies:cannot_award_self"];
             public string ModeratorAdded => _configuration["comment_replies:moderator_added"];
             public string ModeratorRemoved => _configuration["comment_replies:moderator_removed"];
-            public List<Tuple<string, DB4CommentType>> SuccessReplies { get; }
-            public List<Tuple<string, DB4CommentType>> FailReplies { get; }
-            public List<Tuple<string, DB4CommentType>> ModeratorReplies { get; }
+            public List<Tuple<string, DB4CommentType>> AllReplies { get; }
 
             public DeltaBotCommentReplies(IConfigurationRoot configuration)
             {
                 _configuration = configuration;
 
-                SuccessReplies = new List<Tuple<string, DB4CommentType>>
+                AllReplies = new List<Tuple<string, DB4CommentType>>
                 {
-                    new Tuple<string, DB4CommentType>(DeltaAwarded, DB4CommentType.SuccessDeltaAwarded)
-                };
-
-                FailReplies = new List<Tuple<string, DB4CommentType>>
-                {
+                    new Tuple<string, DB4CommentType>(DeltaAwarded, DB4CommentType.SuccessDeltaAwarded),
                     new Tuple<string, DB4CommentType>(CommentTooShort, DB4CommentType.FailCommentTooShort),
                     new Tuple<string, DB4CommentType>(CannotAwardOP, DB4CommentType.FailCannotAwardOP),
                     new Tuple<string, DB4CommentType>(CannotAwardDeltaBot, DB4CommentType.FailCannotAwardDeltaBot),
-                    new Tuple<string, DB4CommentType>(CannotAwardSelf, DB4CommentType.FailCannotAwardSelf)
-                };
-
-                ModeratorReplies = new List<Tuple<string, DB4CommentType>>
-                {
+                    new Tuple<string, DB4CommentType>(CannotAwardSelf, DB4CommentType.FailCannotAwardSelf),
                     new Tuple<string, DB4CommentType>(ModeratorAdded, DB4CommentType.ModeratorAdded),
                     new Tuple<string, DB4CommentType>(ModeratorRemoved, DB4CommentType.ModeratorRemoved)
                 };
