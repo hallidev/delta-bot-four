@@ -86,7 +86,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
             Task.Run(async () =>
             {
-                Comment newComment = null;
+                Comment newComment;
 
                 if (qualifiedThing is Post post)
                 {
