@@ -18,5 +18,7 @@ namespace DeltaBotFour.Persistence.Interface
         void RemoveDeltaboardEntry(string username);
         List<string> GetIgnoreQuotedDeltaPMUserList();
         void AddIgnoredQuotedDeltaPMUser(string username);
+        void UpsertWATTArticle(WATTArticle article);
+        WATTArticle GetWattArticleForPost(string postId);
     }
 }

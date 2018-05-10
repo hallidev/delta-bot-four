@@ -66,7 +66,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 // Update sticky comment - make sure to add one to the count since we haven't saved the data to
                 // the repository yet, so the current comment won't count
                 int newDeltaCount = opDeltaCommentsInPost.Count + 1;
-                _stickyCommentEditor.UpsertOrRemoveSticky(comment.ParentPost, newDeltaCount);
+                _stickyCommentEditor.UpsertOrRemoveSticky(comment.ParentPost, newDeltaCount, null);
             }
 
             // If this was the user's first delta, send the first delta PM
@@ -142,7 +142,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 // Update or remove sticky comment - make sure to remove one from the count since we haven't removed the data from
                 // the repository yet, so the current comment won't count
                 int newDeltaCount = opDeltaCommentsInPost.Count - 1;
-                _stickyCommentEditor.UpsertOrRemoveSticky(comment.ParentPost, newDeltaCount);
+                _stickyCommentEditor.UpsertOrRemoveSticky(comment.ParentPost, newDeltaCount, null);
             }
 
             // Update deltaboards

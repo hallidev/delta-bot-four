@@ -15,6 +15,7 @@ namespace DeltaBotFour.Persistence.Implementation
         private const string DeltaBotStateCollectionName = "deltabotstate";
         private const string DeltaCommentsCollectionName = "deltacomments";
         private const string DeltaboardsCollectionName = "deltaboards";
+        private const string WATTArticlesCollectionName = "wattarticles";
         private const string BsonIdField = "_id";
         private const string BsonValueField = "value";
         private const string LastActivityTimeUtcKey = "last_processed_comment_time_utc";
@@ -192,6 +193,18 @@ namespace DeltaBotFour.Persistence.Implementation
             }
         }
 
+        public void UpsertWATTArticle(WATTArticle article)
+        {
+            var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
+            wattArticlesCollection.EnsureIndex(d => d.Id, true);
+            wattArticlesCollection.Upsert(article);
+        }
+
+        public WATTArticle GetWattArticleForPost(string postId)
+        {
+            var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
+            return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
+        }
 
         private LiteCollection<BsonDocument> getState()
         {

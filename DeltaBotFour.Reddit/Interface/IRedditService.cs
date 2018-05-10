@@ -5,6 +5,7 @@ namespace DeltaBotFour.Reddit.Interface
     public interface IRedditService
     {
         void PopulateParentAndChildren(DB4Thing comment);
+        void PopulateChildren(DB4Thing post);
         DB4Thing GetThingByFullname(string fullname);
         DB4Thing GetCommentByUrl(string url);
         void ReplyToThing(DB4Thing thing, string reply, bool isSticky = false);

@@ -23,11 +23,11 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void PopulateParentAndChildren(DB4Thing comment)
         {
-            // We're always calling these on processed comments
+            // PopulateParentAndChildren should only be called on comments
             Assert.That(comment.Type == DB4ThingType.Comment);
 
             // Get comment with children and parent post populated
-            var qualifiedComment = (Comment) getQualifiedThing(comment);
+            var qualifiedComment = (Comment)getQualifiedThing(comment);
 
             // Set parent post
             comment.ParentPost = RedditThingConverter.Convert(qualifiedComment.Parent);
@@ -61,6 +61,26 @@ namespace DeltaBotFour.Reddit.Implementation
             // Get the parent thing - this could be the same as ParentPost above or it could be a comment
             var parentThing = _reddit.GetThingByFullnameAsync(comment.ParentId).Result;
             comment.ParentThing = RedditThingConverter.Convert(parentThing);
+        }
+
+        public void PopulateChildren(DB4Thing post)
+        {
+            // PopulateChildren should only be called on posts
+            Assert.That(post.Type == DB4ThingType.Post);
+
+            var qualifiedPost = (Post)getQualifiedThing(post);
+
+            post.Comments = new List<DB4Thing>();
+
+            Task.Run(async () =>
+            {
+                var postComments = await qualifiedPost.GetCommentsAsync();
+
+                foreach (var postComment in postComments)
+                {
+                    post.Comments.Add(RedditThingConverter.Convert(postComment));
+                }
+            }).Wait();
         }
 
         public DB4Thing GetThingByFullname(string fullname)

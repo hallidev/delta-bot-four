@@ -14,16 +14,29 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _appConfiguration = appConfiguration;
         }
 
-        public DB4Comment BuildSticky(DB4Thing post, int deltaCount)
+        public DB4Comment BuildSticky(DB4Thing post, int deltaCount, WATTArticle article)
         {
             // Can only call BuildSticky on posts
             Assert.That(post.Type == DB4ThingType.Post);
 
-            string body = _appConfiguration.Comments.PostSticky
-                .Replace(_appConfiguration.ReplaceTokens.UsernameToken, post.AuthorName)
-                .Replace(_appConfiguration.ReplaceTokens.CountToken, deltaCount.ToString())
-                .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken,
-                    _appConfiguration.DeltaLogSubredditName);
+            string body = string.Empty;
+
+            if (deltaCount > 0)
+            {
+                body += _appConfiguration.Comments.PostStickyDeltas
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, post.AuthorName)
+                    .Replace(_appConfiguration.ReplaceTokens.CountToken, deltaCount.ToString())
+                    .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken,
+                        _appConfiguration.DeltaLogSubredditName);
+            }
+
+            if (article != null)
+            {
+                if (!string.IsNullOrEmpty(body)) body += "\n\n";
+
+                body += _appConfiguration.Comments.PostStickyWATT
+                    .Replace(_appConfiguration.ReplaceTokens.WATTLinkToken, article.Url);
+            }
 
             return new DB4Comment
             {

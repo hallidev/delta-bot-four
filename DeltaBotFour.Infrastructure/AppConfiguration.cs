@@ -107,6 +107,7 @@ namespace DeltaBotFour.Infrastructure
             public string DeltasToken => _configuration["replace_tokens:deltas_token"];
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
             public string ContextNumberToken => _configuration["replace_tokens:context_number_token"];
+            public string WATTLinkToken => _configuration["replace_tokens:watt_link_token"];
 
             public DeltaBotReplaceTokens(IConfigurationRoot configuration)
             {
@@ -141,7 +142,8 @@ namespace DeltaBotFour.Infrastructure
         {
             private readonly IConfigurationRoot _configuration;
 
-            public string PostSticky => _configuration["comments:post_sticky"];
+            public string PostStickyDeltas => _configuration["comments:post_sticky_deltas"];
+            public string PostStickyWATT => _configuration["comments:post_sticky_watt"];
             public string DeltaAwarded => _configuration["comments:delta_awarded"];
             public string CommentTooShort => _configuration["comments:comment_too_short"];
             public string CannotAwardOP => _configuration["comments:cannot_award_op"];
@@ -157,7 +159,7 @@ namespace DeltaBotFour.Infrastructure
 
                 AllComments = new List<Tuple<string, DB4CommentType>>
                 {
-                    new Tuple<string, DB4CommentType>(PostSticky, DB4CommentType.PostSticky),
+                    new Tuple<string, DB4CommentType>(PostStickyDeltas, DB4CommentType.PostSticky),
                     new Tuple<string, DB4CommentType>(DeltaAwarded, DB4CommentType.SuccessDeltaAwarded),
                     new Tuple<string, DB4CommentType>(CommentTooShort, DB4CommentType.FailCommentTooShort),
                     new Tuple<string, DB4CommentType>(CannotAwardOP, DB4CommentType.FailCannotAwardOP),

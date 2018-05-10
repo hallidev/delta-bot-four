@@ -17,6 +17,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly ICommentBuilder _commentBuilder;
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
+        private readonly IStickyCommentEditor _stickyCommentEditor;
 
         public PrivateMessageHandlerFactory(AppConfiguration appConfiguration,
             IDB4Repository db4Repository, 
@@ -25,7 +26,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             ICommentDetector commentDetector,
             ICommentBuilder commentBuilder,
             ICommentReplier replier,
-            IDeltaAwarder deltaAwarder)
+            IDeltaAwarder deltaAwarder,
+            IStickyCommentEditor stickyCommentEditor)
         {
             _appConfiguration = appConfiguration;
             _db4Repository = db4Repository;
@@ -35,6 +37,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _commentBuilder = commentBuilder;
             _replier = replier;
             _deltaAwarder = deltaAwarder;
+            _stickyCommentEditor = stickyCommentEditor;
         }
 
         public IPrivateMessageHandler Create(DB4Thing privateMessage)
@@ -64,7 +67,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (_appConfiguration.ValidWATTUsers.Any(u => u.ToLower() == privateMessage.AuthorName.ToLower()) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.WATTArticleCreatedSubject.ToLower()))
             {
-                return new WATTArticleCreatedPMHandler();
+                return new WATTArticleCreatedPMHandler(_db4Repository, _redditService, _stickyCommentEditor);
             }
 
             return null;
