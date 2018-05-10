@@ -59,19 +59,6 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Update wiki
             _wikiEditor.UpdateUserWikiEntryAward(comment);
 
-            // Update sticky if this is OP
-            if (comment.AuthorName == comment.ParentPost.AuthorName)
-            {
-                // We need to get the count of deltas for this particular post
-                var opDeltaCommentsInPost =
-                    _repository.GetDeltaCommentsForPost(comment.ParentPost.Id, comment.ParentPost.AuthorName);
-
-                // Update sticky comment - make sure to add one to the count since we haven't saved the data to
-                // the repository yet, so the current comment won't count
-                int newDeltaCount = opDeltaCommentsInPost.Count + 1;
-                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, newDeltaCount, null);
-            }
-
             // If this was the user's first delta, send the first delta PM
             if (currentDeltaCount == 0)
             {
@@ -109,8 +96,20 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Upsert performs an insert or update depending on if it already exists
             _repository.UpsertDeltaComment(deltaComment);
 
-            // Update DeltaLogs last since it reads data from the repository
-            _deltaLogEditor.UpsertOrRemove(comment.ParentPost.Id);
+            // Update DeltaLogs after repository update since it reads data from the repository
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink);
+
+            // Update sticky if this is OP
+            // This needs to be absolute last since it relies on getting a Url from the DeltaLog post
+            if (comment.AuthorName == comment.ParentPost.AuthorName)
+            {
+                // We need to get the count of deltas for this particular post
+                var opDeltaCommentsInPost =
+                    _repository.GetDeltaCommentsForPost(comment.ParentPost.Id, comment.ParentPost.AuthorName);
+
+                // Update sticky comment
+                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
+            }
 
             ConsoleHelper.WriteLine($"DeltaBot awarded a delta -> user: {comment.ParentThing.AuthorName}", ConsoleColor.Green);
         }
@@ -141,6 +140,15 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Update wiki
             _wikiEditor.UpdateUserWikiEntryUnaward(comment);
 
+            // Update deltaboards
+            _deltaboardEditor.RemoveDelta(comment.ParentThing.AuthorName);
+
+            // Remove from repository after successful unaward
+            _repository.RemoveDeltaComment(comment.Id);
+
+            // Update DeltaLogs after repository update since it reads data from the repository
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink);
+
             // Update sticky if this is from OP
             if (comment.AuthorName == comment.ParentPost.AuthorName)
             {
@@ -150,18 +158,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update or remove sticky comment - make sure to remove one from the count since we haven't removed the data from
                 // the repository yet, so the current comment won't count
-                int newDeltaCount = opDeltaCommentsInPost.Count - 1;
-                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, newDeltaCount, null);
+                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
             }
-
-            // Update deltaboards
-            _deltaboardEditor.RemoveDelta(comment.ParentThing.AuthorName);
-
-            // Remove from repository after successful unaward
-            _repository.RemoveDeltaComment(comment.Id);
-
-            // Update DeltaLogs last since it reads data from the repository
-            _deltaLogEditor.UpsertOrRemove(comment.ParentPost.Id);
 
             ConsoleHelper.WriteLine($"DeltaBot unawarded a delta -> user: {comment.ParentThing.AuthorName}", ConsoleColor.Green);
         }

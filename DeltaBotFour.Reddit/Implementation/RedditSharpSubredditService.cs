@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
 using RedditSharp;
 using RedditSharp.Things;
@@ -10,11 +11,35 @@ namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpSubredditService : ISubredditService
     {
+        private readonly RedditSharp.Reddit _reddit;
         private readonly Subreddit _subreddit;
 
-        public RedditSharpSubredditService(Subreddit subreddit)
+        public RedditSharpSubredditService(RedditSharp.Reddit reddit, Subreddit subreddit)
         {
+            _reddit = reddit;
             _subreddit = subreddit;
+        }
+
+        public DB4Thing Post(string title, string text, string subredditName = "")
+        {
+            var subReddit = _subreddit;
+
+            // Since DB4 posts to another subreddit for DeltaLogs and registering multiple interfaces
+            // against the DI container is a bit of a pain, default to main subreddit, but switch
+            // to DeltaLog subreddit if passed in
+            if (!string.IsNullOrEmpty(subredditName))
+            {
+                subReddit = _reddit.GetSubredditAsync($"/r/{subredditName}").Result;
+            }
+
+            // Submit post
+            var post = subReddit.SubmitTextPostAsync(title, text).Result;
+
+            // The returned post has basically nothing on it - need to retrieve a post with GetPost
+            var oAuthUrl = UrlHelper.ConvertToOAuth(post.Url.AbsoluteUri);
+            var fullPost = _reddit.GetPostAsync(new Uri(oAuthUrl)).Result;
+
+            return RedditThingConverter.Convert(fullPost);
         }
 
         public bool IsUserModerator(string username)

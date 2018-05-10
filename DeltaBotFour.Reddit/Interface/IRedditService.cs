@@ -8,6 +8,7 @@ namespace DeltaBotFour.Reddit.Interface
         void PopulateChildren(DB4Thing post);
         DB4Thing GetThingByFullname(string fullname);
         DB4Thing GetCommentByUrl(string url);
+        void EditPost(string postUrl, string text);
         void ReplyToThing(DB4Thing thing, string reply, bool isSticky = false);
         void EditComment(DB4Thing comment, string editedComment);
         void DeleteComment(DB4Thing comment);

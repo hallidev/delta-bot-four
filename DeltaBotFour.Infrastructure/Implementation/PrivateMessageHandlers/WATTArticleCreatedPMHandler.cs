@@ -64,8 +64,18 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
             var post = _redditService.GetThingByFullname(postFullname);
             _redditService.PopulateChildren(post);
 
+            // Get DeltaLog mapping for building out sticky
+            // The mapping can be null
+            var deltaLogMapping = _db4Repository.GetDeltaLogPostMapping(postId);
+            string deltaLogPostUrl = string.Empty;
+
+            if (deltaLogMapping != null)
+            {
+                deltaLogPostUrl = deltaLogMapping.DeltaLogPostUrl;
+            }
+
             // Update sticky for the post in question
-            _stickyCommentEditor.UpsertOrRemove(post, null, article);
+            _stickyCommentEditor.UpsertOrRemove(post, null, article, deltaLogPostUrl);
         }
     }
 }

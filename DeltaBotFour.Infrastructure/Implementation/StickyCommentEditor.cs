@@ -23,7 +23,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _repository = repository;
         }
 
-        public void UpsertOrRemove(DB4Thing post, int? deltaCount, WATTArticle article)
+        public void UpsertOrRemove(DB4Thing post, int? deltaCount, WATTArticle article, string deltaLogPostUrl)
         {
             // This method needs to do some extra work to handle WATT stuff
             // I'm not loving how this particular implementation came out...
@@ -66,7 +66,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             // We'll need the updated sticky whether it has been made or not
-            var db4Comment = _commentBuilder.BuildSticky(post, finalDeltaCount, article);
+            var db4Comment = _commentBuilder.BuildSticky(post, finalDeltaCount, article, deltaLogPostUrl);
 
             if (result.HasDB4Replied)
             {

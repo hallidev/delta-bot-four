@@ -12,8 +12,6 @@ namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpRedditService : IRedditService
     {
-        private const string WwwRedditBaseUrl = "https://www.reddit.com";
-        private const string OAuthRedditBaseUrl = "https://oauth.reddit.com";
         private readonly RedditSharp.Reddit _reddit;
 
         public RedditSharpRedditService(RedditSharp.Reddit reddit)
@@ -91,13 +89,22 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public DB4Thing GetCommentByUrl(string url)
         {
-            if (url.StartsWith(WwwRedditBaseUrl))
-            {
-                url = url.Replace(WwwRedditBaseUrl, OAuthRedditBaseUrl);
-            }
+            url = UrlHelper.ConvertToOAuth(url);
 
             var qualifiedComment = _reddit.GetCommentAsync(new Uri(url)).Result;
             return RedditThingConverter.Convert(qualifiedComment);
+        }
+
+        public void EditPost(string postUrl, string text)
+        {
+            postUrl = UrlHelper.ConvertToOAuth(postUrl);
+
+            Task.Run(async () =>
+            {
+                var post = _reddit.GetPostAsync(new Uri(postUrl)).Result;
+                await post.EditTextAsync(text);
+
+            }).Wait();
         }
 
         public void ReplyToThing(DB4Thing thing, string reply, bool isSticky = false)
@@ -198,7 +205,7 @@ namespace DeltaBotFour.Reddit.Implementation
         {
             var link = thing.Type == DB4ThingType.Comment ? thing.Shortlink : thing.Permalink;
 
-            string thingUrl = $"{OAuthRedditBaseUrl}{link}".TrimEnd('/');
+            string thingUrl = $"{UrlHelper.OAuthRedditBaseUrl}{link}".TrimEnd('/');
             var thingUri = new Uri(thingUrl);
 
             switch (thing.Type)

@@ -15,6 +15,7 @@ namespace DeltaBotFour.Persistence.Implementation
         private const string DeltaBotStateCollectionName = "deltabotstate";
         private const string DeltaCommentsCollectionName = "deltacomments";
         private const string DeltaboardsCollectionName = "deltaboards";
+        private const string DeltaLogPostMappingsCollectionName = "deltalogpostmappings";
         private const string WATTArticlesCollectionName = "wattarticles";
         private const string BsonIdField = "_id";
         private const string BsonValueField = "value";
@@ -151,6 +152,19 @@ namespace DeltaBotFour.Persistence.Implementation
 
             // Save changes
             updateDeltaboards(deltaboards);
+        }
+
+        public DeltaLogPostMapping GetDeltaLogPostMapping(string postId)
+        {
+            var deltaLogPostMappingsCollection = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
+            return deltaLogPostMappingsCollection.Find(dc => dc.Id == postId).FirstOrDefault();
+        }
+
+        public void AddDeltaLogPostMapping(DeltaLogPostMapping mapping)
+        {
+            var deltaLogPostMappingsCollection = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
+            deltaLogPostMappingsCollection.EnsureIndex(d => d.Id, true);
+            deltaLogPostMappingsCollection.Insert(mapping);
         }
 
         public List<string> GetIgnoreQuotedDeltaPMUserList()

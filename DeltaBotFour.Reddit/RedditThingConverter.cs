@@ -4,7 +4,7 @@ using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit
 {
-    public static class RedditThingConverter
+    internal static class RedditThingConverter
     {
         private const string SHORT_LINK_FROM = "www.reddit.com";
         private const string SHORT_LINK_TO = "oauth.reddit.com";

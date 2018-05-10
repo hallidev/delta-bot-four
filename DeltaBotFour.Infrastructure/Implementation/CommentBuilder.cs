@@ -14,7 +14,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _appConfiguration = appConfiguration;
         }
 
-        public DB4Comment BuildSticky(DB4Thing post, int deltaCount, WATTArticle article)
+        public DB4Comment BuildSticky(DB4Thing post, int deltaCount, WATTArticle article, string deltaLogPostUrl)
         {
             // Can only call BuildSticky on posts
             Assert.That(post.Type == DB4ThingType.Post);
@@ -26,6 +26,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 body += _appConfiguration.Comments.PostStickyDeltas
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, post.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CountToken, deltaCount.ToString())
+                    .Replace(_appConfiguration.ReplaceTokens.PostLink, deltaLogPostUrl)
                     .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken,
                         _appConfiguration.DeltaLogSubredditName);
             }

@@ -85,7 +85,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         private string getPattern(string db4reply)
         {
-            // Escape tokens and special characters
+            // Escape all tokens and special characters
             // []^$.|?*+()
             string pattern = db4reply
                 .Replace("[", "\\[")
@@ -97,13 +97,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Replace("*", "\\*")
                 .Replace("+", "\\+")
                 .Replace("(", "\\(")
-                .Replace(")", "\\)")
-                .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.DeltasToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.SubredditToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.DeltaLogSubredditToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.UsernameToken, TOKEN_MATCH_REGEX)
-                .Replace(_appConfiguration.ReplaceTokens.CountToken, TOKEN_MATCH_REGEX);
+                .Replace(")", "\\)");
+
+            foreach (string token in _appConfiguration.ReplaceTokens.AllTokens)
+            {
+                pattern = pattern.Replace(token, TOKEN_MATCH_REGEX);
+            }
 
             return $".*{pattern}.*";
         }

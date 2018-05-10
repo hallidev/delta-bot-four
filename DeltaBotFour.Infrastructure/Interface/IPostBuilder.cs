@@ -5,6 +5,6 @@ namespace DeltaBotFour.Infrastructure.Interface
 {
     public interface IPostBuilder
     {
-        string BuildDeltaLogPost(List<DeltaComment> deltaComments);
+        (string, string) BuildDeltaLogPost(List<DeltaComment> deltaComments);
     }
 }

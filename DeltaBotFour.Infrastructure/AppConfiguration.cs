@@ -111,10 +111,43 @@ namespace DeltaBotFour.Infrastructure
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
             public string ContextNumberToken => _configuration["replace_tokens:context_number_token"];
             public string WATTLinkToken => _configuration["replace_tokens:watt_link_token"];
+            public List<string> AllTokens { get; private set; }
 
             public DeltaBotReplaceTokens(IConfigurationRoot configuration)
             {
                 _configuration = configuration;
+
+                AllTokens = new List<string>
+                {
+                    SubredditToken,
+                    DeltaLogSubredditToken,
+                    DateToken,
+                    UsernameToken,
+                    UserWikiLinkToken,
+                    HiddenParamsToken,
+                    DailyDeltaboardToken,
+                    WeeklyDeltaboardToken,
+                    MonthlyDeltaboardToken,
+                    YearlyDeltaboardToken,
+                    AllTimeDeltaboardToken,
+                    DeltaboardTypeToken,
+                    DeltaboardRowsToken,
+                    RankToken,
+                    CountToken,
+                    DeltasGivenCountToken,
+                    DeltasReceivedCountToken,
+                    WikiRowsGivenToken,
+                    WikiRowsReceivedToken,
+                    DateMMDYYYY,
+                    PostTitle,
+                    PostLink,
+                    CommentLink,
+                    ParentAuthorNameToken,
+                    DeltasToken,
+                    DB4ReplyToken,
+                    ContextNumberToken,
+                    WATTLinkToken
+                };
             }
         }
 

@@ -6,9 +6,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class PostBuilder : IPostBuilder
     {
-        public string BuildDeltaLogPost(List<DeltaComment> deltaComments)
+        
+
+        public (string, string) BuildDeltaLogPost(List<DeltaComment> deltaComments)
         {
-            return "this is a deltalog post";
+            return ("this is a deltalog title", "this is deltalog text");
         }
     }
 }

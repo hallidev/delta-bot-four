@@ -2,6 +2,6 @@
 {
     public interface IDeltaLogEditor
     {
-        void UpsertOrRemove(string postId);
+        string Upsert(string postId, string postPermalink);
     }
 }
