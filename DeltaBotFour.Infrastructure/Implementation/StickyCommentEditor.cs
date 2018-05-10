@@ -18,7 +18,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _commentReplier = commentReplier;
         }
 
-        public void UpsertSticky(DB4Thing post, int deltaCount)
+        public void UpsertOrRemoveSticky(DB4Thing post, int deltaCount)
         {
             // Find out if the sticky comment has been made yet
             var result = _commentDetector.DidDB4MakeStickyComment(post);

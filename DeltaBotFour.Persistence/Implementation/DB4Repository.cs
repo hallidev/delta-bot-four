@@ -13,6 +13,7 @@ namespace DeltaBotFour.Persistence.Implementation
     {
         private const string DbFileName = "DeltaBotFour.db";
         private const string DeltaBotStateCollectionName = "deltabotstate";
+        private const string DeltaCommentsCollectionName = "deltacomments";
         private const string DeltaboardsCollectionName = "deltaboards";
         private const string BsonIdField = "_id";
         private const string BsonValueField = "value";
@@ -43,44 +44,33 @@ namespace DeltaBotFour.Persistence.Implementation
             stateCollection.Update(lastActivityTimeUtcDocument);
         }
 
-        public List<string> GetIgnoreQuotedDeltaPMUserList()
+        public bool DeltaCommentExists(string commentId)
         {
-            var stateCollection = getState();
-
-            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
-
-            var users = new List<string>();
-            foreach (var value in bsonList)
-            {
-                users.Add(value.AsString);
-            }
-
-            return users;
+            return GetDeltaComment(commentId) != null;
         }
 
-        public void AddIgnoredQuotedDeltaPMUser(string username)
+        public DeltaComment GetDeltaComment(string commentId)
         {
-            var stateCollection = getState();
+            return _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName).FindById(commentId);
+        }
 
-            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
+        public void UpsertDeltaComment(DeltaComment commentWithDelta)
+        {
+            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            deltaCommentsCollection.EnsureIndex(d => d.Id, true);
+            deltaCommentsCollection.Upsert(commentWithDelta);
+        }
 
-            bool userExists = false;
-            foreach (var value in bsonList)
-            {
-                if (value.AsString == username)
-                {
-                    userExists = true;
-                    break;
-                }
-            }
+        public void RemoveDeltaComment(string commentId)
+        {
+            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            deltaCommentsCollection.Delete(commentId);
+        }
 
-            if (!userExists)
-            {
-                bsonList.Add(username);
-                stateCollection.Update(ignoreQuotedDeltaPMUserListDocument);
-            }
+        public List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "")
+        {
+            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            return deltaCommentsCollection.Find(dc => dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.AuthorName == authorName)).ToList();
         }
 
         public List<Deltaboard> GetCurrentDeltaboards()
@@ -160,6 +150,46 @@ namespace DeltaBotFour.Persistence.Implementation
 
             // Save changes
             updateDeltaboards(deltaboards);
+        }
+
+        public List<string> GetIgnoreQuotedDeltaPMUserList()
+        {
+            var stateCollection = getState();
+
+            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
+            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
+
+            var users = new List<string>();
+            foreach (var value in bsonList)
+            {
+                users.Add(value.AsString);
+            }
+
+            return users;
+        }
+
+        public void AddIgnoredQuotedDeltaPMUser(string username)
+        {
+            var stateCollection = getState();
+
+            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
+            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
+
+            bool userExists = false;
+            foreach (var value in bsonList)
+            {
+                if (value.AsString == username)
+                {
+                    userExists = true;
+                    break;
+                }
+            }
+
+            if (!userExists)
+            {
+                bsonList.Add(username);
+                stateCollection.Update(ignoreQuotedDeltaPMUserListDocument);
+            }
         }
 
 

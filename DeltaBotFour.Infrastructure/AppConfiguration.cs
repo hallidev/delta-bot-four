@@ -12,7 +12,6 @@ namespace DeltaBotFour.Infrastructure
     {
         private readonly IConfigurationRoot _configuration;
 
-        public List<DB4Mode> DB4Modes => _configuration["db4_modes"].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<DB4Mode>).ToList();
         public string DB4Username => _configuration["db4_username"];
         public string DB4Password => _configuration["db4_password"];
         public string DB4ClientId => _configuration["db4_client_id"];

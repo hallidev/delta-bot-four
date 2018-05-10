@@ -8,10 +8,15 @@ namespace DeltaBotFour.Persistence.Interface
     {
         DateTime GetLastActivityTimeUtc();
         void SetLastActivityTimeUtc();
-        List<string> GetIgnoreQuotedDeltaPMUserList();
-        void AddIgnoredQuotedDeltaPMUser(string username);
+        bool DeltaCommentExists(string commentId);
+        DeltaComment GetDeltaComment(string commentId);
+        void UpsertDeltaComment(DeltaComment commentWithDelta);
+        void RemoveDeltaComment(string commentId);
+        List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "");
         List<Deltaboard> GetCurrentDeltaboards();
         void AddDeltaboardEntry(string username);
         void RemoveDeltaboardEntry(string username);
+        List<string> GetIgnoreQuotedDeltaPMUserList();
+        void AddIgnoredQuotedDeltaPMUser(string username);
     }
 }
