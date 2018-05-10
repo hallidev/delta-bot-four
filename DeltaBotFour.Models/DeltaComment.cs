@@ -8,7 +8,9 @@ namespace DeltaBotFour.Models
         public string ParentId { get; set; }
         public DateTime CreatedUTC { get; set; }
         public bool IsEdited { get; set; }
-        public string AuthorName { get; set; }
+        public string FromUsername { get; set; }
+        public string ToUsername { get; set; }
+        public string CommentText { get; set; }
         public string LinkId { get; set; }
         public string Permalink { get; set; }
         public string Shortlink { get; set; }
@@ -16,5 +18,6 @@ namespace DeltaBotFour.Models
         public string ParentPostLinkId { get; set; }
         public string ParentPostPermalink { get; set; }
         public string ParentPostShortlink { get; set; }
+        public string ParentPostTitle { get; set; }
     }
 }

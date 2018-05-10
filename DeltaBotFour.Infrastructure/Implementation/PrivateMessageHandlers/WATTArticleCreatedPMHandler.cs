@@ -65,7 +65,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
             _redditService.PopulateChildren(post);
 
             // Update sticky for the post in question
-            _stickyCommentEditor.UpsertOrRemoveSticky(post, null, article);
+            _stickyCommentEditor.UpsertOrRemove(post, null, article);
         }
     }
 }

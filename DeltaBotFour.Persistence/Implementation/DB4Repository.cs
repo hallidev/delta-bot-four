@@ -71,7 +71,7 @@ namespace DeltaBotFour.Persistence.Implementation
         public List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "")
         {
             var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-            return deltaCommentsCollection.Find(dc => dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.AuthorName == authorName)).ToList();
+            return deltaCommentsCollection.Find(dc => dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.FromUsername == authorName)).ToList();
         }
 
         public List<Deltaboard> GetCurrentDeltaboards()

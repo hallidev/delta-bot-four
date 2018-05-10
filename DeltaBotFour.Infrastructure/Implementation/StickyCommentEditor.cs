@@ -23,7 +23,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _repository = repository;
         }
 
-        public void UpsertOrRemoveSticky(DB4Thing post, int? deltaCount, WATTArticle article)
+        public void UpsertOrRemove(DB4Thing post, int? deltaCount, WATTArticle article)
         {
             // This method needs to do some extra work to handle WATT stuff
             // I'm not loving how this particular implementation came out...

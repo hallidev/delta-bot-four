@@ -36,6 +36,7 @@ namespace DeltaBotFour.Infrastructure
         public DeltaBotTemplateFiles TemplateFiles { get; }
         public DeltaBotReplaceTokens ReplaceTokens { get; }
         public DeltaBotPrivateMessages PrivateMessages { get; }
+        public DeltaBotPosts Posts { get; }
         public DeltaBotComments Comments { get; }
         public DeltaBotValidationValues ValidationValues { get; }
 
@@ -52,6 +53,8 @@ namespace DeltaBotFour.Infrastructure
             ReplaceTokens = new DeltaBotReplaceTokens(_configuration);
 
             PrivateMessages = new DeltaBotPrivateMessages(_configuration);
+
+            Posts = new DeltaBotPosts(_configuration);
 
             Comments = new DeltaBotComments(_configuration);
 
@@ -133,6 +136,19 @@ namespace DeltaBotFour.Infrastructure
             public string ConfirmStopQuotedDeltaWarningMessage => _configuration["private_messages:confirm_stop_quoted_delta_warning_message"];
 
             public DeltaBotPrivateMessages(IConfigurationRoot configuration)
+            {
+                _configuration = configuration;
+            }
+        }
+
+        public class DeltaBotPosts
+        {
+            private readonly IConfigurationRoot _configuration;
+
+            public string DeltaLogTitle => _configuration["posts:delta_log_title"];
+            public string DeltaLogContent => _configuration["posts:delta_log_content"];
+
+            public DeltaBotPosts(IConfigurationRoot configuration)
             {
                 _configuration = configuration;
             }
