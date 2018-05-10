@@ -45,6 +45,7 @@ namespace DeltaBotFour.Reddit
                     Body = comment.Body,
                     Created = comment.Created,
                     CreatedUTC = comment.CreatedUTC,
+                    Permalink = comment.Permalink.OriginalString,
                     IsEdited = comment.Edited,
                     LinkId = comment.LinkId,
                     Shortlink = comment.Shortlink.Replace(SHORT_LINK_FROM, SHORT_LINK_TO),

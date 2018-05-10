@@ -2,6 +2,6 @@
 {
     public interface IDeltaLogEditor
     {
-        string Upsert(string postId, string postPermalink);
+        string Upsert(string mainSubPostId, string mainSubPostPermalink, string mainSubPostTitle, string opUsername);
     }
 }

@@ -160,11 +160,11 @@ namespace DeltaBotFour.Persistence.Implementation
             return deltaLogPostMappingsCollection.Find(dc => dc.Id == postId).FirstOrDefault();
         }
 
-        public void AddDeltaLogPostMapping(DeltaLogPostMapping mapping)
+        public void UpsertDeltaLogPostMapping(DeltaLogPostMapping mapping)
         {
             var deltaLogPostMappingsCollection = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
             deltaLogPostMappingsCollection.EnsureIndex(d => d.Id, true);
-            deltaLogPostMappingsCollection.Insert(mapping);
+            deltaLogPostMappingsCollection.Upsert(mapping);
         }
 
         public List<string> GetIgnoreQuotedDeltaPMUserList()

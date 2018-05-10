@@ -1,4 +1,6 @@
-﻿using DeltaBotFour.Infrastructure.Interface;
+﻿using System;
+using System.Net.Http.Headers;
+using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
@@ -26,42 +28,60 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _subredditService = subredditService;
         }
 
-        public string Upsert(string postId, string postPermalink)
+        public string Upsert(string mainSubPostId, string mainSubPostPermalink, string mainSubPostTitle, string opUsername)
         {
             // Get all of the delta comments for this post
-            var deltaComments = _repository.GetDeltaCommentsForPost(postId);
+            var deltaComments = _repository.GetDeltaCommentsForPost(mainSubPostId);
 
             // Build post title and text
-            var postTitleAndText = _postBuilder.BuildDeltaLogPost(deltaComments);
+            var postTitleAndText = _postBuilder.BuildDeltaLogPost(mainSubPostTitle, mainSubPostPermalink, opUsername, deltaComments);
 
             // Determine if a post already exists in DeltaLog
-            var existingPostMapping = _repository.GetDeltaLogPostMapping(postId);
+            var existingPostMapping = _repository.GetDeltaLogPostMapping(mainSubPostId);
 
             if (existingPostMapping == null)
             {
-                // Make new post to the DeltaLog sub
-                var newPost = _subredditService.Post(postTitleAndText.Item1, postTitleAndText.Item2, _appConfiguration.DeltaLogSubredditName);
-
-                // Add new mapping
-                var newPostMapping = new DeltaLogPostMapping
-                {
-                    Id = postId,
-                    MainSubPostUrl = postPermalink,
-                    DeltaLogPostId = newPost.Id,
-                    DeltaLogPostUrl = newPost.Permalink
-                };
-
-                _repository.AddDeltaLogPostMapping(newPostMapping);
-
-                return newPost.Permalink;
+                return createNewPost(postTitleAndText.Item1, postTitleAndText.Item2, mainSubPostId, mainSubPostPermalink);
             }
-            else
+
+            try
             {
                 // There is an existing mapping - edit post
                 _redditService.EditPost(existingPostMapping.DeltaLogPostUrl, postTitleAndText.Item2);
-
-                return existingPostMapping.DeltaLogPostUrl;
             }
+            catch (Exception ex)
+            {
+                // This will fail with a forbidden if the post was manually deleted.
+                // It should never really happen, but this is handy for my testing
+                // and won't really hurt in production
+                if (ex.ToString().Contains("403 (Forbidden)"))
+                {
+                    return createNewPost(postTitleAndText.Item1, postTitleAndText.Item2, mainSubPostId, mainSubPostPermalink);
+                }
+
+                throw;
+            }
+
+            return existingPostMapping.DeltaLogPostUrl;
+        }
+
+        private string createNewPost(string title, string text, string mainSubPostId, string mainSubPostPermalink)
+        {
+            // Make new post to the DeltaLog sub
+            var newPost = _subredditService.Post(title, text, _appConfiguration.DeltaLogSubredditName);
+
+            // Add new mapping
+            var newPostMapping = new DeltaLogPostMapping
+            {
+                Id = mainSubPostId,
+                MainSubPostUrl = mainSubPostPermalink,
+                DeltaLogPostId = newPost.Id,
+                DeltaLogPostUrl = newPost.Permalink
+            };
+
+            _repository.UpsertDeltaLogPostMapping(newPostMapping);
+
+            return newPost.Permalink;
         }
     }
 }

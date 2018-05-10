@@ -97,7 +97,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _repository.UpsertDeltaComment(deltaComment);
 
             // Update DeltaLogs after repository update since it reads data from the repository
-            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink);
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is OP
             // This needs to be absolute last since it relies on getting a Url from the DeltaLog post
@@ -147,7 +147,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _repository.RemoveDeltaComment(comment.Id);
 
             // Update DeltaLogs after repository update since it reads data from the repository
-            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink);
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is from OP
             if (comment.AuthorName == comment.ParentPost.AuthorName)

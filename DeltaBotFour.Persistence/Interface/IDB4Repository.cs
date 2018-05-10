@@ -17,7 +17,7 @@ namespace DeltaBotFour.Persistence.Interface
         void AddDeltaboardEntry(string username);
         void RemoveDeltaboardEntry(string username);
         DeltaLogPostMapping GetDeltaLogPostMapping(string postId);
-        void AddDeltaLogPostMapping(DeltaLogPostMapping mapping);
+        void UpsertDeltaLogPostMapping(DeltaLogPostMapping mapping);
         List<string> GetIgnoreQuotedDeltaPMUserList();
         void AddIgnoredQuotedDeltaPMUser(string username);
         void UpsertWATTArticle(WATTArticle article);

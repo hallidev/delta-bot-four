@@ -85,8 +85,11 @@ namespace DeltaBotFour.Infrastructure
 
             public string SubredditToken => _configuration["replace_tokens:subreddit_token"];
             public string DeltaLogSubredditToken => _configuration["replace_tokens:deltalog_subreddit_token"];
+            public string DeltaLogOPRowsToken => _configuration["replace_tokens:deltalog_op_rows_token"];
+            public string DeltaLogOtherRowsToken => _configuration["replace_tokens:deltalog_other_rows_token"];
             public string DateToken => _configuration["replace_tokens:date_token"];
             public string UsernameToken => _configuration["replace_tokens:username_token"];
+            public string UsernameFromToken => _configuration["replace_tokens:username_from_token"];
             public string UserWikiLinkToken => _configuration["replace_tokens:user_wiki_link_token"];
             public string HiddenParamsToken => _configuration["replace_tokens:hidden_params_token"];
             public string DailyDeltaboardToken => _configuration["replace_tokens:daily_deltaboard_token"];
@@ -106,6 +109,7 @@ namespace DeltaBotFour.Infrastructure
             public string PostTitle => _configuration["replace_tokens:post_title"];
             public string PostLink => _configuration["replace_tokens:post_link"];
             public string CommentLink => _configuration["replace_tokens:comment_link"];
+            public string CommentText => _configuration["replace_tokens:comment_text"];
             public string ParentAuthorNameToken => _configuration["replace_tokens:parent_author_name_token"];
             public string DeltasToken => _configuration["replace_tokens:deltas_token"];
             public string DB4ReplyToken => _configuration["replace_tokens:db4_reply_token"];
@@ -123,6 +127,7 @@ namespace DeltaBotFour.Infrastructure
                     DeltaLogSubredditToken,
                     DateToken,
                     UsernameToken,
+                    UsernameFromToken,
                     UserWikiLinkToken,
                     HiddenParamsToken,
                     DailyDeltaboardToken,
@@ -146,7 +151,9 @@ namespace DeltaBotFour.Infrastructure
                     DeltasToken,
                     DB4ReplyToken,
                     ContextNumberToken,
-                    WATTLinkToken
+                    WATTLinkToken,
+                    DeltaLogOPRowsToken,
+                    DeltaLogOtherRowsToken
                 };
             }
         }
@@ -180,6 +187,9 @@ namespace DeltaBotFour.Infrastructure
 
             public string DeltaLogTitle => _configuration["posts:delta_log_title"];
             public string DeltaLogContent => _configuration["posts:delta_log_content"];
+            public string DeltaNoRowContent => _configuration["posts:delta_log_no_row_content"];
+            public string DeltaOPRowContent => _configuration["posts:delta_log_op_row_content"];
+            public string DeltaOtherRowContent => _configuration["posts:delta_log_other_row_content"];
 
             public DeltaBotPosts(IConfigurationRoot configuration)
             {
