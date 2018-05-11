@@ -7,6 +7,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
     public class ModDeleteDeltaPMHandler : IPrivateMessageHandler
     {
+        private const string DeleteFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't delete.";
         private const string DeleteFailedNeverAwardedMessage = "I never awarded a delta for this comment, so there's nothing for me to delete!";
         private const string DeleteFailedErrorMessageFormat = "Delete failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
@@ -48,6 +49,13 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Check for replies
                 var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
+                // If a the parent authorname is [deleted], bail
+                if (comment.ParentThing.AuthorName == Constants.DeletedAuthorName)
+                {
+                    _redditService.ReplyToPrivateMessage(privateMessage.Id, DeleteFailedAuthorDeletedMessage);
+                    return;
+                }
+
                 // If a delta was never awarded in the first place, bail
                 if (!db4ReplyResult.HasDB4Replied || !db4ReplyResult.WasSuccessReply && db4ReplyResult.CommentType != DB4CommentType.ModeratorAdded)
                 {
@@ -68,6 +76,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.Reply(comment, reply);
 
                 string body = _appConfiguration.PrivateMessages.ModDeletedDeltaNotificationMessage
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
 
                 // Reply with modmail indicating success

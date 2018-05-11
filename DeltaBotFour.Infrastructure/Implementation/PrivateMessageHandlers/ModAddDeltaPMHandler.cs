@@ -7,6 +7,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
     public class ModAddDeltaPMHandler : IPrivateMessageHandler
     {
+        private const string AddFailedCantAwardDeltaBot = "You can't award DeltaBot a delta, even with force add. Nice try though :)";
+        private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't force add.";
         private const string AddFailedAlreadyAwardedMessage = "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
         private const string AddFailedErrorMessageFormat = "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
@@ -48,6 +50,20 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Check for replies
                 var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
+                // If a the parent authorname is DeltaBot, bail
+                if (comment.ParentThing.AuthorName == _appConfiguration.DB4Username)
+                {
+                    _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedCantAwardDeltaBot);
+                    return;
+                }
+
+                // If a the parent authorname is [deleted], bail
+                if (comment.ParentThing.AuthorName == Constants.DeletedAuthorName)
+                {
+                    _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedAuthorDeletedMessage);
+                    return;
+                }
+
                 // If a delta was already awarded successfully, bail
                 if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply || db4ReplyResult.CommentType == DB4CommentType.ModeratorAdded)
                 {
@@ -74,6 +90,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 
                 // Reply with modmail indicating success
                 string body = _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
 
                 // Reply with modmail indicating success

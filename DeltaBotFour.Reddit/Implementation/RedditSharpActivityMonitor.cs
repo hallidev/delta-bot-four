@@ -232,7 +232,7 @@ namespace DeltaBotFour.Reddit.Implementation
                 _db4Repository.SetLastActivityTimeUtc();
 
                 // Only send unread messages to queue for processing
-                if (privateMessage.Unread)
+                if (privateMessage != null && privateMessage.Unread)
                 {
                     _activityDispatcher.SendToQueue(privateMessage);
                 }

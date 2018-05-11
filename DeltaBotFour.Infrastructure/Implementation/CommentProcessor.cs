@@ -49,6 +49,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // DB4 shouldn't process its own comments
             if (comment.AuthorName == _appConfiguration.DB4Username)
             {
+                _logger.Info("Done processing comment.");
                 return;
             }
 

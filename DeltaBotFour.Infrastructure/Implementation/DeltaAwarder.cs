@@ -42,6 +42,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public void Award(DB4Thing comment)
         {
+            // This can happen on "force add" command
+            if (comment.ParentThing.AuthorName == Constants.DeletedAuthorName)
+            {
+                _logger.Info("---SKIPPING AWARD ON DELETED USER---");
+                return;
+            }
+
             _logger.Info($"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
             // Safety check - if a delta has already been saved for this comment, it must be an edit
@@ -57,10 +64,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string newFlairText = DeltaHelper.GetIncrementedFlairText(comment.ParentThing.AuthorFlairText);
 
             // Award to the parent comment
+            _logger.Info("   ---Setting flair (award)");
             _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
                 newFlairText);
 
             // Update wiki
+            _logger.Info("   ---Updating wiki (award)");
             _wikiEditor.UpdateUserWikiEntryAward(comment);
 
             // If this was the user's first delta, send the first delta PM
@@ -71,10 +80,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, comment.ParentThing.AuthorName);
 
+                _logger.Info("   ---Sending first delta PM (award)");
                 _redditService.SendPrivateMessage(subject, body, comment.ParentThing.AuthorName);
             }
 
             // Update deltaboards
+            _logger.Info("   ---Updating deltaboards (award)");
             _deltaboardEditor.AddDelta(comment.ParentThing.AuthorName);
 
             // After a successful award, record the DeltaComment
@@ -98,9 +109,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
             };
 
             // Upsert performs an insert or update depending on if it already exists
+            _logger.Info("   ---Adding delta to local db (award)");
             _repository.UpsertDeltaComment(deltaComment);
 
             // Update DeltaLogs after repository update since it reads data from the repository
+            _logger.Info("   ---Updating DeltaLog (award)");
             string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is OP
@@ -112,6 +125,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     _repository.GetDeltaCommentsForPost(comment.ParentPost.Id, comment.ParentPost.AuthorName);
 
                 // Update sticky comment
+                _logger.Info("   ---Updating post sticky (award)");
                 _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
             }
 
@@ -120,6 +134,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public void Unaward(DB4Thing comment)
         {
+            // This can happen on "force add" command
+            if (comment.ParentThing.AuthorName == Constants.DeletedAuthorName)
+            {
+                _logger.Info("---SKIPPING UNAWARD ON DELETED USER---");
+                return;
+            }
+
             _logger.Info($"---START UNAWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
             // Safety check - if a delta hasnt' been saved for this comment, what are we trying to remove?
@@ -140,19 +161,24 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             // Unaward from the parent comment
+            _logger.Info("   ---Setting flair (unaward)");
             _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
                 newFlairText);
 
             // Update wiki
+            _logger.Info("   ---Updating wiki (unaward)");
             _wikiEditor.UpdateUserWikiEntryUnaward(comment);
 
             // Update deltaboards
+            _logger.Info("   ---Updating deltaboards (unaward)");
             _deltaboardEditor.RemoveDelta(comment.ParentThing.AuthorName);
 
             // Remove from repository after successful unaward
+            _logger.Info("   ---Removing delta from local db (unaward)");
             _repository.RemoveDeltaComment(comment.Id);
 
             // Update DeltaLogs after repository update since it reads data from the repository
+            _logger.Info("   ---Updating DeltaLog (unaward)");
             string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is from OP
@@ -164,6 +190,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update or remove sticky comment - make sure to remove one from the count since we haven't removed the data from
                 // the repository yet, so the current comment won't count
+                _logger.Info("   ---Updating post sticky (unaward)");
                 _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
             }
 

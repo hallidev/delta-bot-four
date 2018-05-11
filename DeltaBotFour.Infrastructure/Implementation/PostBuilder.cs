@@ -33,6 +33,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, deltaComment.ToUsername)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, deltaComment.Permalink)
                     .Replace(_appConfiguration.ReplaceTokens.CommentText, deltaComment.CommentText.Ellipsis(MaxChars));
+                opRowContent += "\n\n";
             }
 
             var otherDeltaComments = deltaComments.Where(c => c.FromUsername != opUsername).ToList();
@@ -47,6 +48,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, deltaComment.ToUsername)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, deltaComment.Permalink)
                     .Replace(_appConfiguration.ReplaceTokens.CommentText, deltaComment.CommentText.Ellipsis(MaxChars));
+                otherRowContent += "\n\n";
             }
 
             string content = _appConfiguration.Posts.DeltaLogContent
