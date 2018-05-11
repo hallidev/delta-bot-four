@@ -20,6 +20,7 @@ namespace DeltaBotFour.Shared.Implementation
 
         public void Error(Exception ex, string message = "")
         {
+            if (string.IsNullOrEmpty(message)) message = ex.Message;
             Logger.Error(ex, message);
         }
     }

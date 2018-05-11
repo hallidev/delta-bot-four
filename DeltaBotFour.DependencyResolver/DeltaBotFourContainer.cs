@@ -32,12 +32,14 @@ namespace DeltaBotFour.DependencyResolver
             var logfile = new NLog.Targets.FileTarget
             {
                 FileName = logFilename,
-                Name = "logfile"
+                Name = "logfile",
+                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${exception:format=ToString,StackTrace}${newline}"
             };
 
             var logconsole = new NLog.Targets.ConsoleTarget
             {
-                Name = "logconsole"
+                Name = "logconsole",
+                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}"
             };
 
             config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Info, logconsole));
