@@ -45,11 +45,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _logger.Info($"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
             // Safety check - if a delta has already been saved for this comment, it must be an edit
-            // TODO: Re-enable check after development is complete
-            //if (_repository.DeltaCommentExists(comment.Id))
-            //{
-            //    Assert.That(comment.IsEdited);
-            //}
+            if (_repository.DeltaCommentExists(comment.Id))
+            {
+                Assert.That(comment.IsEdited);
+            }
 
             // Get the user's current delta count from flair
             int currentDeltaCount = DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText);

@@ -38,8 +38,7 @@ namespace DeltaBotFour.Reddit.Implementation
             var lastActivityTimeUtc = _db4Repository.GetLastActivityTimeUtc();
 
             // Process comments since last activity
-            // TODO: Remove the X hours re-processing. It's nice for testing
-            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddHours(-96))
+            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc)
                 .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
 
             // Process edits since last activity
