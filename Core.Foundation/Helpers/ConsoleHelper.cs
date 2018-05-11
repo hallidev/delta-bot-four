@@ -7,7 +7,7 @@ namespace Core.Foundation.Helpers
         public static void WriteLine(string message, ConsoleColor? color = null)
         {
             ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = color.HasValue ? color.Value : originalColor;
+            Console.ForegroundColor = color ?? originalColor;
             Console.WriteLine($"{DateTime.Now}: {message}");
             Console.ForegroundColor = originalColor;
         }
