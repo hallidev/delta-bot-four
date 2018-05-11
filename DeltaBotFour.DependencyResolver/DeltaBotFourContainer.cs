@@ -1,7 +1,10 @@
 ﻿using System;
 using Core.Foundation.IoC;
+using DeltaBotFour.Shared.Implementation;
+using NLog;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
+using ILogger = DeltaBotFour.Shared.Logging.ILogger;
 
 namespace DeltaBotFour.DependencyResolver
 {
@@ -22,9 +25,30 @@ namespace DeltaBotFour.DependencyResolver
             return this;
         }
 
-        public T Resolve<T>()
+        public void RegisterLogger(string logFilename)
         {
-            return (T)_container.GetInstance(typeof(T));
+            var config = new NLog.Config.LoggingConfiguration();
+
+            var logfile = new NLog.Targets.FileTarget
+            {
+                FileName = logFilename,
+                Name = "logfile"
+            };
+
+            var logconsole = new NLog.Targets.ConsoleTarget
+            {
+                Name = "logconsole"
+            };
+
+            config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Info, logconsole));
+            config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Warn, logfile));
+            config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Error, logfile));
+
+            LogManager.Configuration = config;
+
+            _container.RegisterConditional(typeof(ILogger),
+                context => typeof(NLogProxy<>).MakeGenericType(context.Consumer.ImplementationType),
+                Lifestyle.Singleton, context => true);
         }
 
         public void Register(Type from, Type to)
@@ -55,6 +79,11 @@ namespace DeltaBotFour.DependencyResolver
         public void RegisterSingleton<TConcrete>(Func<TConcrete> instanceCreator) where TConcrete : class
         {
             _container.RegisterSingleton<TConcrete>();
+        }
+
+        public T Resolve<T>()
+        {
+            return (T)_container.GetInstance(typeof(T));
         }
 
         public void Dispose()

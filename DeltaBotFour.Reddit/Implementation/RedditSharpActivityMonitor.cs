@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Core.Foundation.Helpers;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared.Logging;
 using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation
@@ -15,19 +15,21 @@ namespace DeltaBotFour.Reddit.Implementation
         private readonly Subreddit _subreddit;
         private readonly IActivityDispatcher _activityDispatcher;
         private readonly IDB4Repository _db4Repository;
+        private readonly ILogger _logger;
         private readonly IObserver<VotableThing> _commentObserver;
         private readonly IObserver<PrivateMessage> _privateMessageObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public RedditSharpActivityMonitor(RedditSharp.Reddit reddit, Subreddit subreddit, 
-            IActivityDispatcher activityDispatcher, IDB4Repository db4Repository)
+            IActivityDispatcher activityDispatcher, IDB4Repository db4Repository, ILogger logger)
         {
             _reddit = reddit;
             _subreddit = subreddit;
             _activityDispatcher = activityDispatcher;
             _db4Repository = db4Repository;
-            _commentObserver = new IncomingCommentObserver(activityDispatcher, db4Repository);
-            _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher, db4Repository);
+            _logger = logger;
+            _commentObserver = new IncomingCommentObserver(activityDispatcher, db4Repository, logger);
+            _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher, db4Repository, logger);
         }
 
         public void Start()
@@ -62,17 +64,17 @@ namespace DeltaBotFour.Reddit.Implementation
             // Start comment monitoring
             monitorComments();
 
-            ConsoleHelper.WriteLine("ActivityMonitor: Started monitoring comments...", ConsoleColor.Green);
+            _logger.Info("Started monitoring comments...");
 
             // Start edit monitoring
             monitorEdits();
 
-            ConsoleHelper.WriteLine("ActivityMonitor: Started monitoring edits...", ConsoleColor.Green);
+            _logger.Info("Started monitoring edits...");
 
             // Start private message monitoring
             monitorPrivateMessages();
 
-            ConsoleHelper.WriteLine("ActivityMonitor: Started monitoring private messages...", ConsoleColor.Green);
+            _logger.Info("Started monitoring private messages...");
         }
 
         public void Stop()
@@ -99,7 +101,7 @@ namespace DeltaBotFour.Reddit.Implementation
                 catch (Exception ex)
                 {
                     // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                    _logger.Error(ex);
                 }
             }
         }
@@ -123,7 +125,7 @@ namespace DeltaBotFour.Reddit.Implementation
                 catch (Exception ex)
                 {
                     // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                    _logger.Error(ex);
                 }
             }
         }
@@ -147,7 +149,7 @@ namespace DeltaBotFour.Reddit.Implementation
                 catch (Exception ex)
                 {
                     // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                    _logger.Error(ex);
                 }
             }
         }
@@ -156,12 +158,14 @@ namespace DeltaBotFour.Reddit.Implementation
         {
             private readonly IActivityDispatcher _activityDispatcher;
             private readonly IDB4Repository _db4Repository;
+            private readonly ILogger _logger;
 
             public IncomingCommentObserver(IActivityDispatcher activityDispatcher,
-                IDB4Repository db4Repository)
+                IDB4Repository db4Repository, ILogger logger)
             {
                 _activityDispatcher = activityDispatcher;
                 _db4Repository = db4Repository;
+                _logger = logger;
             }
 
             public void OnCompleted()
@@ -171,7 +175,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
             public void OnError(Exception error)
             {
-
+                _logger.Error(error, "IncomingCommentObserver:OnError");
             }
 
             public void OnNext(VotableThing votableThing)
@@ -201,12 +205,14 @@ namespace DeltaBotFour.Reddit.Implementation
         {
             private readonly IActivityDispatcher _activityDispatcher;
             private readonly IDB4Repository _db4Repository;
+            private readonly ILogger _logger;
 
             public IncomingPrivateMessageObserver(IActivityDispatcher activityDispatcher,
-                IDB4Repository db4Repository)
+                IDB4Repository db4Repository, ILogger logger)
             {
                 _activityDispatcher = activityDispatcher;
                 _db4Repository = db4Repository;
+                _logger = logger;
             }
 
             public void OnCompleted()
@@ -216,7 +222,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
             public void OnError(Exception error)
             {
-                
+                _logger.Error(error, "IncomingPrivateMessageObserver:OnError");
             }
 
             public void OnNext(PrivateMessage privateMessage)

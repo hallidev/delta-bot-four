@@ -1,21 +1,25 @@
 ﻿using System;
 using System.IO;
-using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared.Logging;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class CommentReplier : ICommentReplier
     {
         private readonly AppConfiguration _appConfiguration;
+        private readonly ILogger _logger;
         private readonly IRedditService _redditService;
         private string _replyTemplate;
 
-        public CommentReplier(AppConfiguration appConfiguration, IRedditService redditService)
+        public CommentReplier(AppConfiguration appConfiguration,
+            ILogger logger,
+            IRedditService redditService)
         {
             _appConfiguration = appConfiguration;
+            _logger = logger;
             _redditService = redditService;
         }
 
@@ -25,7 +29,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             _redditService.ReplyToThing(thing, replyMessage, isSticky);
 
-            ConsoleHelper.WriteLine($"DeltaBot replied -> result: {db4Comment.CommentType.ToString()} link: {thing.Shortlink}");
+            _logger.Info($"DeltaBot replied -> result: {db4Comment.CommentType.ToString()} link: {thing.Shortlink}");
         }
 
         public void EditReply(DB4Thing commentToEdit, DB4Comment db4Comment)
@@ -34,14 +38,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             _redditService.EditComment(commentToEdit, replyMessage);
 
-            ConsoleHelper.WriteLine($"DeltaBot edited a reply -> result: {db4Comment.CommentType.ToString()} link: {commentToEdit.Shortlink}");
+            _logger.Info($"DeltaBot edited a reply -> result: {db4Comment.CommentType.ToString()} link: {commentToEdit.Shortlink}");
         }
 
         public void DeleteReply(DB4Thing commentToDelete)
         {
             _redditService.DeleteComment(commentToDelete);
 
-            ConsoleHelper.WriteLine($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
+            _logger.Info($"DeltaBot deleted a reply -> link: {commentToDelete.Shortlink}");
         }
 
         private string getReplyMessage(DB4Comment db4Comment)

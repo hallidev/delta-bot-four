@@ -4,6 +4,7 @@ namespace Core.Foundation.IoC
 {
     public interface IModularContainer
     {
+        void RegisterLogger(string logFilename);
         void Register(Type from, Type to);
         void Register<TFrom, TTo>() where TTo : class, TFrom where TFrom : class;
         void Register<TFrom>(Func<TFrom> instanceCreator) where TFrom : class;

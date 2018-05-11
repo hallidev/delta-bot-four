@@ -18,6 +18,9 @@ namespace DeltaBotFour.DependencyResolver
         {
             var appConfiguration = new AppConfiguration();
 
+            // Register the logger for the application immediately
+            container.RegisterLogger(appConfiguration.LogFilename);
+
             // Actual login is performed here.
             // TODO: This should be abstracted away as well
             var botWebAgent = new BotWebAgent

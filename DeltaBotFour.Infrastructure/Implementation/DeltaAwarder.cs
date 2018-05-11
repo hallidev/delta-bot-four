@@ -1,15 +1,16 @@
-﻿using System;
-using Core.Foundation.Helpers;
+﻿using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared.Logging;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class DeltaAwarder : IDeltaAwarder
     {
         private readonly AppConfiguration _appConfiguration;
+        private readonly ILogger _logger;
         private readonly IUserWikiEditor _wikiEditor;
         private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
@@ -19,6 +20,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IDB4Repository _repository;
 
         public DeltaAwarder(AppConfiguration appConfiguration,
+            ILogger logger,
             IUserWikiEditor wikiEditor,
             IRedditService redditService,
             ISubredditService subredditService, 
@@ -28,6 +30,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             IDB4Repository repository)
         {
             _appConfiguration = appConfiguration;
+            _logger = logger;
             _wikiEditor = wikiEditor;
             _redditService = redditService;
             _subredditService = subredditService;
@@ -39,6 +42,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public void Award(DB4Thing comment)
         {
+            _logger.Info($"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
+
             // Safety check - if a delta has already been saved for this comment, it must be an edit
             // TODO: Re-enable check after development is complete
             //if (_repository.DeltaCommentExists(comment.Id))
@@ -111,11 +116,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
             }
 
-            ConsoleHelper.WriteLine($"DeltaBot awarded a delta -> user: {comment.ParentThing.AuthorName}", ConsoleColor.Green);
+            _logger.Info("---END AWARD DELTA---");
         }
 
         public void Unaward(DB4Thing comment)
         {
+            _logger.Info($"---START UNAWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
+
             // Safety check - if a delta hasnt' been saved for this comment, what are we trying to remove?
             if (!_repository.DeltaCommentExists(comment.Id))
             {
@@ -161,7 +168,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
             }
 
-            ConsoleHelper.WriteLine($"DeltaBot unawarded a delta -> user: {comment.ParentThing.AuthorName}", ConsoleColor.Green);
+            _logger.Info("---END UNAWARD DELTA---");
         }
     }
 }

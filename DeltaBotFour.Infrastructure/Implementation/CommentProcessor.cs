@@ -5,12 +5,14 @@ using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared.Logging;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class CommentProcessor : ICommentProcessor
     {
         private readonly AppConfiguration _appConfiguration;
+        private readonly ILogger _logger;
         private readonly IRedditService _redditService;
         private readonly ICommentValidator _commentValidator;
         private readonly ICommentDetector _commentDetector;
@@ -18,11 +20,17 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly ICommentReplier _commentReplier;
         private readonly IDB4Repository _db4Repository;
 
-        public CommentProcessor(AppConfiguration appConfiguration, IRedditService redditService,
-            ICommentValidator commentValidator, ICommentDetector commentDetector,
-            IDeltaAwarder deltaAwarder, ICommentReplier commentReplier, IDB4Repository db4Repository)
+        public CommentProcessor(AppConfiguration appConfiguration,
+            ILogger logger,
+            IRedditService redditService,
+            ICommentValidator commentValidator,
+            ICommentDetector commentDetector,
+            IDeltaAwarder deltaAwarder,
+            ICommentReplier commentReplier,
+            IDB4Repository db4Repository)
         {
             _appConfiguration = appConfiguration;
+            _logger = logger;
             _redditService = redditService;
             _commentValidator = commentValidator;
             _commentDetector = commentDetector;
@@ -35,6 +43,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             // If we got here with a PM or post, that's a problem
             Assert.That(comment.Type == DB4ThingType.Comment, $"CommentProcessor received type: {comment.Type}");
+
+            _logger.Info($"Processing incoming comment: {comment.Permalink}");
 
             // DB4 shouldn't process its own comments
             if (comment.AuthorName == _appConfiguration.DB4Username)
@@ -116,6 +126,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     }
                 }
             }
+
+            _logger.Info("Done processing comment.");
         }
 
         private bool commentHasDelta(string commentBody, out bool hadDeltaInQuotes)

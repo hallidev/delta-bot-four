@@ -19,6 +19,7 @@ namespace DeltaBotFour.Infrastructure
         public string RedditBaseUrl => _configuration["reddit_base_url"];
         public string SubredditName => _configuration["subreddit_name"];
         public string DeltaLogSubredditName => _configuration["deltalog_subreddit_name"];
+        public string LogFilename => _configuration["log_file_name"];
         public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);

@@ -5,21 +5,25 @@ using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Shared.Interface;
+using DeltaBotFour.Shared.Logging;
 using Newtonsoft.Json;
 
 namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class DB4QueueDispatcher : IDB4QueueDispatcher
     {
+        private readonly ILogger _logger;
         private readonly IDB4Queue _queue;
         private readonly ICommentProcessor _commentProcessor;
         private readonly IPrivateMessageProcessor _privateMessageProcessor;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public DB4QueueDispatcher(IDB4Queue queue, 
+        public DB4QueueDispatcher(ILogger logger,
+            IDB4Queue queue, 
             ICommentProcessor commentProcessor,
             IPrivateMessageProcessor privateMessageProcessor)
         {
+            _logger = logger;
             _queue = queue;
             _commentProcessor = commentProcessor;
             _privateMessageProcessor = privateMessageProcessor;
@@ -27,7 +31,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public async void Start()
         {
-            ConsoleHelper.WriteLine("DB4QueueDispatcher: Running...", ConsoleColor.Green);
+            _logger.Info("DB4QueueDispatcher: Running...");
 
             // Process messages from the queue
             // This will run as long as the application is running
@@ -61,7 +65,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     catch(Exception ex)
                     {
                         // Make sure no exceptions get thrown out of this loop
-                        ConsoleHelper.WriteLine(ex.ToString(), ConsoleColor.Red);
+                        _logger.Error(ex);
                     }
                 }
             }, _cancellationTokenSource.Token);
