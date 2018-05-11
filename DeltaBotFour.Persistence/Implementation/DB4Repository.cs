@@ -227,9 +227,11 @@ namespace DeltaBotFour.Persistence.Implementation
             // Ensure that state key / value pairs exist
             if (stateCollection.FindById(LastActivityTimeUtcKey) == null)
             {
+                // If no LastActivity exists, create a new one and set the date to one day prior
+                // so that it picks up anything during the transition
                 var lastActivityTimeUtcDocument = new BsonDocument();
                 lastActivityTimeUtcDocument[BsonIdField] = LastActivityTimeUtcKey;
-                lastActivityTimeUtcDocument[BsonValueField] = DateTime.UtcNow;
+                lastActivityTimeUtcDocument[BsonValueField] = DateTime.UtcNow.AddDays(-1);
                 stateCollection.Insert(lastActivityTimeUtcDocument);
             }
 
