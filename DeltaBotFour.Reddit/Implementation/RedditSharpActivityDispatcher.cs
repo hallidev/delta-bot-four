@@ -1,4 +1,5 @@
-﻿using DeltaBotFour.Models;
+﻿using System;
+using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared.Interface;
 using Newtonsoft.Json;
@@ -30,7 +31,7 @@ namespace DeltaBotFour.Reddit.Implementation
         private void pushToQueue(DB4Thing db4Thing, QueueMessageType messageType)
         {
             // Put on the queue for comment processing
-            _queue.Push(new QueueMessage(messageType, JsonConvert.SerializeObject(db4Thing)));
+            _queue.Push(new QueueMessage(messageType, JsonConvert.SerializeObject(db4Thing), DateTime.UtcNow));
         }
     }
 }

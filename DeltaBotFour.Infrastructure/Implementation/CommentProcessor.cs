@@ -53,6 +53,15 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 return;
             }
 
+            // Comments with ninja edits will need to be refreshed
+            if (comment.NeedsRefresh)
+            {
+                // Get latest comment and make sure to treat this as an edit
+                // so the potential unaward code path is processed
+                comment = _redditService.GetThingByFullname(comment.FullName);
+                comment.IsEdited = true;
+            }
+
             // Check for a delta
             bool hasDelta = commentHasDelta(comment.Body, out bool hadDeltaInQuotes);
 
@@ -113,7 +122,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                     // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
-                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && comment.CreatedUTC < DateTime.Now.AddHours(-_appConfiguration.HoursToUnawardDelta))
+                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && (DateTime.UtcNow - comment.CreatedUTC).TotalHours < _appConfiguration.HoursToUnawardDelta)
                     {
                         // Unaward
                         // parentThing can safely be cast to Comment here - we could have only

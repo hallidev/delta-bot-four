@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Shared.Interface;
@@ -37,7 +36,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // This will run as long as the application is running
             await Task.Factory.StartNew(() =>
             {
-                while(true)
+                while (true)
                 {
                     try
                     {
@@ -67,6 +66,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                         // Make sure no exceptions get thrown out of this loop
                         _logger.Error(ex);
                     }
+
+                    Thread.Sleep(100);
                 }
             }, _cancellationTokenSource.Token);
         }
