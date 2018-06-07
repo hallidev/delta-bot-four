@@ -20,8 +20,13 @@ namespace DeltaBotFour.Reddit.Implementation
         private readonly IObserver<PrivateMessage> _privateMessageObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public RedditSharpActivityMonitor(RedditSharp.Reddit reddit, Subreddit subreddit, 
-            IActivityDispatcher activityDispatcher, IDB4Repository db4Repository, ILogger logger)
+        private DateTime _lastEditCheckUtc;
+
+        public RedditSharpActivityMonitor(RedditSharp.Reddit reddit, 
+            Subreddit subreddit, 
+            IActivityDispatcher activityDispatcher, 
+            IDB4Repository db4Repository, 
+            ILogger logger)
         {
             _reddit = reddit;
             _subreddit = subreddit;
@@ -32,7 +37,7 @@ namespace DeltaBotFour.Reddit.Implementation
             _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher, db4Repository, logger);
         }
 
-        public void Start()
+        public void Start(int editScanIntervalSeconds)
         {
             // Get the time of the last processed comment
             var lastActivityTimeUtc = _db4Repository.GetLastActivityTimeUtc();
@@ -41,15 +46,9 @@ namespace DeltaBotFour.Reddit.Implementation
             _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc)
                 .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
 
-            // Process edits since last activity
-            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc)
-                .ForEachAsync(c =>
-                {
-                    if (c is Comment editedComment)
-                    {
-                        _activityDispatcher.SendToQueue(editedComment);
-                    }
-                });
+            // Process edits since last activity - subtracting editScanIntervalSeconds
+            // will guarantee it runs immediately on startup
+            _lastEditCheckUtc = lastActivityTimeUtc.AddSeconds(-editScanIntervalSeconds);
 
             if (_reddit.User == null)
             {
@@ -66,7 +65,7 @@ namespace DeltaBotFour.Reddit.Implementation
             _logger.Info("Started monitoring comments...");
 
             // Start edit monitoring
-            monitorEdits();
+            monitorEdits(editScanIntervalSeconds);
 
             _logger.Info("Started monitoring edits...");
 
@@ -105,28 +104,30 @@ namespace DeltaBotFour.Reddit.Implementation
             }
         }
 
-        private async void monitorEdits()
+        private async void monitorEdits(int editScanIntervalSeconds)
         {
-            var editsStream = _subreddit.GetEdited().Stream();
-
-            // Get all new comments as they are posted
-            // This will run as long as the application is running
-            using (editsStream.Subscribe(_commentObserver))
+            await Task.Factory.StartNew(async () =>
             {
-                try
+                while (true)
                 {
-                    await editsStream.Enumerate(_cancellationTokenSource.Token);
+                    if (DateTime.UtcNow > _lastEditCheckUtc.AddSeconds(editScanIntervalSeconds))
+                    {
+                        // Process edits since last activity
+                        await _subreddit.GetEdited().Where(c => c.EditedUTC.HasValue && c.EditedUTC > _lastEditCheckUtc)
+                            .ForEachAsync(c =>
+                            {
+                                if (c is Comment editedComment)
+                                {
+                                    _activityDispatcher.SendToQueue(editedComment);
+                                }
+                            });
+
+                        _lastEditCheckUtc = DateTime.UtcNow;
+                    }
+
+                    Thread.Sleep(100);
                 }
-                catch (TaskCanceledException)
-                {
-                    // User cancelled, swallow
-                }
-                catch (Exception ex)
-                {
-                    // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    _logger.Error(ex);
-                }
-            }
+            }, _cancellationTokenSource.Token);
         }
 
         private async void monitorPrivateMessages()

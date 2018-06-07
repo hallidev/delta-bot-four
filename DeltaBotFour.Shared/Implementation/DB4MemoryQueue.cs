@@ -8,13 +8,13 @@ namespace DeltaBotFour.Shared.Implementation
 {
     public class DB4MemoryQueue : IDB4Queue
     {
+        // The goal here is to catch "ninja edits" which don't show up as edits until 3 minutes
+        // after the initial comment
         private const int NinjaEditReprocessSeconds = 180;
 
         // Main queue for comments / edits and private messages
         private readonly Queue _queue = new Queue();
         // Second queue to re-process comments a second time after 3 minutes
-        // The goal here is to catch "ninja edits" which don't show up as edits until 3 minutes
-        // after the initial comment
         private readonly Queue _ninjaEditQueue = new Queue();
 
         public void Push(QueueMessage message)
