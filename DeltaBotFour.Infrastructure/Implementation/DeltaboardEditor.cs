@@ -75,18 +75,30 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             var sidebarDeltaboardMatch = _appConfiguration.DeltaboardSidebarRegex.Match(sidebar);
 
+            // Build just the monthly
+            string monthlyDeltaboardContent =
+                buildSidebarDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Monthly));
+
             // Note: the second group is the content we're interested in
             if (sidebarDeltaboardMatch.Groups.Count == 2)
             {
                 string currentSidebarDeltaboard = sidebarDeltaboardMatch.Groups[1].Value;
                 string updatedSidebarDeltaboard =
-                    $"\r\n{buildSidebarDeltaboard(deltaboards.First(db => db.DeltaboardType == DeltaboardType.Monthly))}";
+                    $"\r\n{monthlyDeltaboardContent}";
 
                 // Update sidebar with new content
                 string updatedSidebar = sidebar.Replace(currentSidebarDeltaboard, updatedSidebarDeltaboard);
 
                 _subredditService.UpdateSidebar(updatedSidebar);
             }
+
+            // Update monthly deltaboard sidebar widget for reddit redesigned site
+            // HACK: The sidebar widget doesn't need the header, so get rid of it
+            string monthlyNoHeader = monthlyDeltaboardContent
+                .Replace("###### Monthly Deltaboard", string.Empty)
+                .TrimStart(Environment.NewLine.ToCharArray());
+
+            _subredditService.UpdateSidebarWidget(_appConfiguration.DeltaboardSidebarWidgetName, monthlyNoHeader);
         }
 
         private string buildDeltaboardsContent(List<Deltaboard> deltaboards)

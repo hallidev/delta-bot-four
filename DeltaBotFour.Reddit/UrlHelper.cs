@@ -21,5 +21,10 @@
 
             return url;
         }
+
+        public static string BuildSubredditApiUrl(string subredditName, string apiPath)
+        {
+            return $"{OAuthRedditBaseUrl}/r/{subredditName}{apiPath}";
+        }
     }
 }

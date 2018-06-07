@@ -26,6 +26,7 @@ namespace DeltaBotFour.Infrastructure
         public string WikiUrlDeltaboards => _configuration["wiki_url_deltaboards"];
         public string WikiUrlUser => _configuration["wiki_url_user"];
         public Regex DeltaboardSidebarRegex => new Regex(_configuration["deltaboard_sidebar_regex"], RegexOptions.Singleline);
+        public string DeltaboardSidebarWidgetName => _configuration["deltaboard_sidebar_widget_name"];
         public Regex HiddenParamsRegex => new Regex(_configuration["hidden_params_regex"], RegexOptions.Singleline);
         public string DefaultHiddenParamsComment => _configuration["default_hidden_params_comment"];
         public Regex GetWikiLinkRegex(string subredditName, string contextNumber)

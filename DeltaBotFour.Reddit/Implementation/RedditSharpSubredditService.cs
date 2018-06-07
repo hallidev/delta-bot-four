@@ -4,13 +4,18 @@ using System.Net;
 using System.Threading.Tasks;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
+using Newtonsoft.Json.Linq;
 using RedditSharp;
+using RedditSharp.Extensions;
 using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpSubredditService : ISubredditService
     {
+        private const string WidgetsUrl = "/api/widgets";
+        private const string WidgetUrl = "/api/widget";
+
         private readonly RedditSharp.Reddit _reddit;
         private readonly Subreddit _subreddit;
 
@@ -87,10 +92,16 @@ namespace DeltaBotFour.Reddit.Implementation
         }
 
         public string GetSidebar()
-        {
+        {            
             var settings = _subreddit.GetSettingsAsync().Result;
 
             return settings.Sidebar;
+        }
+
+        public string GetSidebarWidgetId(string sidebarWidgetName)
+        {
+            var widgetJToken = getSidebarWidgetJson(sidebarWidgetName);
+            return widgetJToken?["id"].ValueOrDefault<string>();
         }
 
         public void UpdateSidebar(string sidebarContent)
@@ -99,6 +110,53 @@ namespace DeltaBotFour.Reddit.Implementation
             settings.Sidebar = sidebarContent;
 
             Task.Run(async () => await settings.UpdateSettings()).Wait();
+        }
+
+        public void UpdateSidebarWidget(string sidebarWidgetName, string sidebarContent)
+        {
+            Task.Run(async () =>
+            {
+                var widgetJToken = getSidebarWidgetJson(sidebarWidgetName);
+                string widgetId = widgetJToken?["id"].ValueOrDefault<string>();
+
+                // If widget wasn't found, bail
+                if (string.IsNullOrEmpty(widgetId))
+                {
+                    return;
+                }
+
+                //widgetId = widgetId.Replace("widget_", string.Empty);
+
+                // Update widget widget
+                string url = $"{UrlHelper.BuildSubredditApiUrl(_subreddit.Name, WidgetUrl)}/{widgetId}";
+                await _subreddit.WebAgent.PutJson(url, new
+                {
+                    kind = widgetJToken["kind"].ToString(),
+                    shortName = widgetJToken["shortName"].ToString(),
+                    text = sidebarContent
+                });
+            }).Wait();
+        }
+
+        private JToken getSidebarWidgetJson(string sidebarWidgetName)
+        {
+            JToken result = null;
+
+            Task.Run(async () =>
+            {
+                // Get all the sidebar widgets so we can retrieve the ID of the mon
+                var response = await _subreddit.WebAgent.Get(UrlHelper.BuildSubredditApiUrl(_subreddit.Name, WidgetsUrl));
+
+                var widgetToken = ((JObject)response["items"]).Properties()
+                    .Where(prop => prop.Name.StartsWith("widget_"))
+                    .Select(prop => prop.Value)
+                    .FirstOrDefault(token => string.Equals(token["shortName"].Value<string>(), sidebarWidgetName, StringComparison.InvariantCultureIgnoreCase));
+
+                result = widgetToken;
+
+            }).Wait();
+
+            return result;
         }
     }
 }

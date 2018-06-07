@@ -11,6 +11,8 @@ namespace DeltaBotFour.Reddit.Interface
         string GetWikiPage(string url);
         void EditPage(string url, string content);
         string GetSidebar();
+        string GetSidebarWidgetId(string sidebarWidgetName);
         void UpdateSidebar(string sidebarContent);
+        void UpdateSidebarWidget(string sidebarWidgetName, string sidebarContent);
     }
 }
