@@ -31,7 +31,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 new[] {"\r\n", "\r", "\n"},
                 StringSplitOptions.RemoveEmptyEntries);
 
-            // We are expecting two lines - first with a title and second with a URL
+            // We are expecting four lines
+            // postid, postfullname, title, url
             // ex:
             // 8hr3tt
             // t3_8hr3tt
