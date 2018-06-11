@@ -25,9 +25,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
             var opDeltaComments = deltaComments.Where(c => c.FromUsername == opUsername).ToList();
 
             // Start the rows as either "None Yet." or empty based on if there are any
-            string opRowContent = opDeltaComments?.Count == 0 ? _appConfiguration.Posts.DeltaNoRowContent : string.Empty;
+            string opRowContent = opDeltaComments.Count == 0 ? _appConfiguration.Posts.DeltaNoRowContent : string.Empty;
 
-            foreach (var deltaComment in deltaComments)
+            foreach (var deltaComment in opDeltaComments)
             {
                 opRowContent += _appConfiguration.Posts.DeltaOPRowContent
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, deltaComment.ToUsername)
@@ -39,7 +39,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             var otherDeltaComments = deltaComments.Where(c => c.FromUsername != opUsername).ToList();
 
             // Start the rows as either "None Yet." or empty based on if there are any
-            string otherRowContent = otherDeltaComments?.Count == 0 ? _appConfiguration.Posts.DeltaNoRowContent : string.Empty;
+            string otherRowContent = otherDeltaComments.Count == 0 ? _appConfiguration.Posts.DeltaNoRowContent : string.Empty;
 
             foreach (var deltaComment in otherDeltaComments)
             {
