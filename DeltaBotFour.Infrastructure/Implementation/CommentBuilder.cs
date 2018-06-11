@@ -68,6 +68,10 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 case DB4CommentType.FailCannotAwardSelf:
                     body = _appConfiguration.Comments.CannotAwardSelf;
                     break;
+                case DB4CommentType.FailCannotAwardTwice:
+                    body = _appConfiguration.Comments.CannotAwardTwice
+                        .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName);
+                    break;
                 case DB4CommentType.ModeratorAdded:
                     body = _appConfiguration.Comments.ModeratorAdded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)

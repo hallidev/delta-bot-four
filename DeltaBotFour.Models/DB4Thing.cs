@@ -15,7 +15,7 @@ namespace DeltaBotFour.Models
         public string Subject { get; set; }
         public string Body { get; set; }
         public DateTime Created { get; set; }
-        public DateTime CreatedUTC { get; set; }
+        public DateTime CreatedUtc { get; set; }
         public string FullName { get; set; }
         public bool IsEdited { get; set; }
         public string LinkId { get; set; }

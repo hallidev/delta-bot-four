@@ -122,7 +122,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                     // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
-                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && (DateTime.UtcNow - comment.CreatedUTC).TotalHours < _appConfiguration.HoursToUnawardDelta)
+                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && (DateTime.UtcNow - comment.CreatedUtc).TotalHours < _appConfiguration.HoursToUnawardDelta)
                     {
                         // Unaward
                         // parentThing can safely be cast to Comment here - we could have only
@@ -132,6 +132,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
                         _deltaAwarder.Unaward(comment);
 
                         // Delete award comment
+                        _commentReplier.DeleteReply(db4ReplyResult.Comment);
+                    }
+                    else if (db4ReplyResult.HasDB4Replied && !db4ReplyResult.WasSuccessReply)
+                    {
+                        // DB4 replied and it was a failure reply. Now there's no delta.
+                        // The user just removed the delta with their edit, so delete the reply
                         _commentReplier.DeleteReply(db4ReplyResult.Comment);
                     }
                 }

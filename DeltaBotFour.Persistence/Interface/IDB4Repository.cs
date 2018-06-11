@@ -9,6 +9,7 @@ namespace DeltaBotFour.Persistence.Interface
         DateTime GetLastActivityTimeUtc();
         void SetLastActivityTimeUtc();
         bool DeltaCommentExists(string commentId);
+        bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName);
         DeltaComment GetDeltaComment(string commentId);
         void UpsertDeltaComment(DeltaComment commentWithDelta);
         void RemoveDeltaComment(string commentId);

@@ -211,6 +211,7 @@ namespace DeltaBotFour.Infrastructure
             public string CannotAwardOP => _configuration["comments:cannot_award_op"];
             public string CannotAwardDeltaBot => _configuration["comments:cannot_award_deltabot"];
             public string CannotAwardSelf => _configuration["comments:cannot_award_self"];
+            public string CannotAwardTwice => _configuration["comments:cannot_award_twice"];
             public string ModeratorAdded => _configuration["comments:moderator_added"];
             public string ModeratorRemoved => _configuration["comments:moderator_removed"];
             public List<Tuple<string, DB4CommentType>> AllComments { get; }
@@ -227,6 +228,7 @@ namespace DeltaBotFour.Infrastructure
                     new Tuple<string, DB4CommentType>(CannotAwardOP, DB4CommentType.FailCannotAwardOP),
                     new Tuple<string, DB4CommentType>(CannotAwardDeltaBot, DB4CommentType.FailCannotAwardDeltaBot),
                     new Tuple<string, DB4CommentType>(CannotAwardSelf, DB4CommentType.FailCannotAwardSelf),
+                    new Tuple<string, DB4CommentType>(CannotAwardTwice, DB4CommentType.FailCannotAwardTwice),
                     new Tuple<string, DB4CommentType>(ModeratorAdded, DB4CommentType.ModeratorAdded),
                     new Tuple<string, DB4CommentType>(ModeratorRemoved, DB4CommentType.ModeratorRemoved)
                 };

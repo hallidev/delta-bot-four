@@ -6,7 +6,7 @@ namespace DeltaBotFour.Models
     {
         public string Id { get; set; }
         public string ParentId { get; set; }
-        public DateTime CreatedUTC { get; set; }
+        public DateTime CreatedUtc { get; set; }
         public bool IsEdited { get; set; }
         public string FromUsername { get; set; }
         public string ToUsername { get; set; }

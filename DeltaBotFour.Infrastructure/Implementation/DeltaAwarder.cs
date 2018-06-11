@@ -93,7 +93,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             {
                 Id = comment.Id,
                 ParentId = comment.ParentId,
-                CreatedUTC = comment.CreatedUTC,
+                CreatedUtc = comment.CreatedUtc,
                 IsEdited = comment.IsEdited,
                 FromUsername = comment.AuthorName,
                 ToUsername = comment.ParentThing.AuthorName,

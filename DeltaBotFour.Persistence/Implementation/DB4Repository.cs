@@ -51,6 +51,14 @@ namespace DeltaBotFour.Persistence.Implementation
             return GetDeltaComment(commentId) != null;
         }
 
+        public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
+        {
+            var deltaComment = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName)
+                .FindOne(dc => dc.ParentId == parentCommentId && dc.FromUsername == authorName);
+
+            return deltaComment != null;
+        }
+
         public DeltaComment GetDeltaComment(string commentId)
         {
             return _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName).FindById(commentId);

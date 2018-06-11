@@ -210,7 +210,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             string postLink = $"{_appConfiguration.RedditBaseUrl}{parentPost.Permalink}";
             string postTitle = parentPost.Title;
-            string createdUTC = new DateTimeOffset(comment.CreatedUTC).ToUnixTimeSeconds().ToString();
+            string createdUTC = new DateTimeOffset(comment.CreatedUtc).ToUnixTimeSeconds().ToString();
 
             // Create new hidden param entry from comment
             return new UserWikiDeltaInfo
