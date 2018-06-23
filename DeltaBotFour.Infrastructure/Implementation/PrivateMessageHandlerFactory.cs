@@ -42,6 +42,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         public IPrivateMessageHandler Create(DB4Thing privateMessage)
         {
+            // Some private messages don't have an author. All handlers here
+            // require an author to process.
+            if (string.IsNullOrEmpty(privateMessage.AuthorName))
+            {
+                return null;
+            }
+
             // Add Delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
                 privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModAddDeltaSubject.ToLower()))
