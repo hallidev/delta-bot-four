@@ -1,5 +1,6 @@
 ﻿using DeltaBotFour.DependencyResolver;
 using System;
+using System.Threading;
 using DeltaBotFour.Infrastructure;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Reddit.Interface;
@@ -35,6 +36,8 @@ namespace DeltaBotFour.Console
                     queueDispatcher.Stop();
                     break;
                 }
+
+                Thread.Sleep(100);
             }
 
             System.Console.WriteLine("------DB4 Shutdown-----");
