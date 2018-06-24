@@ -67,11 +67,14 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public string GetWikiPage(string url)
         {
+            // Trim any leading slashes. This was causing a malformed URL
+            string fixedUrl = url.TrimStart('/');
+
             var wiki = _subreddit.GetWiki;
 
             try
             {
-                return wiki.GetPageAsync(url).Result.MarkdownContent;
+                return wiki.GetPageAsync(fixedUrl).Result.MarkdownContent;
             }
             catch (Exception ex)
             {
