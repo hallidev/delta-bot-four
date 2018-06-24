@@ -13,6 +13,7 @@ namespace DeltaBotFour.Reddit.Implementation
 {
     public class RedditSharpSubredditService : ISubredditService
     {
+        private const string SiteAdminUrl = "/api/site_admin";
         private const string WidgetsUrl = "/api/widgets";
         private const string WidgetUrl = "/api/widget";
 
@@ -92,7 +93,7 @@ namespace DeltaBotFour.Reddit.Implementation
         }
 
         public string GetSidebar()
-        {            
+        {
             var settings = _subreddit.GetSettingsAsync().Result;
 
             return settings.Sidebar;
@@ -106,10 +107,15 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public void UpdateSidebar(string sidebarContent)
         {
-            var settings = _subreddit.GetSettingsAsync().Result;
-            settings.Sidebar = sidebarContent;
-
-            Task.Run(async () => await settings.UpdateSettings()).Wait();
+            Task.Run(async () =>
+            {
+                await _subreddit.WebAgent.Post(SiteAdminUrl, new
+                {
+                    sr = _subreddit.FullName,
+                    description = sidebarContent,
+                    api_type = "json"
+                }).ConfigureAwait(false);
+            }).Wait();
         }
 
         public void UpdateSidebarWidget(string sidebarWidgetName, string sidebarContent)
@@ -124,8 +130,6 @@ namespace DeltaBotFour.Reddit.Implementation
                 {
                     return;
                 }
-
-                //widgetId = widgetId.Replace("widget_", string.Empty);
 
                 // Update widget widget
                 string url = $"{UrlHelper.BuildSubredditApiUrl(_subreddit.Name, WidgetUrl)}/{widgetId}";
