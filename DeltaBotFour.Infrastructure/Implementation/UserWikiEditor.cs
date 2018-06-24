@@ -58,8 +58,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string receivngUserPageContent = buildUserPageContent(receivingUserUrl, comment.ParentThing.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
-            _subredditService.EditPage(givingUserUrl, givingUserPageContent);
-            _subredditService.EditPage(receivingUserUrl, receivngUserPageContent);
+            _subredditService.EditWikiPage(givingUserUrl, givingUserPageContent);
+            _subredditService.EditWikiPage(receivingUserUrl, receivngUserPageContent);
         }
 
         private string buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)

@@ -68,7 +68,7 @@ namespace DeltaBotFour.Reddit.Implementation
         public string GetWikiPage(string url)
         {
             // Trim any leading slashes. This was causing a malformed URL
-            string fixedUrl = url.TrimStart('/');
+            string fixedUrl = url.TrimStart('/').ToLower();
 
             var wiki = _subreddit.GetWiki;
 
@@ -90,9 +90,10 @@ namespace DeltaBotFour.Reddit.Implementation
             }
         }
 
-        public void EditPage(string url, string content)
+        public void EditWikiPage(string url, string content)
         {
-            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(url, content)).Wait();
+            string fixedUrl = url.TrimStart('/').ToLower();
+            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(fixedUrl, content)).Wait();
         }
 
         public string GetSidebar()
@@ -117,7 +118,7 @@ namespace DeltaBotFour.Reddit.Implementation
                     sr = _subreddit.FullName,
                     description = sidebarContent,
                     api_type = "json"
-                }).ConfigureAwait(false);
+                });
             }).Wait();
         }
 

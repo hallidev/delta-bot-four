@@ -68,7 +68,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
             // Update the wiki page
-            _subredditService.EditPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
+            _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
 
             // Get sidebar
             string sidebar = _subredditService.GetSidebar();
