@@ -19,10 +19,4 @@
     <ProjectReference Include="..\RedditSharp\RedditSharp.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="RedditSharp">
-      <HintPath>..\SharedAssemblies\RedditSharp.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
