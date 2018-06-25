@@ -32,7 +32,7 @@ namespace DeltaBotFour.DependencyResolver
                  "http://localhost"
             );
 
-            var reddit = new RedditSharp.Reddit(botWebAgent, false);
+            var reddit = new RedditSharp.Reddit(botWebAgent, true);
             var subreddit = reddit.GetSubredditAsync($"/r/{appConfiguration.SubredditName}").Result;
 
             // Register core / shared classes

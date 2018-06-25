@@ -75,6 +75,61 @@ namespace RedditSharp
                 SelfPostStrength = GetSpamFilterStrength(data["spam_selfposts"].ValueOrDefault<string>()),
                 CommentStrength = GetSpamFilterStrength(data["spam_comments"].ValueOrDefault<string>())
             };
+
+            FreeFormReports = data["free_form_reports"].ValueOrDefault<bool>();
+            SubmitText = WebUtility.HtmlDecode(data["submit_text"].ValueOrDefault<string>() ?? string.Empty);
+            CollapseDeletedComments = data["collapse_deleted_comments"].ValueOrDefault<bool>();
+            AllowVideos = data["allow_videos"].ValueOrDefault<bool>();
+            SpoilersEnabled = data["spoilers_enabled"].ValueOrDefault<bool>();
+            OriginalContentTagEnabled = data["original_content_tag_enabled"].ValueOrDefault<bool>();
+            SubmitLinkLabel = data["submit_link_label"].ValueOrDefault<string>();
+            AllowPostCrossposts = data["allow_post_crossposts"].ValueOrDefault<bool>();
+            PublicTraffic = data["public_traffic"].ValueOrDefault<bool>();
+            SubmitTextLabel = data["submit_text_label"].ValueOrDefault<string>();
+            AllOriginalContent = data["all_original_content"].ValueOrDefault<bool>();
+            HideAds = data["hide_ads"].ValueOrDefault<bool>();
+            AllowDiscovery = data["allow_discovery"].ValueOrDefault<bool>();
+            ShowMediaPreview = data["show_media_preview"].ValueOrDefault<bool>();
+            CommentScoreHideMins = data["comment_score_hide_mins"].ValueOrDefault<int>();
+            ExcludeBannedModqueue = data["exclude_banned_modqueue"].ValueOrDefault<bool>();
+
+            if (data["suggested_comment_sort"] != null)
+            {
+                // one of (confidence, top, new, controversial, old, random, qa, live)
+                var suggestedCommentSort = data["suggested_comment_sort"].ValueOrDefault<string>();
+
+                if (!string.IsNullOrEmpty(suggestedCommentSort))
+                {
+                    switch (suggestedCommentSort)
+                    {
+                        case "confidence":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Confidence;
+                            break;
+                        case "top":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Top;
+                            break;
+                        case "new":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.New;
+                            break;
+                        case "controversial":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Controversial;
+                            break;
+                        case "old":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Old;
+                            break;
+                        case "random":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Random;
+                            break;
+                        case "qa":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Qa;
+                            break;
+                        case "live":
+                            SuggestedCommentSort = RedditSharp.SuggestedCommentSort.Live;
+                            break;
+                    }
+                }
+            }
+
             if (data["wikimode"] != null)
             {
                 var wikiMode = data["wikimode"].ValueOrDefault<string>();
@@ -91,6 +146,7 @@ namespace RedditSharp
                         break;
                 }
             }
+
             if (data["subreddit_type"] != null)
             {
                 var type = data["subreddit_type"].ValueOrDefault<string>();
@@ -107,8 +163,10 @@ namespace RedditSharp
                         break;
                 }
             }
+
             ShowThumbnails = data["show_media"].ValueOrDefault<bool>();
             WikiEditAge = data["wiki_edit_age"].ValueOrDefault<int>();
+
             if (data["content_options"] != null)
             {
                 var contentOptions = data["content_options"].ValueOrDefault<string>();
@@ -217,6 +275,40 @@ namespace RedditSharp
         /// </summary>
         public bool AllowImages { get; set; }
 
+        public bool FreeFormReports { get; set; }
+
+        public string SubmitText { get; set; }
+
+        public bool CollapseDeletedComments { get; set; }
+
+        public bool AllowVideos { get; set; }
+
+        public SuggestedCommentSort? SuggestedCommentSort { get; set; }
+
+        public bool SpoilersEnabled { get; set; }
+
+        public bool OriginalContentTagEnabled { get; set; }
+
+        public string SubmitLinkLabel { get; set; }
+
+        public bool AllowPostCrossposts { get; set; }
+
+        public bool PublicTraffic { get; set; }
+
+        public string SubmitTextLabel { get; set; }
+
+        public bool AllOriginalContent { get; set; }
+
+        public bool HideAds { get; set; }
+
+        public bool AllowDiscovery { get; set; }
+
+        public bool ShowMediaPreview { get; set; }
+
+        public int CommentScoreHideMins { get; set; }
+
+        public bool ExcludeBannedModqueue { get; set; }
+
         /// <summary>
         /// Update the subreddit settings.
         /// </summary>
@@ -225,6 +317,8 @@ namespace RedditSharp
             string link_type;
             string type;
             string wikimode;
+            string suggested_comment_sort = null;
+
             switch (ContentOptions)
             {
                 case ContentOptions.All:
@@ -237,6 +331,7 @@ namespace RedditSharp
                     link_type = "self";
                     break;
             }
+
             switch (SubredditType)
             {
                 case SubredditType.Archived:
@@ -267,6 +362,7 @@ namespace RedditSharp
                     type = "public";
                     break;
             }
+
             switch (WikiEditMode)
             {
                 case WikiEditMode.All:
@@ -279,6 +375,38 @@ namespace RedditSharp
                     wikimode = "disabled";
                     break;
             }
+
+            if (SuggestedCommentSort.HasValue)
+            {
+                switch (SuggestedCommentSort)
+                {
+                    case RedditSharp.SuggestedCommentSort.Confidence:
+                        suggested_comment_sort = "confidence";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Top:
+                        suggested_comment_sort = "top";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.New:
+                        suggested_comment_sort = "new";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Controversial:
+                        suggested_comment_sort = "controversial";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Old:
+                        suggested_comment_sort = "old";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Random:
+                        suggested_comment_sort = "random";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Qa:
+                        suggested_comment_sort = "qa";
+                        break;
+                    case RedditSharp.SuggestedCommentSort.Live:
+                        suggested_comment_sort = "live";
+                        break;
+                }
+            }
+
             await WebAgent.Post(SiteAdminUrl, new
             {
                 allow_top = AllowAsDefault,
@@ -299,6 +427,23 @@ namespace RedditSharp
                 spam_links = SpamFilter?.LinkPostStrength.ToString().ToLowerInvariant(),
                 spam_selfposts = SpamFilter?.SelfPostStrength.ToString().ToLowerInvariant(),
                 spam_comments = SpamFilter?.CommentStrength.ToString().ToLowerInvariant(),
+                free_form_reports = FreeFormReports,
+                submit_text = SubmitText,
+                collapse_deleted_comments = CollapseDeletedComments,
+                allow_videos = AllowVideos,
+                suggested_comment_sort,
+                spoilers_enabled = SpoilersEnabled,
+                original_content_tag_enabled = OriginalContentTagEnabled,
+                submit_link_label = SubmitLinkLabel,
+                allow_post_crossposts = AllowPostCrossposts,
+                public_traffic = PublicTraffic,
+                submit_text_label = SubmitTextLabel,
+                all_original_content = AllOriginalContent,
+                hide_ads = HideAds,
+                allow_discovery = AllowDiscovery,
+                show_media_preview = ShowMediaPreview,
+                comment_score_hide_mins = CommentScoreHideMins,
+                exclude_banned_modqueue = ExcludeBannedModqueue,
                 api_type = "json"
             }, "header-title", HeaderHoverText).ConfigureAwait(false);
         }
@@ -433,5 +578,18 @@ namespace RedditSharp
         /// Filter every post initially and they will need to be approved manually to be visible.
         /// </summary>
         All
+    }
+
+    // one of (confidence, top, new, controversial, old, random, qa, live)
+    public enum SuggestedCommentSort
+    {
+        Confidence,
+        Top,
+        New,
+        Controversial,
+        Old,
+        Random,
+        Qa,
+        Live
     }
 }
