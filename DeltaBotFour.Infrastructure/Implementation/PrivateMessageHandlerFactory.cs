@@ -51,9 +51,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // Add Delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModAddDeltaSubject.ToLower()))
+                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModForceAddDeltaSubject.ToLower()))
             {
-                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
+                return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)

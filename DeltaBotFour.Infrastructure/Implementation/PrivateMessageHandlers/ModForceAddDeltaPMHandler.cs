@@ -5,7 +5,7 @@ using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
-    public class ModAddDeltaPMHandler : IPrivateMessageHandler
+    public class ModForceAddDeltaPMHandler : IPrivateMessageHandler
     {
         private const string AddFailedCantAwardDeltaBot = "You can't award DeltaBot a delta, even with force add. Nice try though :)";
         private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't force add.";
@@ -19,7 +19,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
-        public ModAddDeltaPMHandler(AppConfiguration appConfiguration,
+        public ModForceAddDeltaPMHandler(AppConfiguration appConfiguration,
             IRedditService redditService,
             ICommentDetector commentDetector,
             ICommentBuilder commentBuilder,
@@ -89,12 +89,12 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.Reply(comment, reply);
 
                 // Reply with modmail indicating success
-                string body = _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
+                string body = _appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationMessage
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
 
                 // Reply with modmail indicating success
-                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModAddedDeltaNotificationSubject,
+                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationSubject,
                     body, $"/r/{_appConfiguration.SubredditName}");
             }
             catch (Exception ex)
