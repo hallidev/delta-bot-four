@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DeltaBotFour.DependencyResolver\DeltaBotFour.DependencyResolver.csproj" />
+    <ProjectReference Include="..\RedditSharp\RedditSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

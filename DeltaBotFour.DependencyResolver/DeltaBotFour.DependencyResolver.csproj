@@ -16,6 +16,7 @@
     <ProjectReference Include="..\DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Reddit\DeltaBotFour.Reddit.csproj" />
     <ProjectReference Include="..\DeltaBotFour.Shared\DeltaBotFour.Shared.csproj" />
+    <ProjectReference Include="..\RedditSharp\RedditSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
