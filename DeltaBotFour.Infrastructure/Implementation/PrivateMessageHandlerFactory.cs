@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
@@ -51,28 +52,34 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // Add Delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModForceAddDeltaSubject.ToLower()))
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModAddDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
+            }
+
+            // Force Add Delta (moderator only)
+            if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
             {
                 return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.ModDeleteDeltaSubject.ToLower()))
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModDeleteDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
             {
                 return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Stop quoted deltas warning
-            if (privateMessage.Subject.ToLower()
-                .Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
+            if (string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.DeltaInQuoteSubject, StringComparison.CurrentCultureIgnoreCase))
             {
                 return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository, _redditService);
             }
 
             // WATT Article created (author must be in ValidWATTUsers list)
-            if (_appConfiguration.ValidWATTUsers.Any(u => u.ToLower() == privateMessage.AuthorName.ToLower()) &&
-                privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.WATTArticleCreatedSubject.ToLower()))
+            if (_appConfiguration.ValidWATTUsers.Any(u => string.Equals(u, privateMessage.AuthorName, StringComparison.CurrentCultureIgnoreCase)) &&
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.WATTArticleCreatedSubject, StringComparison.CurrentCultureIgnoreCase))
             {
                 return new WATTArticleCreatedPMHandler(_db4Repository, _redditService, _stickyCommentEditor);
             }

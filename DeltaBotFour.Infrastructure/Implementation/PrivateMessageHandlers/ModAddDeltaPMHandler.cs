@@ -5,10 +5,10 @@ using DeltaBotFour.Reddit.Interface;
 
 namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
-    public class ModForceAddDeltaPMHandler : IPrivateMessageHandler
+    public class ModAddDeltaPMHandler : IPrivateMessageHandler
     {
-        private const string AddFailedCantAwardDeltaBot = "You can't award DeltaBot a delta with the 'force add' command.";
-        private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't force add.";
+        private const string AddFailedCantAwardDeltaBot = "You can't award DeltaBot a delta with the 'add' comment.";
+        private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't add a delta.";
         private const string AddFailedAlreadyAwardedMessage = "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
         private const string AddFailedErrorMessageFormat = "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
 
@@ -19,7 +19,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         private readonly ICommentReplier _replier;
         private readonly IDeltaAwarder _deltaAwarder;
 
-        public ModForceAddDeltaPMHandler(AppConfiguration appConfiguration,
+        public ModAddDeltaPMHandler(AppConfiguration appConfiguration,
             IRedditService redditService,
             ICommentDetector commentDetector,
             ICommentBuilder commentBuilder,
@@ -76,8 +76,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Award delta
                 _deltaAwarder.Award(comment);
 
-                // Build moderator add message
-                var reply = _commentBuilder.BuildReply(DB4CommentType.ModeratorAdded, comment);
+                // Build the normal success message
+                var reply = _commentBuilder.BuildReply(DB4CommentType.SuccessDeltaAwarded, comment);
 
                 // Don't edit the existing comment - delete it and reply with the mod added reply
                 // db4ReplyResult.Comment will be null if the mod is adding a delta directly to a comment
@@ -89,12 +89,12 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.Reply(comment, reply);
 
                 // Reply with modmail indicating success
-                string body = _appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationMessage
+                string body = _appConfiguration.PrivateMessages.ModAddedDeltaNotificationMessage
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
 
                 // Reply with modmail indicating success
-                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationSubject,
+                _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModAddedDeltaNotificationSubject,
                     body, $"/r/{_appConfiguration.SubredditName}");
             }
             catch (Exception ex)
