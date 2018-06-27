@@ -159,7 +159,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // For each line that isn't a reddit quote, check for a delta
             foreach (var commentLine in commentLines)
             {
-                if (_appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d)))
+                // We need to ToLower() the string to test for tokens like !DeLta, but ToLower() screws up
+                // delta symbols, so check both!
+                string commentLineLower = commentLine.ToLower();
+
+                if (_appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d) || commentLineLower.Contains(d)))
                 {
                     if (!commentLine.StartsWith("&gt;"))
                     {
