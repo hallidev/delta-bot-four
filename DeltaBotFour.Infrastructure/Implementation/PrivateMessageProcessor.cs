@@ -1,4 +1,5 @@
-﻿using Core.Foundation.Helpers;
+﻿using System;
+using Core.Foundation.Helpers;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Reddit.Interface;
@@ -35,7 +36,20 @@ namespace DeltaBotFour.Infrastructure.Implementation
             if (handler != null)
             {
                 _logger.Info($"PrivateMessageHandler created: {handler.GetType()}");
-                handler.Handle(privateMessage);
+
+                try
+                {
+                    // Try to handle the message
+                    handler.Handle(privateMessage);
+                }
+                catch (Exception)
+                {
+                    // Remember to set message to read even if there was an exception
+                    _redditService.SetPrivateMessageAsRead(privateMessage.Id);
+
+                    // Re-throw - it will be handled and logged by dispatcher
+                    throw;
+                }
             }
 
             // After handling the private message, set it to read
