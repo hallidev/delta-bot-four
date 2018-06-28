@@ -13,6 +13,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
     public class DeltaboardEditor : IDeltaboardEditor
     {
         private const int RanksToShow = 10;
+        private const string UpdateDeltaboarsdReason = "Update deltaboards";
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IDB4Repository _db4Repository;
@@ -68,7 +69,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
             // Update the wiki page
-            _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards);
+            _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards, UpdateDeltaboarsdReason);
 
             // Get sidebar
             string sidebar = _subredditService.GetSidebar();

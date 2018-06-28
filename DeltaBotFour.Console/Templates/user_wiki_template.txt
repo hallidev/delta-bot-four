@@ -1,7 +1,7 @@
 ﻿[​](HTTP://DB3PARAMSSTART
 {{hiddenparams}}
 DB3PARAMSEND)
-#Delta History for {{username}}
+#Delta History for u/{{username}}
 
 ##Deltas Received
 

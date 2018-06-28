@@ -12,6 +12,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
 {
     public class UserWikiEditor : IUserWikiEditor
     {
+        private const string DB3SpaceToken = "-s---"; // Not sure where this comes from in DB3
+        private const string ParenOpenToken = "ZZDK9vhFALCkjXPmwvSB"; // DB3 didn't do open parens, but being safe
+        private const string ParenCloseToken = "AXDK9vhFALCkjXPmwvSB"; // Taken from DB3 - this is the token it used
+        private const string GiveEditReason = "Added a delta given";
+        private const string ReceiveEditReason = "Added a delta received";
+
         private string _userWikiTemplate;
         private string _userWikiRowTemplate;
 
@@ -58,14 +64,20 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string receivngUserPageContent = buildUserPageContent(receivingUserUrl, comment.ParentThing.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
-            _subredditService.EditWikiPage(givingUserUrl, givingUserPageContent);
-            _subredditService.EditWikiPage(receivingUserUrl, receivngUserPageContent);
+            _subredditService.EditWikiPage(givingUserUrl, givingUserPageContent, GiveEditReason);
+            _subredditService.EditWikiPage(receivingUserUrl, receivngUserPageContent, ReceiveEditReason);
         }
 
         private string buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)
         {
             // Get page content
             string pageContent = _subredditService.GetWikiPage(userUrl);
+
+            // DB3 has many wiki entries with this space token in it. It's not needed here so must be replaced
+            pageContent = pageContent
+                .Replace(DB3SpaceToken, " ")
+                .Replace(ParenOpenToken, "(")
+                .Replace(ParenCloseToken, ")");
 
             // If the page wasn't found, consider it empty
             if (string.IsNullOrEmpty(pageContent))
@@ -153,15 +165,19 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string updatedContent = _userWikiTemplate;
 
             // Replace the hidden params token with the new serialized hidden params
+            string hiddenParamsJson = JsonConvert.SerializeObject(wikiHiddenParams, Formatting.Indented)
+                .Replace("(", ParenOpenToken)
+                .Replace(")", ParenCloseToken);
+
             updatedContent = updatedContent
-                .Replace(_appConfiguration.ReplaceTokens.HiddenParamsToken, JsonConvert.SerializeObject(wikiHiddenParams, Formatting.Indented))
+                .Replace(_appConfiguration.ReplaceTokens.HiddenParamsToken, hiddenParamsJson)
                 .Replace(_appConfiguration.ReplaceTokens.UsernameToken, username)
                 .Replace(_appConfiguration.ReplaceTokens.DeltasGivenCountToken, wikiHiddenParams.DeltasGiven.Count.ToString())
                 .Replace(_appConfiguration.ReplaceTokens.DeltasReceivedCountToken, wikiHiddenParams.DeltasReceived.Count.ToString());
 
             // Update rows
-            string givingRowsContent = getRowsContent(wikiHiddenParams.DeltasGiven, toUsername, "3");
-            string receivingRowsContent = getRowsContent(wikiHiddenParams.DeltasReceived, toUsername, "2");
+            string givingRowsContent = getRowsContent(wikiHiddenParams.DeltasGiven, "3");
+            string receivingRowsContent = getRowsContent(wikiHiddenParams.DeltasReceived, "2");
 
             updatedContent = updatedContent
                 .Replace(_appConfiguration.ReplaceTokens.WikiRowsGivenToken, givingRowsContent)
@@ -170,7 +186,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             return updatedContent;
         }
 
-        private string getRowsContent(List<UserWikiDeltaInfo> deltaInfos, string toUsername, string contextNumber)
+        private string getRowsContent(List<UserWikiDeltaInfo> deltaInfos, string contextNumber)
         {
             // Convert hidden params into rows of text
             string rowsContent = string.Empty;
@@ -182,7 +198,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(_appConfiguration.ReplaceTokens.PostTitle, deltaInfo.PostTitle)
                     .Replace(_appConfiguration.ReplaceTokens.PostLink, deltaInfo.PostLink)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, $"{deltaInfo.PostLink}{deltaInfo.CommentId}?context={contextNumber}")
-                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, $"/u/{toUsername}");
+                    .Replace(_appConfiguration.ReplaceTokens.UsernameToken, $"/u/{deltaInfo.Username}");
 
                 rowsContent = $"{rowsContent}{rowContent}\r\n";
             }

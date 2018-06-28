@@ -89,10 +89,10 @@ namespace DeltaBotFour.Reddit.Implementation
             }
         }
 
-        public void EditWikiPage(string url, string content)
+        public void EditWikiPage(string url, string content, string reason)
         {
             string fixedUrl = url.TrimStart('/').ToLower();
-            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(fixedUrl, content)).Wait();
+            Task.Run(async () => await _subreddit.GetWiki.EditPageAsync(fixedUrl, content, null, reason)).Wait();
         }
 
         public string GetSidebar()
