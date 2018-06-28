@@ -73,16 +73,18 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Get page content
             string pageContent = _subredditService.GetWikiPage(userUrl);
 
-            // DB3 has many wiki entries with this space token in it. It's not needed here so must be replaced
-            pageContent = pageContent
-                .Replace(DB3SpaceToken, " ")
-                .Replace(ParenOpenToken, "(")
-                .Replace(ParenCloseToken, ")");
-
             // If the page wasn't found, consider it empty
             if (string.IsNullOrEmpty(pageContent))
             {
                 pageContent = string.Empty;
+            }
+            else
+            {
+                // DB3 has many wiki entries with this space token in it. It's not needed here so must be replaced
+                pageContent = pageContent
+                    .Replace(DB3SpaceToken, " ")
+                    .Replace(ParenOpenToken, "(")
+                    .Replace(ParenCloseToken, ")");
             }
 
             // Find and deserialize hidden params
