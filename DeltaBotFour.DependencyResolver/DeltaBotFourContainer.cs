@@ -39,7 +39,7 @@ namespace DeltaBotFour.DependencyResolver
             var logconsole = new NLog.Targets.ConsoleTarget
             {
                 Name = "logconsole",
-                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}"
+                Layout = "${longdate}|${level:uppercase=true}|${logger:shortName=true}|${message}"
             };
 
             config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Info, logconsole));

@@ -19,7 +19,8 @@ namespace DeltaBotFour.Reddit.Implementation
         public void SendToQueue(Comment comment)
         {
             var db4Thing = RedditThingConverter.Convert(comment);
-            pushToQueue(db4Thing, QueueMessageType.Comment);
+            var queueMessageType = db4Thing.IsEdited ? QueueMessageType.Edit : QueueMessageType.Comment;
+            pushToQueue(db4Thing, queueMessageType);
         }
 
         public void SendToQueue(PrivateMessage privateMessage)

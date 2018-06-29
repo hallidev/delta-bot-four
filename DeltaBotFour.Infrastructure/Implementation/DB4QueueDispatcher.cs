@@ -49,6 +49,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                             switch (message.Type)
                             {
                                 case QueueMessageType.Comment:
+                                case QueueMessageType.Edit:
                                     var comment = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
                                     _commentProcessor.Process(comment);
                                     break;
@@ -59,6 +60,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                                 default:
                                     throw new InvalidOperationException($"Unhandled enum value: {message.Type}");
                             }
+
+                            _logger.Info($"Queue remaining: ({_queue.GetPrimaryCount()} primary), ({_queue.GetNinjaEditCount()} ninja)");
                         }
                     }
                     catch(Exception ex)

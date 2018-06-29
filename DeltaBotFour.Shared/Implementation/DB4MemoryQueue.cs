@@ -17,6 +17,16 @@ namespace DeltaBotFour.Shared.Implementation
         // Second queue to re-process comments a second time after 3 minutes
         private readonly Queue _ninjaEditQueue = new Queue();
 
+        public int GetPrimaryCount()
+        {
+            return _queue.Count;
+        }
+
+        public int GetNinjaEditCount()
+        {
+            return _ninjaEditQueue.Count;
+        }
+
         public void Push(QueueMessage message)
         {
             _queue.Enqueue(JsonConvert.SerializeObject(message));

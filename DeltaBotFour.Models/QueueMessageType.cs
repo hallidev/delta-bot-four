@@ -7,6 +7,7 @@ namespace DeltaBotFour.Models
     public enum QueueMessageType
     {
         Comment,
+        Edit,
         PrivateMessage
     }
 }
