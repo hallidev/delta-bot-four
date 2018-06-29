@@ -44,12 +44,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // If we got here with a PM or post, that's a problem
             Assert.That(comment.Type == DB4ThingType.Comment, $"CommentProcessor received type: {comment.Type}");
 
-            _logger.Info($"Processing incoming comment: {comment.Permalink}");
+            _logger.Info($"Processing incoming comment{(comment.IsEdited ? " (edit)" : string.Empty)}: {comment.Permalink}");
 
             // DB4 shouldn't process its own comments
             if (comment.AuthorName == _appConfiguration.DB4Username)
             {
-                _logger.Info("Done processing comment.");
+                _logger.Info($"Done processing comment{(comment.IsEdited ? " (edit)" : string.Empty)}.");
                 return;
             }
 
@@ -143,7 +143,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 }
             }
 
-            _logger.Info("Done processing comment.");
+            _logger.Info($"Done processing comment{(comment.IsEdited ? " (edit)" : string.Empty)}.");
         }
 
         private bool commentHasDelta(string commentBody, out bool hadDeltaInQuotes)
