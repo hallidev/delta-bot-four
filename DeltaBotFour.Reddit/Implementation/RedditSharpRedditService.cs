@@ -211,10 +211,10 @@ namespace DeltaBotFour.Reddit.Implementation
             switch (thing.Type)
             {
                 case DB4ThingType.Comment:
-                    // Get post
+                    // Get comment with children and parent post populated
                     return _reddit.GetCommentAsync(thingUri).Result;
                 case DB4ThingType.Post:
-                    // Get comment with children and parent post populated
+                    // Get post
                     return _reddit.GetPostAsync(thingUri).Result;
                 default:
                     throw new UnhandledEnumException<DB4ThingType>(thing.Type);
