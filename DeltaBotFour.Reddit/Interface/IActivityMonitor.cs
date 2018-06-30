@@ -2,7 +2,7 @@
 {
     public interface IActivityMonitor
     {
-        void Start(int commentScanIntervalSeconds, int editScanIntervalSeconds, int pmScanIntervalSeconds);
+        void Start(int editScanIntervalSeconds);
         void Stop();
     }
 }
