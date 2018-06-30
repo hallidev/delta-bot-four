@@ -4,7 +4,8 @@ namespace DeltaBotFour.Infrastructure.Interface
 {
     public interface IUserWikiEditor
     {
-        void UpdateUserWikiEntryAward(DB4Thing comment);
-        void UpdateUserWikiEntryUnaward(DB4Thing comment);
+        int GetCurrentDeltaCount(string userName);
+        int UpdateUserWikiEntryAward(DB4Thing comment);
+        int UpdateUserWikiEntryUnaward(DB4Thing comment);
     }
 }

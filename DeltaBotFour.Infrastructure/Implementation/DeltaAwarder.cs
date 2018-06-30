@@ -57,23 +57,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 Assert.That(comment.IsEdited);
             }
 
-            // Get the user's current delta count from flair
-            int currentDeltaCount = DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText);
-
-            // Get new flair with incremented delta count
-            string newFlairText = DeltaHelper.GetIncrementedFlairText(comment.ParentThing.AuthorFlairText);
-
-            // Award to the parent comment
-            _logger.Info("   ---Setting flair (award)");
-            _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
-                newFlairText);
-
             // Update wiki
+            // The wiki is the standard from which delta counts come from
             _logger.Info("   ---Updating wiki (award)");
-            _wikiEditor.UpdateUserWikiEntryAward(comment);
+            int newDeltaCount = _wikiEditor.UpdateUserWikiEntryAward(comment);
 
             // If this was the user's first delta, send the first delta PM
-            if (currentDeltaCount == 0)
+            if (newDeltaCount == 1)
             {
                 string subject = _appConfiguration.PrivateMessages.FirstDeltaSubject;
                 string body = _appConfiguration.PrivateMessages.FirstDeltaMessage
@@ -83,6 +73,14 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 _logger.Info("   ---Sending first delta PM (award)");
                 _redditService.SendPrivateMessage(subject, body, comment.ParentThing.AuthorName);
             }
+
+            // Get new flair with incremented delta count
+            string newFlairText = DeltaHelper.GetFlairText(newDeltaCount);
+
+            // Award to the parent comment
+            _logger.Info("   ---Setting flair (award)");
+            _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
+                newFlairText);
 
             // Update deltaboards
             _logger.Info("   ---Updating deltaboards (award)");
@@ -149,25 +147,23 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 Assert.That(comment.IsEdited);
             }
 
-            // Get the user's current delta count from flair
-            int currentDeltaCount = DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText);
+            // Update wiki
+            // The wiki is the standard from which delta counts come from
+            _logger.Info("   ---Updating wiki (unaward)");
+            int newDeltaCount = _wikiEditor.UpdateUserWikiEntryUnaward(comment);
 
             string newFlairText = string.Empty;
 
             // If we are removing the user's only delta, we don't want the text to read "0∆"
-            if (currentDeltaCount != 1)
+            if (newDeltaCount != 0)
             {
-                newFlairText = DeltaHelper.GetDecrementedFlairText(comment.ParentThing.AuthorFlairText);
+                newFlairText = DeltaHelper.GetFlairText(newDeltaCount);
             }
 
             // Unaward from the parent comment
             _logger.Info("   ---Setting flair (unaward)");
             _subredditService.SetUserFlair(comment.ParentThing.AuthorName, comment.ParentThing.AuthorFlairCssClass,
                 newFlairText);
-
-            // Update wiki
-            _logger.Info("   ---Updating wiki (unaward)");
-            _wikiEditor.UpdateUserWikiEntryUnaward(comment);
 
             // Update deltaboards
             _logger.Info("   ---Updating deltaboards (unaward)");

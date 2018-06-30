@@ -8,10 +8,12 @@ namespace DeltaBotFour.Infrastructure.Implementation
     public class CommentBuilder : ICommentBuilder
     {
         private readonly AppConfiguration _appConfiguration;
+        private readonly IUserWikiEditor _userWikiEditor;
 
-        public CommentBuilder(AppConfiguration appConfiguration)
+        public CommentBuilder(AppConfiguration appConfiguration, IUserWikiEditor userWikiEditor)
         {
             _appConfiguration = appConfiguration;
+            _userWikiEditor = userWikiEditor;
         }
 
         public DB4Comment BuildSticky(DB4Thing post, int deltaCount, WATTArticle article, string deltaLogPostUrl)
@@ -76,7 +78,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     body = _appConfiguration.Comments.ModeratorAdded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
                         .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
-                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
+                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (_userWikiEditor.GetCurrentDeltaCount(comment.ParentThing.AuthorName) + 1).ToString());
                     break;
                 case DB4CommentType.ModeratorRemoved:
                     body = _appConfiguration.Comments.ModeratorRemoved;
@@ -85,7 +87,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     body = _appConfiguration.Comments.DeltaAwarded
                         .Replace(_appConfiguration.ReplaceTokens.ParentAuthorNameToken, comment.ParentThing.AuthorName)
                         .Replace(_appConfiguration.ReplaceTokens.SubredditToken, _appConfiguration.SubredditName)
-                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (DeltaHelper.GetDeltaCount(comment.ParentThing.AuthorFlairText) + 1).ToString());
+                        .Replace(_appConfiguration.ReplaceTokens.DeltasToken, (_userWikiEditor.GetCurrentDeltaCount(comment.ParentThing.AuthorName) + 1).ToString());
                     break;
                 default:
                     throw new UnhandledEnumException<DB4CommentType>(commentType);

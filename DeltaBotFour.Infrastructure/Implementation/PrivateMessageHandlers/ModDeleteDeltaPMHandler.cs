@@ -10,6 +10,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         private const string DeleteFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't delete.";
         private const string DeleteFailedNeverAwardedMessage = "I never awarded a delta for this comment, so there's nothing for me to delete!";
         private const string DeleteFailedErrorMessageFormat = "Delete failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
+        private const string DeleteSucceededMessage = "The 'delete' command was processed successfully.";
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
@@ -75,6 +76,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _replier.DeleteReply(db4ReplyResult.Comment);
                 _replier.Reply(comment, reply);
 
+                // Build modmail body
                 string body = _appConfiguration.PrivateMessages.ModDeletedDeltaNotificationMessage
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
@@ -83,6 +85,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModDeletedDeltaNotificationSubject,
                     body, $"/r/{_appConfiguration.SubredditName}");
 
+                // Reply to user
+                _redditService.ReplyToPrivateMessage(privateMessage.Id, DeleteSucceededMessage);
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't force add.";
         private const string AddFailedAlreadyAwardedMessage = "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
         private const string AddFailedErrorMessageFormat = "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
+        private const string AddSucceededMessage = "The 'force add' command was processed successfully.";
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IRedditService _redditService;
@@ -67,17 +68,15 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // If a delta was already awarded successfully, bail
                 if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply || db4ReplyResult.CommentType == DB4CommentType.ModeratorAdded)
                 {
-                    _redditService.ReplyToPrivateMessage(privateMessage.Id,
-                        AddFailedAlreadyAwardedMessage);
-
+                    _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedAlreadyAwardedMessage);
                     return;
                 }
 
-                // Award delta
-                _deltaAwarder.Award(comment);
-
                 // Build moderator add message
                 var reply = _commentBuilder.BuildReply(DB4CommentType.ModeratorAdded, comment);
+
+                // Award delta
+                _deltaAwarder.Award(comment);
 
                 // Don't edit the existing comment - delete it and reply with the mod added reply
                 // db4ReplyResult.Comment will be null if the mod is adding a delta directly to a comment
@@ -88,7 +87,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 
                 _replier.Reply(comment, reply);
 
-                // Reply with modmail indicating success
+                // Build modmail body
                 string body = _appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationMessage
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, privateMessage.AuthorName)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, commentUrl);
@@ -96,6 +95,9 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Reply with modmail indicating success
                 _redditService.SendPrivateMessage(_appConfiguration.PrivateMessages.ModForceAddedDeltaNotificationSubject,
                     body, $"/r/{_appConfiguration.SubredditName}");
+
+                // Reply to user
+                _redditService.ReplyToPrivateMessage(privateMessage.Id, AddSucceededMessage);
             }
             catch (Exception ex)
             {

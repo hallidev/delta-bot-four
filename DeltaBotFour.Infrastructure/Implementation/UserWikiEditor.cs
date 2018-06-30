@@ -32,17 +32,24 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _subredditService = subredditService;
         }
 
-        public void UpdateUserWikiEntryAward(DB4Thing comment)
+        public int GetCurrentDeltaCount(string userName)
         {
-            performWikiPageUpdate(comment, true);
+            string userUrl = getUserWikiUrl(userName);
+            var wikiHiddenParams = getHiddenParams(userUrl, userName);
+            return wikiHiddenParams.DeltasReceived.Count;
         }
 
-        public void UpdateUserWikiEntryUnaward(DB4Thing comment)
+        public int UpdateUserWikiEntryAward(DB4Thing comment)
         {
-            performWikiPageUpdate(comment, false);
+            return performWikiPageUpdate(comment, true);
         }
 
-        private void performWikiPageUpdate(DB4Thing comment, bool isAward)
+        public int UpdateUserWikiEntryUnaward(DB4Thing comment)
+        {
+            return performWikiPageUpdate(comment, false);
+        }
+
+        private int performWikiPageUpdate(DB4Thing comment, bool isAward)
         {
             if (string.IsNullOrEmpty(_userWikiTemplate))
             {
@@ -58,79 +65,25 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string receivingUserUrl = getUserWikiUrl(comment.ParentThing.AuthorName);
 
             // Get content for the user giving
-            string givingUserPageContent = buildUserPageContent(givingUserUrl, comment.AuthorName, comment.ParentThing.AuthorName, comment, true, isAward);
+            var givingInfo = buildUserPageContent(givingUserUrl, comment.AuthorName, comment.ParentThing.AuthorName, comment, true, isAward);
 
             // Get content for the user receiving
-            string receivngUserPageContent = buildUserPageContent(receivingUserUrl, comment.ParentThing.AuthorName, comment.AuthorName, comment, false, isAward);
+            var receivngInfo = buildUserPageContent(receivingUserUrl, comment.ParentThing.AuthorName, comment.AuthorName, comment, false, isAward);
 
             // Update content
-            _subredditService.EditWikiPage(givingUserUrl, givingUserPageContent, GiveEditReason);
-            _subredditService.EditWikiPage(receivingUserUrl, receivngUserPageContent, ReceiveEditReason);
+            _subredditService.EditWikiPage(givingUserUrl, givingInfo.Item1, GiveEditReason);
+            _subredditService.EditWikiPage(receivingUserUrl, receivngInfo.Item1, ReceiveEditReason);
+
+            // We only care about the receiving count for updated flair
+            return receivngInfo.Item2;
         }
 
-        private string buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)
+        private (string, int) buildUserPageContent(string userUrl, string username, string toUsername, DB4Thing commentToBuildLinkFor, bool giving, bool isAward)
         {
-            // Get page content
-            string pageContent = _subredditService.GetWikiPage(userUrl);
+            // Load hidden params from the wiki page. This will create hiddenparams for a new page
+            var wikiHiddenParams = getHiddenParams(userUrl, toUsername);
 
-            // If the page wasn't found, consider it empty
-            if (string.IsNullOrEmpty(pageContent))
-            {
-                pageContent = string.Empty;
-            }
-            else
-            {
-                // DB3 has many wiki entries with this space token in it. It's not needed here so must be replaced
-                pageContent = pageContent
-                    .Replace(DB3SpaceToken, " ")
-                    .Replace(ParenOpenToken, "(")
-                    .Replace(ParenCloseToken, ")");
-            }
-
-            // Find and deserialize hidden params
-            var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
-
-            UserWikiHiddenParams wikiHiddenParams;
-
-            // If a hidden params section wasn't found, make one
-            // Note: the second group is actually the hidden params, so count == 1 means it wasn't found
-            if(hiddenParamsMatch.Groups.Count == 1)
-            {
-                var givenLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "3").Matches(pageContent); // 3 = Given
-                var receivedLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "2").Matches(pageContent); // 2 = Received
-
-                // Get fullnames of given links
-                List<string> givenLinkFullnames = new List<string>();
-                foreach(Match match in givenLinks)
-                {
-                    givenLinkFullnames.Add("t1_" + match.Value.Substring(match.Value.LastIndexOf('/') + 1, (match.Value.Length - match.Value.LastIndexOf('/')) - 1).Replace("?context=3", string.Empty));
-                }
-
-                // Get fullnames of received links
-                List<string> receivedLinkFullnames = new List<string>();
-                foreach (Match match in receivedLinks)
-                {
-                    receivedLinkFullnames.Add("t1_" + match.Value.Substring(match.Value.LastIndexOf('/') + 1, (match.Value.Length - match.Value.LastIndexOf('/')) - 1).Replace("?context=2", string.Empty));
-                }
-
-                // Create a DeltaGiven / DeltaReceived for each link
-                List<UserWikiDeltaInfo> deltasGiven = getWikiDeltaInfoFromFullnames(givenLinkFullnames, toUsername);
-                List<UserWikiDeltaInfo> deltasReceived = getWikiDeltaInfoFromFullnames(receivedLinkFullnames, toUsername);
-
-                wikiHiddenParams = new UserWikiHiddenParams
-                {
-                    Comment = _appConfiguration.DefaultHiddenParamsComment,
-                    DeltasGiven = deltasGiven,
-                    DeltasReceived = deltasReceived
-                };
-            }
-            else
-            {
-                // Take hidden params from hidden params section
-                wikiHiddenParams = JsonConvert.DeserializeObject<UserWikiHiddenParams>(hiddenParamsMatch.Groups[1].Value);
-            }
-            
-            if(wikiHiddenParams.DeltasGiven == null) { wikiHiddenParams.DeltasGiven = new List<UserWikiDeltaInfo>(); }
+            if (wikiHiddenParams.DeltasGiven == null) { wikiHiddenParams.DeltasGiven = new List<UserWikiDeltaInfo>(); }
             if (wikiHiddenParams.DeltasReceived == null) { wikiHiddenParams.DeltasReceived = new List<UserWikiDeltaInfo>(); }
 
             // Add new info to hidden params
@@ -185,7 +138,72 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Replace(_appConfiguration.ReplaceTokens.WikiRowsGivenToken, givingRowsContent)
                 .Replace(_appConfiguration.ReplaceTokens.WikiRowsReceivedToken, receivingRowsContent);
 
-            return updatedContent;
+            return (updatedContent, wikiHiddenParams.DeltasReceived.Count);
+        }
+
+        private UserWikiHiddenParams getHiddenParams(string userUrl, string userName)
+        {
+            // Get page content
+            string pageContent = _subredditService.GetWikiPage(userUrl);
+
+            // If the page wasn't found, consider it empty
+            if (string.IsNullOrEmpty(pageContent))
+            {
+                pageContent = string.Empty;
+            }
+            else
+            {
+                // DB3 has many wiki entries with this space token in it. It's not needed here so must be replaced
+                pageContent = pageContent
+                    .Replace(DB3SpaceToken, " ")
+                    .Replace(ParenOpenToken, "(")
+                    .Replace(ParenCloseToken, ")");
+            }
+
+            // Find and deserialize hidden params
+            var hiddenParamsMatch = _appConfiguration.HiddenParamsRegex.Match(pageContent);
+
+            UserWikiHiddenParams wikiHiddenParams;
+
+            // If a hidden params section wasn't found, make one
+            // Note: the second group is actually the hidden params, so count == 1 means it wasn't found
+            if (hiddenParamsMatch.Groups.Count == 1)
+            {
+                var givenLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "3").Matches(pageContent); // 3 = Given
+                var receivedLinks = _appConfiguration.GetWikiLinkRegex(_appConfiguration.SubredditName, "2").Matches(pageContent); // 2 = Received
+
+                // Get fullnames of given links
+                List<string> givenLinkFullnames = new List<string>();
+                foreach (Match match in givenLinks)
+                {
+                    givenLinkFullnames.Add("t1_" + match.Value.Substring(match.Value.LastIndexOf('/') + 1, (match.Value.Length - match.Value.LastIndexOf('/')) - 1).Replace("?context=3", string.Empty));
+                }
+
+                // Get fullnames of received links
+                List<string> receivedLinkFullnames = new List<string>();
+                foreach (Match match in receivedLinks)
+                {
+                    receivedLinkFullnames.Add("t1_" + match.Value.Substring(match.Value.LastIndexOf('/') + 1, (match.Value.Length - match.Value.LastIndexOf('/')) - 1).Replace("?context=2", string.Empty));
+                }
+
+                // Create a DeltaGiven / DeltaReceived for each link
+                List<UserWikiDeltaInfo> deltasGiven = getWikiDeltaInfoFromFullnames(givenLinkFullnames, userName);
+                List<UserWikiDeltaInfo> deltasReceived = getWikiDeltaInfoFromFullnames(receivedLinkFullnames, userName);
+
+                wikiHiddenParams = new UserWikiHiddenParams
+                {
+                    Comment = _appConfiguration.DefaultHiddenParamsComment,
+                    DeltasGiven = deltasGiven,
+                    DeltasReceived = deltasReceived
+                };
+            }
+            else
+            {
+                // Take hidden params from hidden params section
+                wikiHiddenParams = JsonConvert.DeserializeObject<UserWikiHiddenParams>(hiddenParamsMatch.Groups[1].Value);
+            }
+
+            return wikiHiddenParams;
         }
 
         private string getRowsContent(List<UserWikiDeltaInfo> deltaInfos, string contextNumber)
