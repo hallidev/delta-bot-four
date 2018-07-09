@@ -23,6 +23,7 @@ namespace DeltaBotFour.Infrastructure
         public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int EditScanIntervalSeconds => int.Parse(_configuration["edit_scan_interval_seconds"]);
+        public int PMScanIntervalSeconds => int.Parse(_configuration["pm_scan_interval_seconds"]);
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);
         public string WikiUrlDeltaboards => _configuration["wiki_url_deltaboards"];
         public string WikiUrlUser => _configuration["wiki_url_user"];

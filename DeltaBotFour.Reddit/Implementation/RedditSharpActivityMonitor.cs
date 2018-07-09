@@ -17,10 +17,10 @@ namespace DeltaBotFour.Reddit.Implementation
         private readonly IDB4Repository _db4Repository;
         private readonly ILogger _logger;
         private readonly IObserver<VotableThing> _commentObserver;
-        private readonly IObserver<PrivateMessage> _privateMessageObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private DateTime _lastEditCheckUtc;
+        private DateTime _lastPMCheckUtc;
 
         public RedditSharpActivityMonitor(RedditSharp.Reddit reddit,
             Subreddit subreddit,
@@ -34,10 +34,9 @@ namespace DeltaBotFour.Reddit.Implementation
             _db4Repository = db4Repository;
             _logger = logger;
             _commentObserver = new IncomingCommentObserver(activityDispatcher, db4Repository, logger);
-            _privateMessageObserver = new IncomingPrivateMessageObserver(activityDispatcher, db4Repository, logger);
         }
 
-        public void Start(int editScanIntervalSeconds)
+        public void Start(int editScanIntervalSeconds, int pmScanIntervalSeconds)
         {
             // Get the time of the last processed comment
             var lastActivityTimeUtc = _db4Repository.GetLastActivityTimeUtc();
@@ -45,10 +44,6 @@ namespace DeltaBotFour.Reddit.Implementation
             // Process comments since last activity
             _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc)
                 .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
-
-            // Process edits since last activity - subtracting editScanIntervalSeconds
-            // will guarantee it runs immediately on startup
-            _lastEditCheckUtc = lastActivityTimeUtc.AddSeconds(-editScanIntervalSeconds);
 
             if (_reddit.User == null)
             {
@@ -64,13 +59,21 @@ namespace DeltaBotFour.Reddit.Implementation
 
             _logger.Info("Started monitoring comments...");
 
+            // Process edits since last activity - subtracting editScanIntervalSeconds
+            // will guarantee it runs immediately on startup
+            _lastEditCheckUtc = lastActivityTimeUtc.AddSeconds(-editScanIntervalSeconds);
+
             // Start edit monitoring
             monitorEdits(editScanIntervalSeconds);
 
             _logger.Info("Started monitoring edits...");
 
+            // Process unread private messages since last activity - subtracting pmScanIntervalSeconds
+            // will guarantee monitorPrivateMessages runs immediately on startup
+            _lastPMCheckUtc = lastActivityTimeUtc.AddSeconds(-pmScanIntervalSeconds);
+
             // Start private message monitoring
-            monitorPrivateMessages();
+            monitorPrivateMessages(pmScanIntervalSeconds);
 
             _logger.Info("Started monitoring private messages...");
         }
@@ -130,28 +133,35 @@ namespace DeltaBotFour.Reddit.Implementation
             }, _cancellationTokenSource.Token);
         }
 
-        private async void monitorPrivateMessages()
+        private async void monitorPrivateMessages(int pmScanIntervalSeconds)
         {
-            var privateMessageStream = _reddit.User.GetInbox().Stream();
-
-            // Get all new comments as they are posted
-            // This will run as long as the application is running
-            using (privateMessageStream.Subscribe(_privateMessageObserver))
+            await Task.Factory.StartNew(async () =>
             {
-                try
+                while (true)
                 {
-                    await privateMessageStream.Enumerate(_cancellationTokenSource.Token);
+                    if (DateTime.UtcNow > _lastPMCheckUtc.AddSeconds(pmScanIntervalSeconds))
+                    {
+                        // Process private messages since last activity
+                        await _reddit.User.GetUnreadMessages()
+                            .ForEachAsync(pm =>
+                            {
+                                if (pm is PrivateMessage privateMessage)
+                                {
+                                    _activityDispatcher.SendToQueue(privateMessage);
+                                }
+                            });
+
+                        _lastPMCheckUtc = DateTime.UtcNow;
+
+                        // Record the time when this happened.
+                        // Whenever DeltaBot stops, it's going to read this time
+                        // and query / process all things starting from this time
+                        _db4Repository.SetLastActivityTimeUtc();
+                    }
+
+                    Thread.Sleep(100);
                 }
-                catch (TaskCanceledException)
-                {
-                    // User cancelled, swallow
-                }
-                catch (Exception ex)
-                {
-                    // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    _logger.Error(ex);
-                }
-            }
+            }, _cancellationTokenSource.Token);
         }
 
         private class IncomingCommentObserver : IObserver<VotableThing>
@@ -198,45 +208,6 @@ namespace DeltaBotFour.Reddit.Implementation
 
                 // Send to queue for processing
                 _activityDispatcher.SendToQueue(comment);
-            }
-        }
-
-        private class IncomingPrivateMessageObserver : IObserver<PrivateMessage>
-        {
-            private readonly IActivityDispatcher _activityDispatcher;
-            private readonly IDB4Repository _db4Repository;
-            private readonly ILogger _logger;
-
-            public IncomingPrivateMessageObserver(IActivityDispatcher activityDispatcher,
-                IDB4Repository db4Repository, ILogger logger)
-            {
-                _activityDispatcher = activityDispatcher;
-                _db4Repository = db4Repository;
-                _logger = logger;
-            }
-
-            public void OnCompleted()
-            {
-
-            }
-
-            public void OnError(Exception error)
-            {
-                _logger.Error(error, "IncomingPrivateMessageObserver:OnError");
-            }
-
-            public void OnNext(PrivateMessage privateMessage)
-            {
-                // Record the time when this was processed.
-                // Whenever DeltaBot stops, it's going to read this time
-                // and query / process all things starting from this time
-                _db4Repository.SetLastActivityTimeUtc();
-
-                // Only send unread messages to queue for processing
-                if (privateMessage != null && privateMessage.Unread)
-                {
-                    _activityDispatcher.SendToQueue(privateMessage);
-                }
             }
         }
     }
