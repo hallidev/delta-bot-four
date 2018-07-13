@@ -11,6 +11,8 @@ namespace DeltaBotFour.Persistence.Implementation
 {
     public class DB4Repository : IDB4Repository
     {
+        private const int LastProcessedIdCountToTrack = 200;
+
         private const string DbFileName = "DeltaBotFour.db";
         private const string DeltaBotStateCollectionName = "deltabotstate";
         private const string DeltaCommentsCollectionName = "deltacomments";
@@ -20,6 +22,8 @@ namespace DeltaBotFour.Persistence.Implementation
         private const string BsonIdField = "_id";
         private const string BsonValueField = "value";
         private const string LastActivityTimeUtcKey = "last_processed_comment_time_utc";
+        private const string LastProcessedCommentIdsKey = "last_processed_comment_ids";
+        private const string LastProcessedEditIdsKey = "last_processed_edit_ids";
         private const string IgnoreQuotedDeltaPMUserListKey = "ignore_quoted_delta_pm_user_list";
 
         private readonly LiteDatabase _liteDatabase;
@@ -44,6 +48,100 @@ namespace DeltaBotFour.Persistence.Implementation
             var lastActivityTimeUtcDocument = stateCollection.FindById(LastActivityTimeUtcKey);
             lastActivityTimeUtcDocument[BsonValueField] = DateTime.UtcNow;
             stateCollection.Update(lastActivityTimeUtcDocument);
+        }
+
+        public List<string> GetLastProcessedCommentIds()
+        {
+            var stateCollection = getState();
+
+            var document = stateCollection.FindById(LastProcessedCommentIdsKey);
+            var bsonList = document[BsonValueField].AsArray;
+
+            var commentIds = new List<string>();
+            foreach (var value in bsonList)
+            {
+                commentIds.Add(value.AsString);
+            }
+
+            // Reverse the list so newest are on top
+            commentIds.Reverse();
+
+            return commentIds;
+        }
+
+        public void SetLastProcessedCommentId(string commentId)
+        {
+            // Get current list of last processed comments
+            var commentIds = GetLastProcessedCommentIds();
+
+            // Remove the first item (oldest) and add new item
+            if (commentIds.Count > LastProcessedIdCountToTrack)
+            {
+                commentIds.RemoveAt(0);
+            }
+            
+            commentIds.Add(commentId);
+
+            var stateCollection = getState();
+
+            var document = stateCollection.FindById(LastProcessedCommentIdsKey);
+            var bsonList = document[BsonValueField].AsArray;
+            
+            bsonList.Clear();
+            
+            foreach (var id in commentIds)
+            {
+                bsonList.Add(id);
+            }
+
+            stateCollection.Update(document);
+        }
+
+        public List<string> GetLastProcessedEditIds()
+        {
+            var stateCollection = getState();
+
+            var document = stateCollection.FindById(LastProcessedEditIdsKey);
+            var bsonList = document[BsonValueField].AsArray;
+
+            var editIds = new List<string>();
+            foreach (var value in bsonList)
+            {
+                editIds.Add(value.AsString);
+            }
+
+            // Reverse the list so newest are on top
+            editIds.Reverse();
+
+            return editIds;
+        }
+
+        public void SetLastProcessedEditId(string editId)
+        {
+            // Get current list of last processed comments
+            var editIds = GetLastProcessedEditIds();
+
+            // Remove the first item (oldest) and add new item
+            if (editIds.Count > LastProcessedIdCountToTrack)
+            {
+                editIds.RemoveAt(0);
+            }
+
+            editIds.Add(editId);
+
+            var stateCollection = getState();
+
+            var document = stateCollection.FindById(LastProcessedEditIdsKey);
+            var bsonList = document[BsonValueField].AsArray;
+
+            bsonList.Clear();
+
+            foreach (var id in editIds)
+            {
+                bsonList.Add(id);
+            }
+
+            stateCollection.Update(document);
         }
 
         public bool DeltaCommentExists(string commentId)
@@ -179,8 +277,8 @@ namespace DeltaBotFour.Persistence.Implementation
         {
             var stateCollection = getState();
 
-            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
+            var document = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
+            var bsonList = document[BsonValueField].AsArray;
 
             var users = new List<string>();
             foreach (var value in bsonList)
@@ -195,8 +293,8 @@ namespace DeltaBotFour.Persistence.Implementation
         {
             var stateCollection = getState();
 
-            var ignoreQuotedDeltaPMUserListDocument = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = ignoreQuotedDeltaPMUserListDocument[BsonValueField].AsArray;
+            var document = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
+            var bsonList = document[BsonValueField].AsArray;
 
             bool userExists = false;
             foreach (var value in bsonList)
@@ -211,7 +309,7 @@ namespace DeltaBotFour.Persistence.Implementation
             if (!userExists)
             {
                 bsonList.Add(username);
-                stateCollection.Update(ignoreQuotedDeltaPMUserListDocument);
+                stateCollection.Update(document);
             }
         }
 
@@ -237,18 +335,34 @@ namespace DeltaBotFour.Persistence.Implementation
             {
                 // If no LastActivity exists, create a new one and set the date to 10 minutes prior
                 // so that it picks up anything during the transition
-                var lastActivityTimeUtcDocument = new BsonDocument();
-                lastActivityTimeUtcDocument[BsonIdField] = LastActivityTimeUtcKey;
-                lastActivityTimeUtcDocument[BsonValueField] = DateTime.UtcNow.AddMinutes(-10);
-                stateCollection.Insert(lastActivityTimeUtcDocument);
+                var document = new BsonDocument();
+                document[BsonIdField] = LastActivityTimeUtcKey;
+                document[BsonValueField] = DateTime.UtcNow.AddMinutes(-10);
+                stateCollection.Insert(document);
+            }
+
+            if (stateCollection.FindById(LastProcessedCommentIdsKey) == null)
+            {
+                var document = new BsonDocument();
+                document[BsonIdField] = LastProcessedCommentIdsKey;
+                document[BsonValueField] = new List<BsonValue>();
+                stateCollection.Insert(document);
+            }
+
+            if (stateCollection.FindById(LastProcessedEditIdsKey) == null)
+            {
+                var document = new BsonDocument();
+                document[BsonIdField] = LastProcessedEditIdsKey;
+                document[BsonValueField] = new List<BsonValue>();
+                stateCollection.Insert(document);
             }
 
             if (stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey) == null)
             {
-                var ignoreQuotedDeltaPMUserListDocument = new BsonDocument();
-                ignoreQuotedDeltaPMUserListDocument[BsonIdField] = IgnoreQuotedDeltaPMUserListKey;
-                ignoreQuotedDeltaPMUserListDocument[BsonValueField] = new List<BsonValue>();
-                stateCollection.Insert(ignoreQuotedDeltaPMUserListDocument);
+                var document = new BsonDocument();
+                document[BsonIdField] = IgnoreQuotedDeltaPMUserListKey;
+                document[BsonValueField] = new List<BsonValue>();
+                stateCollection.Insert(document);
             }
 
             return stateCollection;

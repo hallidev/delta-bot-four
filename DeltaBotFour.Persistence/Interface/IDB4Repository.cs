@@ -8,6 +8,10 @@ namespace DeltaBotFour.Persistence.Interface
     {
         DateTime GetLastActivityTimeUtc();
         void SetLastActivityTimeUtc();
+        List<string> GetLastProcessedCommentIds();
+        void SetLastProcessedCommentId(string commentId);
+        List<string> GetLastProcessedEditIds();
+        void SetLastProcessedEditId(string editId);
         bool DeltaCommentExists(string commentId);
         bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName);
         DeltaComment GetDeltaComment(string commentId);

@@ -22,6 +22,7 @@ namespace DeltaBotFour.Infrastructure
         public string LogFilename => _configuration["log_file_name"];
         public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+        public int CommentScanIntervalSeconds => int.Parse(_configuration["comment_scan_interval_seconds"]);
         public int EditScanIntervalSeconds => int.Parse(_configuration["edit_scan_interval_seconds"]);
         public int PMScanIntervalSeconds => int.Parse(_configuration["pm_scan_interval_seconds"]);
         public int HoursToUnawardDelta => int.Parse(_configuration["hours_to_unaward_delta"]);

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared.Logging;
+using Newtonsoft.Json.Linq;
+using RedditSharp;
 using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation
@@ -16,9 +20,9 @@ namespace DeltaBotFour.Reddit.Implementation
         private readonly IActivityDispatcher _activityDispatcher;
         private readonly IDB4Repository _db4Repository;
         private readonly ILogger _logger;
-        private readonly IObserver<VotableThing> _commentObserver;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
+        private DateTime _lastCommentCheckUtc;
         private DateTime _lastEditCheckUtc;
         private DateTime _lastPMCheckUtc;
 
@@ -33,17 +37,30 @@ namespace DeltaBotFour.Reddit.Implementation
             _activityDispatcher = activityDispatcher;
             _db4Repository = db4Repository;
             _logger = logger;
-            _commentObserver = new IncomingCommentObserver(activityDispatcher, db4Repository, logger);
         }
 
-        public void Start(int editScanIntervalSeconds, int pmScanIntervalSeconds)
+        public void Start(int commentScanIntervalSeconds, int editScanIntervalSeconds, int pmScanIntervalSeconds)
         {
             // Get the time of the last processed comment
             var lastActivityTimeUtc = _db4Repository.GetLastActivityTimeUtc();
 
-            // Process comments since last activity
-            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc)
-                .ForEachAsync(c => _activityDispatcher.SendToQueue(c));
+            // For first time runs of DeltaBot, we need to prime the database with a comment id
+            // to start at.
+            var lastProcessedComments = _db4Repository.GetLastProcessedCommentIds();
+
+            if (lastProcessedComments.Count == 0)
+            {
+                primeCommentMonitor(lastActivityTimeUtc);
+            }
+
+            // For first time runs of DeltaBot, we need to prime the database with an edit id
+            // to start at.
+            var lastProcessedEdits = _db4Repository.GetLastProcessedEditIds();
+
+            if (lastProcessedEdits.Count == 0)
+            {
+                primeEditMonitor(lastActivityTimeUtc);
+            }
 
             if (_reddit.User == null)
             {
@@ -54,10 +71,12 @@ namespace DeltaBotFour.Reddit.Implementation
             _reddit.User.GetInbox().Where(pm => pm != null && pm.Unread)
                 .ForEachAsync(pm => _activityDispatcher.SendToQueue(pm));
 
-            // Start comment monitoring
-            monitorComments();
+            // Process comments since last activity - subtracting commentScanIntervalSeconds
+            // will guarantee it runs immediately on startup
+            _lastCommentCheckUtc = lastActivityTimeUtc.AddSeconds(-commentScanIntervalSeconds);
 
-            _logger.Info("Started monitoring comments...");
+            // Start comment monitoring
+            monitorComments(commentScanIntervalSeconds);
 
             // Process edits since last activity - subtracting editScanIntervalSeconds
             // will guarantee it runs immediately on startup
@@ -66,16 +85,12 @@ namespace DeltaBotFour.Reddit.Implementation
             // Start edit monitoring
             monitorEdits(editScanIntervalSeconds);
 
-            _logger.Info("Started monitoring edits...");
-
             // Process unread private messages since last activity - subtracting pmScanIntervalSeconds
             // will guarantee monitorPrivateMessages runs immediately on startup
             _lastPMCheckUtc = lastActivityTimeUtc.AddSeconds(-pmScanIntervalSeconds);
 
             // Start private message monitoring
             monitorPrivateMessages(pmScanIntervalSeconds);
-
-            _logger.Info("Started monitoring private messages...");
         }
 
         public void Stop()
@@ -83,28 +98,85 @@ namespace DeltaBotFour.Reddit.Implementation
             _cancellationTokenSource.Cancel();
         }
 
-        private async void monitorComments()
+        private async void monitorComments(int commentScanIntervalSeconds)
         {
-            var commentsStream = _subreddit.GetComments().Stream();
-
-            // Get all new comments as they are posted
-            // This will run as long as the application is running
-            using (commentsStream.Subscribe(_commentObserver))
+            await Task.Factory.StartNew(async () =>
             {
-                try
+                while (true)
                 {
-                    await commentsStream.Enumerate(_cancellationTokenSource.Token);
+                    try
+                    {
+                        if (DateTime.UtcNow > _lastCommentCheckUtc.AddSeconds(commentScanIntervalSeconds))
+                        {
+                            // Get the last valid processed comment
+                            // This looping / comment checking has to be done
+                            // since deleted comments won't return anything
+                            var lastCommentIds = _db4Repository.GetLastProcessedCommentIds();
+
+                            string lastProcessedCommentId = string.Empty;
+
+                            foreach (string lastCommentId in lastCommentIds)
+                            {
+                                if (await isValidComment(lastCommentId))
+                                {
+                                    lastProcessedCommentId = lastCommentId;
+                                    break;
+                                }
+                            }
+
+                            // If we got here with no commentId, DeltaBot can't continue.
+                            if (string.IsNullOrEmpty(lastProcessedCommentId))
+                            {
+                                _logger.Error(new Exception(), "CRITICAL: No valid last processed comment found. DeltaBot cannot continue monitoring comments...");
+                                break;
+                            }
+
+                            var commentsJson = await _subreddit.WebAgent.Get($"/r/{_subreddit.Name}/comments.json?before={lastProcessedCommentId}&limit=100");
+
+                            var children = commentsJson["data"]["children"] as JArray;
+                            var comments = new List<Comment>();
+
+                            if (children != null && children.Count > 0)
+                            {
+                                foreach (var child in children)
+                                {
+                                    comments.Add(Thing.Parse<Comment>(_subreddit.WebAgent, child));
+                                }
+                            }
+
+                            if (comments.Count > 0)
+                            {
+                                // Make sure comments are sorted oldest to newest so oldest get processed first
+                                var sortedComments = comments.OrderBy(c => c.CreatedUTC).ToList();
+
+                                foreach (var comment in sortedComments)
+                                {
+                                    // Record the time when this was processed.
+                                    // Whenever DeltaBot stops, it's going to read this time
+                                    // and query / process all things starting from this time
+                                    _db4Repository.SetLastActivityTimeUtc();
+
+                                    // Send to queue for processing
+                                    _activityDispatcher.SendToQueue(comment);
+
+                                    // Mark as the last processed comment
+                                    _db4Repository.SetLastProcessedCommentId(comment.FullName);
+                                }
+                            }
+
+                            _lastCommentCheckUtc = DateTime.UtcNow;
+                        }
+
+                        Thread.Sleep(100);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Error in comment monitor loop - continuing...");
+                    }
                 }
-                catch (TaskCanceledException)
-                {
-                    // User cancelled, swallow
-                }
-                catch (Exception ex)
-                {
-                    // Make sure no exceptions get thrown out of this method - this will stop the comment monitoring
-                    _logger.Error(ex);
-                }
-            }
+            }, _cancellationTokenSource.Token);
+
+            _logger.Info("Started monitoring comments...");
         }
 
         private async void monitorEdits(int editScanIntervalSeconds)
@@ -113,31 +185,86 @@ namespace DeltaBotFour.Reddit.Implementation
             {
                 while (true)
                 {
-                    if (DateTime.UtcNow > _lastEditCheckUtc.AddSeconds(editScanIntervalSeconds))
+                    try
                     {
-                        // Process edits since last activity
-                        await _subreddit.GetEdited().Where(c => c.EditedUTC.HasValue && c.EditedUTC > _lastEditCheckUtc)
-                            .ForEachAsync(c =>
+                        if (DateTime.UtcNow > _lastEditCheckUtc.AddSeconds(editScanIntervalSeconds))
+                        {
+                            // Get the last valid processed edit
+                            // This looping / edit checking has to be done
+                            // since deleted edits won't return anything
+                            var lastEditIds = _db4Repository.GetLastProcessedEditIds();
+
+                            string lastProcessedEditId = string.Empty;
+
+                            foreach (string lastEditId in lastEditIds)
                             {
-                                if (c is Comment editedComment)
+                                if (await isValidComment(lastEditId))
                                 {
-                                    _activityDispatcher.SendToQueue(editedComment);
+                                    lastProcessedEditId = lastEditId;
+                                    break;
                                 }
-                            });
+                            }
 
-                        _lastEditCheckUtc = DateTime.UtcNow;
+                            // If we got here with no editId, DeltaBot can't continue.
+                            if (string.IsNullOrEmpty(lastProcessedEditId))
+                            {
+                                _logger.Error(new Exception(), "CRITICAL: No valid last processed edit found. DeltaBot cannot continue monitoring edits...");
+                                break;
+                            }
+
+                            var editsJson = await _subreddit.WebAgent.Get($"/r/{_subreddit.Name}/about/edited.json?only=comments&before={lastProcessedEditId}&limit=100");
+
+                            var children = editsJson["data"]["children"] as JArray;
+                            var edits = new List<Comment>();
+
+                            if (children != null && children.Count > 0)
+                            {
+                                foreach (var child in children)
+                                {
+                                    edits.Add(Thing.Parse<Comment>(_subreddit.WebAgent, child));
+                                }
+                            }
+
+                            if (edits.Count > 0)
+                            {
+                                // Make sure comments are sorted oldest to newest so oldest get processed first
+                                var sortedEdits = edits.OrderBy(c => c.CreatedUTC).ToList();
+
+                                foreach (var comment in sortedEdits)
+                                {
+                                    // Record the time when this was processed.
+                                    // Whenever DeltaBot stops, it's going to read this time
+                                    // and query / process all things starting from this time
+                                    _db4Repository.SetLastActivityTimeUtc();
+
+                                    // Send to queue for processing
+                                    _activityDispatcher.SendToQueue(comment);
+
+                                    // Mark as the last processed comment
+                                    _db4Repository.SetLastProcessedEditId(comment.FullName);
+                                }
+                            }
+
+                            _lastEditCheckUtc = DateTime.UtcNow;
+                        }
+
+                        Thread.Sleep(100);
                     }
-
-                    Thread.Sleep(100);
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Error in edit monitor loop - continuing...");
+                    }
                 }
             }, _cancellationTokenSource.Token);
+
+            _logger.Info("Started monitoring edits...");
         }
 
         private async void monitorPrivateMessages(int pmScanIntervalSeconds)
         {
             await Task.Factory.StartNew(async () =>
             {
-                while (true)
+                while(true)
                 {
                     if (DateTime.UtcNow > _lastPMCheckUtc.AddSeconds(pmScanIntervalSeconds))
                     {
@@ -162,53 +289,44 @@ namespace DeltaBotFour.Reddit.Implementation
                     Thread.Sleep(100);
                 }
             }, _cancellationTokenSource.Token);
+
+            _logger.Info("Started monitoring private messages...");
         }
 
-        private class IncomingCommentObserver : IObserver<VotableThing>
+        private void primeCommentMonitor(DateTime lastActivityTimeUtc)
         {
-            private readonly IActivityDispatcher _activityDispatcher;
-            private readonly IDB4Repository _db4Repository;
-            private readonly ILogger _logger;
-
-            public IncomingCommentObserver(IActivityDispatcher activityDispatcher,
-                IDB4Repository db4Repository, ILogger logger)
-            {
-                _activityDispatcher = activityDispatcher;
-                _db4Repository = db4Repository;
-                _logger = logger;
-            }
-
-            public void OnCompleted()
-            {
-
-            }
-
-            public void OnError(Exception error)
-            {
-                _logger.Error(error, "IncomingCommentObserver:OnError");
-            }
-
-            public void OnNext(VotableThing votableThing)
-            {
-                // We are only observing comments
-                if (!(votableThing is Comment comment)) { return; }
-
-                // There is a known bug in RedditSharp where this observer can attempt
-                // to process a few very old comments where it starts up. I'm arbitrarily picking 6 months
-                // here. I'm not sure if there's a better way to fix this
-                if ((DateTime.UtcNow - comment.CreatedUTC).TotalDays > 180)
+            bool lastCommentSet = false;
+            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-20))
+                .ForEach(comment =>
                 {
-                    return;
-                }
+                    if (!lastCommentSet && isValidComment(comment.FullName).Result)
+                    {
+                        _db4Repository.SetLastProcessedCommentId(comment.FullName);
+                        lastCommentSet = true;
+                    }
+                });
+        }
 
-                // Record the time when this was processed.
-                // Whenever DeltaBot stops, it's going to read this time
-                // and query / process all things starting from this time
-                _db4Repository.SetLastActivityTimeUtc();
+        private void primeEditMonitor(DateTime lastActivityTimeUtc)
+        {
+            bool lastEditSet = false;
+            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-20))
+                .ForEach(edit =>
+                {
+                    if (!lastEditSet && isValidComment(edit.FullName).Result)
+                    {
+                        _db4Repository.SetLastProcessedEditId(edit.FullName);
+                        lastEditSet = true;
+                    }
+                });
+        }
 
-                // Send to queue for processing
-                _activityDispatcher.SendToQueue(comment);
-            }
+        private async Task<bool> isValidComment(string fullname)
+        {
+            var commentJson = await _subreddit.WebAgent.Get($"/r/{_subreddit.Name}/comments.json?limit=1&after={fullname}");
+            var children = commentJson["data"]["children"] as JArray;
+
+            return children.Count >= 1;
         }
     }
 }

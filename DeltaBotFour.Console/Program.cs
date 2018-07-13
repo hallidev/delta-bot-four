@@ -22,7 +22,8 @@ namespace DeltaBotFour.Console
 
             // Start monitoring comments / edits / private messages
             var activityMonitor = _container.Resolve<IActivityMonitor>();
-            activityMonitor.Start(appConfiguration.EditScanIntervalSeconds,
+            activityMonitor.Start(appConfiguration.CommentScanIntervalSeconds,
+                appConfiguration.EditScanIntervalSeconds,
                 appConfiguration.PMScanIntervalSeconds);
 
             // Start queue dispatcher
