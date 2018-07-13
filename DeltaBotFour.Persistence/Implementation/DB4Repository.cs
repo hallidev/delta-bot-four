@@ -74,6 +74,9 @@ namespace DeltaBotFour.Persistence.Implementation
             // Get current list of last processed comments
             var commentIds = GetLastProcessedCommentIds();
 
+            // We want oldest on top here, and it's currently sorted newest on top
+            commentIds.Reverse();
+
             // Remove the first item (oldest) and add new item
             if (commentIds.Count > LastProcessedIdCountToTrack)
             {
@@ -120,6 +123,9 @@ namespace DeltaBotFour.Persistence.Implementation
         {
             // Get current list of last processed comments
             var editIds = GetLastProcessedEditIds();
+
+            // We want oldest on top here, and it's currently sorted newest on top
+            editIds.Reverse();
 
             // Remove the first item (oldest) and add new item
             if (editIds.Count > LastProcessedIdCountToTrack)
