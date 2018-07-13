@@ -308,7 +308,7 @@ namespace DeltaBotFour.Reddit.Implementation
         private void primeEditMonitor(DateTime lastActivityTimeUtc)
         {
             bool lastEditSet = false;
-            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-10))
+            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-30))
                 .ForEach(edit =>
                 {
                     if (!lastEditSet && isValidComment(edit.FullName).Result)
