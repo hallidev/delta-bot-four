@@ -294,7 +294,7 @@ namespace DeltaBotFour.Reddit.Implementation
         private void primeCommentMonitor(DateTime lastActivityTimeUtc)
         {
             bool lastCommentSet = false;
-            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-20))
+            _subreddit.GetComments().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-5))
                 .ForEach(comment =>
                 {
                     if (!lastCommentSet && isValidComment(comment.FullName).Result)
@@ -308,7 +308,7 @@ namespace DeltaBotFour.Reddit.Implementation
         private void primeEditMonitor(DateTime lastActivityTimeUtc)
         {
             bool lastEditSet = false;
-            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-20))
+            _subreddit.GetEdited().Where(c => c.CreatedUTC > lastActivityTimeUtc.AddMinutes(-10))
                 .ForEach(edit =>
                 {
                     if (!lastEditSet && isValidComment(edit.FullName).Result)
