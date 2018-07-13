@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared.Logging;
 using Newtonsoft.Json.Linq;
-using RedditSharp;
 using RedditSharp.Things;
 
 namespace DeltaBotFour.Reddit.Implementation

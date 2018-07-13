@@ -4,7 +4,6 @@ using RedditSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Things

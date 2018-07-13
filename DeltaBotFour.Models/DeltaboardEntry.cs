@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DeltaBotFour.Models
+﻿namespace DeltaBotFour.Models
 {
     public class DeltaboardEntry
     {

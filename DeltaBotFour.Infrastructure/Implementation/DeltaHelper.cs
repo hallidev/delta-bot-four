@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace DeltaBotFour.Infrastructure.Implementation
+﻿namespace DeltaBotFour.Infrastructure.Implementation
 {
     public static class DeltaHelper
     {
