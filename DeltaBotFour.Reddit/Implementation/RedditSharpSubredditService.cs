@@ -152,7 +152,7 @@ namespace DeltaBotFour.Reddit.Implementation
                 var widgetToken = ((JObject)response["items"]).Properties()
                     .Where(prop => prop.Name.StartsWith("widget_"))
                     .Select(prop => prop.Value)
-                    .FirstOrDefault(token => string.Equals(token["shortName"].Value<string>(), sidebarWidgetName, StringComparison.InvariantCultureIgnoreCase));
+                    .FirstOrDefault(token => token?["shortName"] != null && string.Equals(token["shortName"].Value<string>(), sidebarWidgetName, StringComparison.InvariantCultureIgnoreCase));
 
                 result = widgetToken;
 
