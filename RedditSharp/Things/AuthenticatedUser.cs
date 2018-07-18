@@ -14,7 +14,7 @@ namespace RedditSharp.Things
         }
 
         private const string ModeratorUrl = "/reddits/mine/moderator.json";
-        private const string UnreadMessagesUrl = "/message/unread.json?mark=true&limit=25";
+        private const string UnreadMessagesUrl = "/message/unread.json?mark={0}&limit=25";
         private const string ModQueueUrl = "/r/mod/about/modqueue.json";
         private const string UnmoderatedUrl = "/r/mod/about/unmoderated.json";
         private const string ModMailUrl = "/message/moderator.json";
@@ -36,7 +36,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unread messages.
         /// </summary>
-        public Listing<Thing> GetUnreadMessages(int max = -1) => Listing<Thing>.Create(WebAgent, UnreadMessagesUrl, max, 100);
+        public Listing<Thing> GetUnreadMessages(int max = -1, bool mark = true) => Listing<Thing>.Create(WebAgent, string.Format(UnreadMessagesUrl, mark.ToString().ToLower()), max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of items in the Moderation Queue.

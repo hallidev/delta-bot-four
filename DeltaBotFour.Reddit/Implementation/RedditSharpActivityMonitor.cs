@@ -267,7 +267,7 @@ namespace DeltaBotFour.Reddit.Implementation
                     if (DateTime.UtcNow > _lastPMCheckUtc.AddSeconds(pmScanIntervalSeconds))
                     {
                         // Process private messages since last activity
-                        await _reddit.User.GetUnreadMessages()
+                        await _reddit.User.GetUnreadMessages(mark: false)
                             .ForEachAsync(pm =>
                             {
                                 if (pm is PrivateMessage privateMessage)
