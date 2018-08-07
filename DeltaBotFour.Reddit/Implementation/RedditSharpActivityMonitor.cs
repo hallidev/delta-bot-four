@@ -65,10 +65,6 @@ namespace DeltaBotFour.Reddit.Implementation
                 Task.Run(async () => await _reddit.InitOrUpdateUserAsync()).Wait();
             }
 
-            // Process unread private messages
-            _reddit.User.GetInbox().Where(pm => pm != null && pm.Unread)
-                .ForEachAsync(pm => _activityDispatcher.SendToQueue(pm));
-
             // Process comments since last activity - subtracting commentScanIntervalSeconds
             // will guarantee it runs immediately on startup
             _lastCommentCheckUtc = lastActivityTimeUtc.AddSeconds(-commentScanIntervalSeconds);

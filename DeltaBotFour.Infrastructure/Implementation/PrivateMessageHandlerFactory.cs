@@ -72,7 +72,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             // Stop quoted deltas warning
-            if (string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.DeltaInQuoteSubject, StringComparison.CurrentCultureIgnoreCase))
+            if (privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
             {
                 return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository, _redditService);
             }
