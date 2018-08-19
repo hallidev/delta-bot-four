@@ -152,9 +152,6 @@ namespace DeltaBotFour.Reddit.Implementation
 
                                     // Send to queue for processing
                                     _activityDispatcher.SendToQueue(comment);
-
-                                    // Mark as the last processed comment
-                                    _db4Repository.SetLastProcessedCommentId(comment.FullName);
                                 }
                             }
 
@@ -233,9 +230,6 @@ namespace DeltaBotFour.Reddit.Implementation
 
                                     // Send to queue for processing
                                     _activityDispatcher.SendToQueue(comment);
-
-                                    // Mark as the last processed comment
-                                    _db4Repository.SetLastProcessedEditId(comment.FullName);
                                 }
                             }
 

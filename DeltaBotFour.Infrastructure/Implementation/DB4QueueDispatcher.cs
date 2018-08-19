@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
+using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Shared.Interface;
 using DeltaBotFour.Shared.Logging;
 using Newtonsoft.Json;
@@ -13,17 +14,20 @@ namespace DeltaBotFour.Infrastructure.Implementation
     {
         private readonly ILogger _logger;
         private readonly IDB4Queue _queue;
+        private readonly IDB4Repository _repository;
         private readonly ICommentProcessor _commentProcessor;
         private readonly IPrivateMessageProcessor _privateMessageProcessor;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public DB4QueueDispatcher(ILogger logger,
             IDB4Queue queue, 
+            IDB4Repository repository,
             ICommentProcessor commentProcessor,
             IPrivateMessageProcessor privateMessageProcessor)
         {
             _logger = logger;
             _queue = queue;
+            _repository = repository;
             _commentProcessor = commentProcessor;
             _privateMessageProcessor = privateMessageProcessor;
         }
@@ -52,6 +56,17 @@ namespace DeltaBotFour.Infrastructure.Implementation
                                 case QueueMessageType.Edit:
                                     var comment = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
                                     _commentProcessor.Process(comment);
+
+                                    // Mark as the last processed comment / edit so when DeltaBot starts up again, it has a place to start
+                                    if (message.Type == QueueMessageType.Comment)
+                                    {
+                                        _repository.SetLastProcessedCommentId(comment.FullName);
+                                    }
+                                    else
+                                    {
+                                        _repository.SetLastProcessedEditId(comment.FullName);
+                                    }
+                                    
                                     break;
                                 case QueueMessageType.PrivateMessage:
                                     var privateMessage = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
