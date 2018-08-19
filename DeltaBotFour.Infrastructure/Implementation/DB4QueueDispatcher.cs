@@ -54,17 +54,28 @@ namespace DeltaBotFour.Infrastructure.Implementation
                             {
                                 case QueueMessageType.Comment:
                                 case QueueMessageType.Edit:
-                                    var comment = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
-                                    _commentProcessor.Process(comment);
 
-                                    // Mark as the last processed comment / edit so when DeltaBot starts up again, it has a place to start
-                                    if (message.Type == QueueMessageType.Comment)
+                                    var comment = JsonConvert.DeserializeObject<DB4Thing>(message.Payload);
+
+                                    try
                                     {
-                                        _repository.SetLastProcessedCommentId(comment.FullName);
+                                        
+                                        _commentProcessor.Process(comment);
                                     }
-                                    else
+                                    finally
                                     {
-                                        _repository.SetLastProcessedEditId(comment.FullName);
+                                        // If for whatever reason there's a problem during processing, we need to be
+                                        // able to move on. Make sure this comment is set as processed
+
+                                        // Mark as the last processed comment / edit so when DeltaBot starts up again, it has a place to start
+                                        if (message.Type == QueueMessageType.Comment)
+                                        {
+                                            _repository.SetLastProcessedCommentId(comment.FullName);
+                                        }
+                                        else
+                                        {
+                                            _repository.SetLastProcessedEditId(comment.FullName);
+                                        }
                                     }
                                     
                                     break;
