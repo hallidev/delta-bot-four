@@ -65,6 +65,7 @@ namespace DeltaBotFour.Reddit
                     AuthorName = privateMessage.AuthorName,
                     Subject = privateMessage.Subject,
                     Body = privateMessage.Body,
+                    Unread = privateMessage.Unread
                 };
             }
 

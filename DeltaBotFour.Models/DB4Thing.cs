@@ -27,5 +27,6 @@ namespace DeltaBotFour.Models
         public DB4Thing ParentThing { get; set; }
         public List<DB4Thing> Comments { get; set; }
         public bool NeedsRefresh { get; set; }
+        public bool Unread { get; set; }
     }
 }

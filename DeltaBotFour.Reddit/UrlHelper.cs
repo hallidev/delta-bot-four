@@ -2,11 +2,19 @@
 {
     internal static class UrlHelper
     {
+        public const string OldReddit = "old.reddit.com";
+        public const string WwwReddit = "www.reddit.com";
         public const string WwwRedditBaseUrl = "https://www.reddit.com";
         public const string OAuthRedditBaseUrl = "https://oauth.reddit.com";
 
         public static string ConvertToOAuth(string url)
         {
+            // First check for old reddit links and replace them with www
+            if (url.Contains(OldReddit))
+            {
+                url = url.Replace(OldReddit, WwwReddit);
+            }
+
             // Convert www to oauth
             if (url.StartsWith(WwwRedditBaseUrl))
             {
