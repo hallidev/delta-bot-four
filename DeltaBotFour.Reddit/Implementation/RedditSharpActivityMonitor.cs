@@ -121,8 +121,19 @@ namespace DeltaBotFour.Reddit.Implementation
                             // If we got here with no commentId, DeltaBot can't continue.
                             if (string.IsNullOrEmpty(lastProcessedCommentId))
                             {
-                                _logger.Error(new Exception(), "CRITICAL: No valid last processed comment found. DeltaBot cannot continue monitoring comments...");
-                                break;
+                                var latestComments = await _subreddit.GetComments(1).OrderByDescending(c => c.CreatedUTC).ToList();
+                                if (latestComments != null && latestComments.Count > 0)
+                                {
+                                    lastProcessedCommentId = latestComments[0].FullName;
+                                    // Need to have a good starting point ASAP
+                                    _db4Repository.SetLastProcessedCommentId(lastProcessedCommentId);
+                                    _logger.Warn($"WARN: Had to bootstrap from latest comment: {lastProcessedCommentId}!!");
+                                }
+                                else
+                                {
+                                    _logger.Error(new Exception(), "CRITICAL: No valid last processed comment found. DeltaBot cannot continue monitoring comments...");
+                                    break;
+                                }
                             }
 
                             var commentsJson = await _subreddit.WebAgent.Get($"/r/{_subreddit.Name}/comments.json?before={lastProcessedCommentId}&limit=100");
@@ -202,8 +213,19 @@ namespace DeltaBotFour.Reddit.Implementation
                             // If we got here with no editId, DeltaBot can't continue.
                             if (string.IsNullOrEmpty(lastProcessedEditId))
                             {
-                                _logger.Error(new Exception(), "CRITICAL: No valid last processed edit found. DeltaBot cannot continue monitoring edits...");
-                                break;
+                                var latestEdits = await _subreddit.GetEdited(1).OrderByDescending(c => c.CreatedUTC).ToList();
+                                if (latestEdits != null && latestEdits.Count > 0)
+                                {
+                                    lastProcessedEditId = latestEdits[0].FullName;
+                                    // Need to have a good starting point ASAP
+                                    _db4Repository.SetLastProcessedEditId(lastProcessedEditId);
+                                    _logger.Warn($"WARN: Had to bootstrap from latest edit: {lastProcessedEditId}!!");
+                                }
+                                else
+                                {
+                                    _logger.Error(new Exception(), "CRITICAL: No valid last processed edit found. DeltaBot cannot continue monitoring edits...");
+                                    break;
+                                }
                             }
 
                             var editsJson = await _subreddit.WebAgent.Get($"/r/{_subreddit.Name}/about/edited.json?only=comments&before={lastProcessedEditId}&limit=100");
