@@ -4,5 +4,6 @@
     {
         void AddDelta(string username);
         void RemoveDelta(string username);
+        void RefreshDeltaboards();
     }
 }

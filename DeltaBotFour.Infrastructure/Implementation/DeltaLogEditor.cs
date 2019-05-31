@@ -1,4 +1,5 @@
 ﻿using System;
+using Core.Foundation.Extensions;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
@@ -66,6 +67,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         private string createNewPost(string title, string text, string mainSubPostId, string mainSubPostPermalink)
         {
+            title = title.Ellipsis(100);
+
             // Make new post to the DeltaLog sub
             var newPost = _subredditService.Post(title, text, _appConfiguration.DeltaLogSubredditName);
 

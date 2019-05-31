@@ -51,12 +51,6 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             _logger.Info($"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
-            // Safety check - if a delta has already been saved for this comment, it must be an edit
-            if (_repository.DeltaCommentExists(comment.Id))
-            {
-                Assert.That(comment.IsEdited);
-            }
-
             // Update wiki
             // The wiki is the standard from which delta counts come from
             _logger.Info("   ---Updating wiki (award)");
@@ -140,12 +134,6 @@ namespace DeltaBotFour.Infrastructure.Implementation
             }
 
             _logger.Info($"---START UNAWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
-
-            // Safety check - if a delta hasnt' been saved for this comment, what are we trying to remove?
-            if (!_repository.DeltaCommentExists(comment.Id))
-            {
-                Assert.That(comment.IsEdited);
-            }
 
             // Update wiki
             // The wiki is the standard from which delta counts come from

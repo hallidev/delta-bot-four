@@ -30,6 +30,10 @@ namespace DeltaBotFour.Console
             var queueDispatcher = _container.Resolve<IDB4QueueDispatcher>();
             queueDispatcher.Start();
 
+            // Refresh deltaboards on startup
+            var deltaboardEditor = _container.Resolve<IDeltaboardEditor>();
+            deltaboardEditor.RefreshDeltaboards();
+
             while (true)
             {
                 if (System.Console.KeyAvailable && System.Console.ReadKey(true).Key == ConsoleKey.Escape)

@@ -59,6 +59,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
             buildAndUpdateDeltaboards();
         }
 
+        public void RefreshDeltaboards()
+        {
+            buildAndUpdateDeltaboards();
+        }
+
         private List<Deltaboard> getDeltaboards()
         {
             return _db4Repository.GetCurrentDeltaboards();

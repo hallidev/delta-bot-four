@@ -180,8 +180,11 @@ namespace DeltaBotFour.Reddit.Implementation
 
                 // Get private message with the specified id
                 var privateMessage = getPrivateMessageById(privateMessageId);
-                await privateMessage.ReplyAsync(body);
 
+                if (privateMessage != null)
+                {
+                    await privateMessage.ReplyAsync(body);
+                }
             }).Wait();
         }
 
@@ -196,8 +199,11 @@ namespace DeltaBotFour.Reddit.Implementation
 
                 // Get private message with the specified id
                 var privateMessage = getPrivateMessageById(privateMessageId);
-                await privateMessage.SetAsReadAsync();
 
+                if (privateMessage != null)
+                {
+                    await privateMessage.SetAsReadAsync();
+                }
             }).Wait();
         }
 
@@ -223,7 +229,7 @@ namespace DeltaBotFour.Reddit.Implementation
 
         private PrivateMessage getPrivateMessageById(string privateMessageId)
         {
-            return _reddit.User.GetInbox().Where(pm => pm != null && pm.Id == privateMessageId && pm.Unread).FirstOrDefault().Result;
+            return _reddit.User.GetInbox().Where(pm => pm != null && pm.Id == privateMessageId).FirstOrDefault().Result;
         }
     }
 }
