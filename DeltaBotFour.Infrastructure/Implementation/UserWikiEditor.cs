@@ -214,7 +214,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             foreach (var deltaInfo in deltaInfos)
             {
                 string rowContent = _userWikiRowTemplate
-                    .Replace(_appConfiguration.ReplaceTokens.DateMMDYYYY, DateTimeOffset.FromUnixTimeSeconds(long.Parse(deltaInfo.CreatedUTC)).ToString("M/d/yyyy"))
+                    .Replace(_appConfiguration.ReplaceTokens.DateYYYYMMDD, DateTimeOffset.FromUnixTimeSeconds(long.Parse(deltaInfo.CreatedUTC)).ToString("yyyy/MM/dd"))
                     .Replace(_appConfiguration.ReplaceTokens.PostTitle, deltaInfo.PostTitle)
                     .Replace(_appConfiguration.ReplaceTokens.PostLink, deltaInfo.PostLink)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, $"{deltaInfo.PostLink}{deltaInfo.CommentId}?context={contextNumber}")

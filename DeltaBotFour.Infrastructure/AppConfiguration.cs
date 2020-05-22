@@ -110,7 +110,7 @@ namespace DeltaBotFour.Infrastructure
             public string DeltasReceivedCountToken => _configuration["replace_tokens:deltas_received_count_token"];
             public string WikiRowsGivenToken => _configuration["replace_tokens:wiki_rows_given_token"];
             public string WikiRowsReceivedToken => _configuration["replace_tokens:wiki_rows_received_token"];
-            public string DateMMDYYYY => _configuration["replace_tokens:date_mmdyyyy"];
+            public string DateYYYYMMDD => _configuration["replace_tokens:date_yyyymmdd"];
             public string PostTitle => _configuration["replace_tokens:post_title"];
             public string PostLink => _configuration["replace_tokens:post_link"];
             public string CommentLink => _configuration["replace_tokens:comment_link"];
@@ -148,7 +148,7 @@ namespace DeltaBotFour.Infrastructure
                     DeltasReceivedCountToken,
                     WikiRowsGivenToken,
                     WikiRowsReceivedToken,
-                    DateMMDYYYY,
+                    DateYYYYMMDD,
                     PostTitle,
                     PostLink,
                     CommentLink,

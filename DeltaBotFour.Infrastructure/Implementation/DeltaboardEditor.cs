@@ -14,7 +14,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
     public class DeltaboardEditor : IDeltaboardEditor
     {
         private const int RanksToShow = 10;
-        private const string UpdateDeltaboarsdReason = "Update deltaboards";
+        private const string UpdateDeltaboardsReason = "Update deltaboards";
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IDB4Repository _db4Repository;
@@ -80,7 +80,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
                 // Update the wiki page
-                _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards, UpdateDeltaboarsdReason);
+                _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards, UpdateDeltaboardsReason);
 
                 // Get sidebar
                 string sidebar = _subredditService.GetSidebar();
@@ -155,6 +155,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Replace(_appConfiguration.ReplaceTokens.DeltaboardRowsToken,
                     buildDeltaboardRows(deltaboard.Entries.OrderBy(e => e.Rank).Take(RanksToShow).ToList()))
                 .Replace(_appConfiguration.ReplaceTokens.DateToken, DateTime.UtcNow.ToString("M/d/yyyy HH:mm:ss UTC"));
+
+            if (deltaboard.DeltaboardType == DeltaboardType.AllTime)
+            {
+                deltaboardContent = $"{deltaboardContent}\r\n\r\n*Due to technical limitations, All Time Deltaboards do not count deltas awarded prior to June 2018*";
+            }
 
             return deltaboardContent;
         }
