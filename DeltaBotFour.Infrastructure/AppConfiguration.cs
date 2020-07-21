@@ -20,6 +20,7 @@ namespace DeltaBotFour.Infrastructure
         public string SubredditName => _configuration["subreddit_name"];
         public string DeltaLogSubredditName => _configuration["deltalog_subreddit_name"];
         public string LogFilename => _configuration["log_file_name"];
+        public int AutoRestartHours => int.Parse(_configuration["auto_restart_hours"]);
         public List<string> ValidWATTUsers => _configuration["valid_watt_users"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public List<string> ValidDeltaIndicators => _configuration["valid_delta_indicators"].Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
         public int CommentScanIntervalSeconds => int.Parse(_configuration["comment_scan_interval_seconds"]);

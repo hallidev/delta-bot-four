@@ -6,8 +6,10 @@ using DeltaBotFour.Persistence.Implementation;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Implementation;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared;
 using DeltaBotFour.Shared.Implementation;
 using DeltaBotFour.Shared.Interface;
+using DeltaBotFour.Shared.Logging;
 using RedditSharp;
 
 namespace DeltaBotFour.DependencyResolver
@@ -37,6 +39,7 @@ namespace DeltaBotFour.DependencyResolver
 
             // Register core / shared classes
             container.RegisterSingleton(appConfiguration);
+            container.RegisterSingleton<AutoRestartManager>();
             container.RegisterSingleton(botWebAgent);
             container.RegisterSingleton(reddit);
             container.RegisterSingleton(subreddit);

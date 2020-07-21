@@ -4,6 +4,8 @@ using System.Threading;
 using DeltaBotFour.Infrastructure;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared;
+using DeltaBotFour.Shared.Logging;
 
 namespace DeltaBotFour.Console
 {
@@ -19,6 +21,10 @@ namespace DeltaBotFour.Console
             _container = new DeltaBotFourContainer().Install(new RegistrationCatalogFactory().GetRegistrationCatalog());
 
             var appConfiguration = _container.Resolve<AppConfiguration>();
+
+            // Start auto-restart manager
+            var restartManager = _container.Resolve<AutoRestartManager>();
+            restartManager.Start(appConfiguration.AutoRestartHours);
 
             // Start monitoring comments / edits / private messages
             var activityMonitor = _container.Resolve<IActivityMonitor>();

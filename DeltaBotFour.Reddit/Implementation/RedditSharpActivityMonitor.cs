@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
+using DeltaBotFour.Shared;
 using DeltaBotFour.Shared.Logging;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Things;
@@ -15,6 +16,7 @@ namespace DeltaBotFour.Reddit.Implementation
     {
         private readonly RedditSharp.Reddit _reddit;
         private readonly Subreddit _subreddit;
+        private readonly AutoRestartManager _autoRestartManager;
         private readonly IActivityDispatcher _activityDispatcher;
         private readonly IDB4Repository _db4Repository;
         private readonly ILogger _logger;
@@ -26,12 +28,14 @@ namespace DeltaBotFour.Reddit.Implementation
 
         public RedditSharpActivityMonitor(RedditSharp.Reddit reddit,
             Subreddit subreddit,
+            AutoRestartManager autoRestartManager,
             IActivityDispatcher activityDispatcher,
             IDB4Repository db4Repository,
             ILogger logger)
         {
             _reddit = reddit;
             _subreddit = subreddit;
+            _autoRestartManager = autoRestartManager;
             _activityDispatcher = activityDispatcher;
             _db4Repository = db4Repository;
             _logger = logger;
@@ -69,6 +73,9 @@ namespace DeltaBotFour.Reddit.Implementation
             // will guarantee it runs immediately on startup
             _lastCommentCheckUtc = lastActivityTimeUtc.AddSeconds(-commentScanIntervalSeconds);
 
+            // Start checking for auto restart
+            monitorAutoRestart(1);
+
             // Start comment monitoring
             monitorComments(commentScanIntervalSeconds);
 
@@ -90,6 +97,18 @@ namespace DeltaBotFour.Reddit.Implementation
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
+        }
+
+        private async void monitorAutoRestart(int autoRestartCheckSeconds)
+        {
+            await Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    _autoRestartManager.RestartIfNecessary();
+                    await Task.Delay(TimeSpan.FromSeconds(autoRestartCheckSeconds));
+                }
+            }, _cancellationTokenSource.Token);
         }
 
         private async void monitorComments(int commentScanIntervalSeconds)
