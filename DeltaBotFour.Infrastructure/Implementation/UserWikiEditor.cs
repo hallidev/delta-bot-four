@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Models;
@@ -245,7 +246,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private UserWikiDeltaInfo getUserWikiDeltaInfo(DB4Thing comment, DB4Thing parentPost, string toUsername)
         {
             string postLink = $"{_appConfiguration.RedditBaseUrl}{parentPost.Permalink}";
-            string postTitle = parentPost.Title;
+            string postTitle = WebUtility.HtmlDecode(parentPost.Title);
             string createdUTC = new DateTimeOffset(comment.CreatedUtc).ToUnixTimeSeconds().ToString();
 
             // Create new hidden param entry from comment
