@@ -8,7 +8,7 @@ DB3PARAMSEND)
 /u/{{username}} has received {{deltasreceivedcount}} deltas:
 
 | Date | Submission | Delta Comment | Awarded By |
-| :------: | :------: | :------: | :------: |
+| :-- | :-- | :-- | :-- |
 {{wikirowsreceived}}
 
 ##Deltas Given
@@ -16,5 +16,5 @@ DB3PARAMSEND)
 /u/{{username}} has given {{deltasgivencount}} deltas:
 
 | Date | Submission | Delta Comment | Awarded To |
-| :------: | :------: | :------: | :------: |
+| :-- | :-- | :-- | :-- |
 {{wikirowsgiven}}
