@@ -32,7 +32,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 opRowContent += _appConfiguration.Posts.DeltaOPRowContent
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, deltaComment.ToUsername)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, $"{deltaComment.Permalink}?context=3")
-                    .Replace(_appConfiguration.ReplaceTokens.CommentText, deltaComment.CommentText.Ellipsis(MaxChars));
+                    .Replace(_appConfiguration.ReplaceTokens.CommentText, Sanitize(deltaComment.CommentText).Ellipsis(MaxChars));
                 opRowContent += "\n\n";
             }
 
@@ -47,7 +47,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     .Replace(_appConfiguration.ReplaceTokens.UsernameFromToken, deltaComment.FromUsername)
                     .Replace(_appConfiguration.ReplaceTokens.UsernameToken, deltaComment.ToUsername)
                     .Replace(_appConfiguration.ReplaceTokens.CommentLink, $"{deltaComment.Permalink}?context=3")
-                    .Replace(_appConfiguration.ReplaceTokens.CommentText, deltaComment.CommentText.Ellipsis(MaxChars));
+                    .Replace(_appConfiguration.ReplaceTokens.CommentText, Sanitize(deltaComment.CommentText).Ellipsis(MaxChars));
                 otherRowContent += "\n\n";
             }
 
@@ -58,6 +58,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 .Replace(_appConfiguration.ReplaceTokens.DeltaLogOtherRowsToken, otherRowContent);
 
             return (title, content);
+        }
+
+        public static string Sanitize(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            return value.Replace("\n", string.Empty);
         }
     }
 }
