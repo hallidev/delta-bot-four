@@ -67,7 +67,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 return string.Empty;
             }
 
-            return value.Replace("\n", string.Empty);
+            return value.Replace("\n", " ");
         }
     }
 }
