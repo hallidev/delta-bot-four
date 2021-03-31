@@ -13,10 +13,13 @@ namespace DeltaBotFour.Reddit.Implementation
     public class RedditSharpRedditService : IRedditService
     {
         private readonly RedditSharp.Reddit _reddit;
+        private readonly RedditState _redditState;
 
-        public RedditSharpRedditService(RedditSharp.Reddit reddit)
+        public RedditSharpRedditService(RedditSharp.Reddit reddit, 
+            RedditState redditState)
         {
             _reddit = reddit;
+            _redditState = redditState;
         }
 
         public void PopulateParentAndChildren(DB4Thing comment)
@@ -101,9 +104,11 @@ namespace DeltaBotFour.Reddit.Implementation
 
             Task.Run(async () =>
             {
+                await _redditState.AcquireEditLock();
+                
                 var post = _reddit.GetPostAsync(new Uri(postUrl)).Result;
-                await post.EditTextAsync(text);
 
+                await post.EditTextAsync(text);
             }).Wait();
         }
 
@@ -142,7 +147,13 @@ namespace DeltaBotFour.Reddit.Implementation
             Assert.That(comment.Type == DB4ThingType.Comment);
 
             var qualifiedComment = (Comment)getQualifiedThing(comment);
-            Task.Run(async () => await qualifiedComment.EditTextAsync(editedComment)).Wait();
+            
+            Task.Run(async () =>
+            {
+                await _redditState.AcquireEditLock();
+
+                await qualifiedComment.EditTextAsync(editedComment);
+            }).Wait();
         }
 
         public void DeleteComment(DB4Thing comment)

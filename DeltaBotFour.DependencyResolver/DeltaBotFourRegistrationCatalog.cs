@@ -4,12 +4,12 @@ using DeltaBotFour.Infrastructure.Implementation;
 using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Persistence.Implementation;
 using DeltaBotFour.Persistence.Interface;
+using DeltaBotFour.Reddit;
 using DeltaBotFour.Reddit.Implementation;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared;
 using DeltaBotFour.Shared.Implementation;
 using DeltaBotFour.Shared.Interface;
-using DeltaBotFour.Shared.Logging;
 using RedditSharp;
 
 namespace DeltaBotFour.DependencyResolver
@@ -24,7 +24,6 @@ namespace DeltaBotFour.DependencyResolver
             container.RegisterLogger(appConfiguration.LogFilename);
 
             // Actual login is performed here.
-            // TODO: This should be abstracted away as well
             var botWebAgent = new BotWebAgent
             (
                 appConfiguration.DB4Username,
@@ -43,6 +42,7 @@ namespace DeltaBotFour.DependencyResolver
             container.RegisterSingleton(botWebAgent);
             container.RegisterSingleton(reddit);
             container.RegisterSingleton(subreddit);
+            container.RegisterSingleton<RedditState>();
 
             // Register shared services
             container.Register<IDB4Queue, DB4MemoryQueue>();
