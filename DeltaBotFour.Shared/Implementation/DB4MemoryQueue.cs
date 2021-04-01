@@ -13,15 +13,13 @@ namespace DeltaBotFour.Shared.Implementation
         private const int NinjaEditReprocessSeconds = 180;
 
         // Main queue for comments / edits and private messages
-        private readonly Queue _primaryQueue = new Queue();
+        private readonly Queue _queue = new Queue();
         // Second queue to re-process comments a second time after 3 minutes
         private readonly Queue _ninjaEditQueue = new Queue();
-        // Count how many messages have be popped
-        private int _popCount;
 
         public int GetPrimaryCount()
         {
-            return _primaryQueue.Count;
+            return _queue.Count;
         }
 
         public int GetNinjaEditCount()
@@ -31,36 +29,16 @@ namespace DeltaBotFour.Shared.Implementation
 
         public void Push(QueueMessage message)
         {
-            _primaryQueue.Enqueue(JsonConvert.SerializeObject(message));
+            _queue.Enqueue(JsonConvert.SerializeObject(message));
         }
 
         public QueueMessage Pop()
         {
-            if (_primaryQueue.Count > 0 || _ninjaEditQueue.Count > 0)
-            {
-                _popCount++;
-            }
-            else
-            {
-                return null;
-            }
-
-            // Every other time a message is popped, give the ninja
-            // queue priority over the primary queue
-            if (_popCount % 2 == 0)
-            {
-                return getFromNinjaQueue() ?? getFromPrimaryQueue();
-            }
-
-            return getFromPrimaryQueue() ?? getFromNinjaQueue();
-        }
-
-        private QueueMessage getFromPrimaryQueue()
-        {
-            if (_primaryQueue.Count > 0)
+            // First, process any new stuff
+            if (_queue.Count > 0)
             {
                 // Get thing to process (comment / edit or private message)
-                string messageString = _primaryQueue.Dequeue().ToString();
+                string messageString = _queue.Dequeue().ToString();
                 var queueMessage = JsonConvert.DeserializeObject<QueueMessage>(messageString);
 
                 // Comments need to be re-processed for ninja edits
@@ -72,11 +50,7 @@ namespace DeltaBotFour.Shared.Implementation
                 return queueMessage;
             }
 
-            return null;
-        }
-
-        private QueueMessage getFromNinjaQueue()
-        {
+            // Process potential ninja edits
             if (_ninjaEditQueue.Count > 0)
             {
                 var oldestOnNinjaQueue = JsonConvert.DeserializeObject<QueueMessage>(_ninjaEditQueue.Peek().ToString());
@@ -89,6 +63,7 @@ namespace DeltaBotFour.Shared.Implementation
                     var db4Thing = JsonConvert.DeserializeObject<DB4Thing>(ninjaQueuMessage.Payload);
                     db4Thing.NeedsRefresh = true;
                     ninjaQueuMessage.Payload = JsonConvert.SerializeObject(db4Thing);
+
                     return ninjaQueuMessage;
                 }
             }
