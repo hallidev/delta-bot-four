@@ -28,6 +28,7 @@ namespace DeltaBotFour.Console
 
             // Start monitoring comments / edits / private messages
             var activityMonitor = _container.Resolve<IActivityMonitor>();
+            
             activityMonitor.Start(appConfiguration.CommentScanIntervalSeconds,
                 appConfiguration.EditScanIntervalSeconds,
                 appConfiguration.PMScanIntervalSeconds);
@@ -35,6 +36,10 @@ namespace DeltaBotFour.Console
             // Start queue dispatcher
             var queueDispatcher = _container.Resolve<IDB4QueueDispatcher>();
             queueDispatcher.Start();
+
+            // Start health pinger
+            var healthPinger = _container.Resolve<IHealthPinger>();
+            healthPinger.Start();
 
             // Refresh deltaboards on startup
             var deltaboardEditor = _container.Resolve<IDeltaboardEditor>();
@@ -46,6 +51,7 @@ namespace DeltaBotFour.Console
                 {
                     activityMonitor.Stop();
                     queueDispatcher.Stop();
+                    healthPinger.Stop();
                     break;
                 }
 

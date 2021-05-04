@@ -66,6 +66,7 @@ namespace DeltaBotFour.DependencyResolver
             container.Register<IDeltaAwarder, DeltaAwarder>();
             container.Register<IDeltaboardEditor, DeltaboardEditor>();
             container.Register<IDeltaLogEditor, DeltaLogEditor>();
+            container.Register<IHealthPinger, HealthPinger>();
             container.Register<IPostBuilder, PostBuilder>();
             container.Register<IPrivateMessageProcessor, PrivateMessageProcessor>();
             container.Register<IPrivateMessageHandlerFactory, PrivateMessageHandlerFactory>();

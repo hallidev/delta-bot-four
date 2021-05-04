@@ -33,6 +33,8 @@ namespace DeltaBotFour.Infrastructure
         public string DeltaboardSidebarWidgetName => _configuration["deltaboard_sidebar_widget_name"];
         public Regex HiddenParamsRegex => new Regex(_configuration["hidden_params_regex"], RegexOptions.Singleline);
         public string DefaultHiddenParamsComment => _configuration["default_hidden_params_comment"];
+        public int HealthCheckIntervalMinutes => int.Parse(_configuration["health_check_interval_minutes"]);
+        public string HealthCheckUrl => _configuration["health_check_url"];
         public Regex GetWikiLinkRegex(string subredditName, string contextNumber)
         { 
             return new Regex(_configuration["wiki_link_regex"]

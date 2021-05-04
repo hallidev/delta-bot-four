@@ -6,7 +6,7 @@ namespace DeltaBotFour.Reddit
 {
     public class RedditState
     {
-        private const int EditSeconds = 30;
+        private const int EditSeconds = 10;
         
         private readonly ILogger _logger;
         private DateTimeOffset _nextEditUtc;
