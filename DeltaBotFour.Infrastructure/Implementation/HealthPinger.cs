@@ -33,6 +33,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 {
                     try
                     {
+                        _logger.Info($"Performing health check ping to '{_configuration.HealthCheckUrl}'");
+                        
                         var result = await _httpClient.GetAsync(new Uri(_configuration.HealthCheckUrl));
 
                         if (!result.IsSuccessStatusCode)
