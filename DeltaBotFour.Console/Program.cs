@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using DeltaBotFour.Infrastructure;
 using DeltaBotFour.Infrastructure.Interface;
+using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared;
 using DeltaBotFour.Shared.Logging;
@@ -21,6 +22,11 @@ namespace DeltaBotFour.Console
             _container = new DeltaBotFourContainer().Install(new RegistrationCatalogFactory().GetRegistrationCatalog());
 
             var appConfiguration = _container.Resolve<AppConfiguration>();
+
+            System.Console.Write("Cleaning up old delta comments...");
+            var repository = _container.Resolve<IDB4Repository>();
+            repository.CleanOldDeltaComments();
+            System.Console.WriteLine("done");
 
             // Start auto-restart manager
             var restartManager = _container.Resolve<AutoRestartManager>();

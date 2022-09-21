@@ -11,6 +11,7 @@ namespace DeltaBotFour.Persistence.Implementation
 {
     public class DB4Repository : IDB4Repository
     {
+        private const int DeltaCommentRetainDays = 365;
         private const int LastProcessedIdCountToTrack = 200;
 
         private const string DbFileName = "DeltaBotFour.db";
@@ -150,9 +151,12 @@ namespace DeltaBotFour.Persistence.Implementation
             stateCollection.Update(document);
         }
 
-        public bool DeltaCommentExists(string commentId)
+        public void CleanOldDeltaComments()
         {
-            return GetDeltaComment(commentId) != null;
+            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+
+            deltaCommentsCollection
+                .Delete(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
         }
 
         public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
@@ -161,11 +165,6 @@ namespace DeltaBotFour.Persistence.Implementation
                 .FindOne(dc => dc.ParentId == parentCommentId && dc.FromUsername == authorName);
 
             return deltaComment != null;
-        }
-
-        public DeltaComment GetDeltaComment(string commentId)
-        {
-            return _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName).FindById(commentId);
         }
 
         public void UpsertDeltaComment(DeltaComment commentWithDelta)
