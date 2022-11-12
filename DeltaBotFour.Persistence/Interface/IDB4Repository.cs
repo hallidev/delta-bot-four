@@ -12,7 +12,7 @@ namespace DeltaBotFour.Persistence.Interface
         void SetLastProcessedCommentId(string commentId);
         List<string> GetLastProcessedEditIds();
         void SetLastProcessedEditId(string editId);
-        void CleanOldDeltaComments();
+        int CleanOldDeltaComments();
         bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName);
         void UpsertDeltaComment(DeltaComment commentWithDelta);
         void RemoveDeltaComment(string commentId);

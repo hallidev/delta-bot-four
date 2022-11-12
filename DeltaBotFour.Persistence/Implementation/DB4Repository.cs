@@ -33,7 +33,7 @@ namespace DeltaBotFour.Persistence.Implementation
         {
             // DI Conttainer registers this as a singleton, so
             // we want to hold onto this instance
-            _liteDatabase = new LiteDatabase(DbFileName);
+            _liteDatabase = new LiteDatabase($"Filename={DbFileName}");
         }
 
         public DateTime GetLastActivityTimeUtc()
@@ -151,19 +151,14 @@ namespace DeltaBotFour.Persistence.Implementation
             stateCollection.Update(document);
         }
 
-        public void CleanOldDeltaComments()
+        public int CleanOldDeltaComments()
         {
-            //var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
 
-            //var oldComments = deltaCommentsCollection
-            //    .Query()
-            //    .Select(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
+            var deleted = deltaCommentsCollection
+                .Delete(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
 
-
-            //deltaCommentsCollection
-            //    .DeleteMany(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
-
-            _liteDatabase.Rebuild();
+            return deleted;
         }
 
         public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
@@ -342,7 +337,7 @@ namespace DeltaBotFour.Persistence.Implementation
             return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
         }
 
-        private ILiteCollection<BsonDocument> getState()
+        private LiteCollection<BsonDocument> getState()
         {
             var stateCollection = _liteDatabase.GetCollection<BsonDocument>(DeltaBotStateCollectionName);
 
@@ -384,7 +379,7 @@ namespace DeltaBotFour.Persistence.Implementation
             return stateCollection;
         }
 
-        private Deltaboard getCurrentDeltaboard(ILiteCollection<Deltaboard> deltaboardCollection, DeltaboardType type)
+        private Deltaboard getCurrentDeltaboard(LiteCollection<Deltaboard> deltaboardCollection, DeltaboardType type)
         {
             DateTime startUtc;
 

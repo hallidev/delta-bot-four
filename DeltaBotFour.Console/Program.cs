@@ -24,8 +24,8 @@ namespace DeltaBotFour.Console
 
             System.Console.Write("Cleaning up old delta comments...");
             var repository = _container.Resolve<IDB4Repository>();
-            repository.CleanOldDeltaComments();
-            System.Console.WriteLine("done");
+            var deletedCount = repository.CleanOldDeltaComments();
+            System.Console.WriteLine($"{deletedCount} deleted");
 
             // Start auto-restart manager
             var restartManager = _container.Resolve<AutoRestartManager>();
@@ -33,7 +33,7 @@ namespace DeltaBotFour.Console
 
             // Start monitoring comments / edits / private messages
             var activityMonitor = _container.Resolve<IActivityMonitor>();
-            
+
             activityMonitor.Start(appConfiguration.CommentScanIntervalSeconds,
                 appConfiguration.EditScanIntervalSeconds,
                 appConfiguration.PMScanIntervalSeconds);
