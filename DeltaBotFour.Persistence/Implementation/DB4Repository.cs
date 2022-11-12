@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using Core.Foundation.Exceptions;
 using Core.Foundation.Extensions;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
 using LiteDB;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace DeltaBotFour.Persistence.Implementation
 {
@@ -36,33 +39,118 @@ namespace DeltaBotFour.Persistence.Implementation
             _liteDatabase = new LiteDatabase($"Filename={DbFileName}");
         }
 
+        public void Migrate()
+        {
+            DeltaBotFourDbContext dbContext = new DeltaBotFourDbContext();
+            dbContext.Database.Migrate();
+        }
+
+        public void MigrateLiteDbToSqlLite()
+        {
+            Console.WriteLine();
+            var dbContext = new DeltaBotFourDbContext();
+
+            // DeltaComments
+            var sqlDeltaCommentCount = dbContext
+                .DeltaComments
+                .Count();
+
+            if (sqlDeltaCommentCount == 0)
+            {
+                Console.WriteLine("Migrating Comments");
+                var deltaComments = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+
+                var comments = deltaComments
+                    .FindAll()
+                    .ToList();
+
+                dbContext
+                    .AddRange(comments);
+
+                dbContext.SaveChanges();
+            }
+
+            // PostMappings
+            var sqlDeltaLogPostMappingCount = dbContext
+                .DeltaLogPostMappings
+                .Count();
+
+            if (sqlDeltaLogPostMappingCount == 0)
+            {
+                Console.WriteLine("Migrating PostMappings");
+                var postMappings = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
+
+                var mappings = postMappings
+                    .FindAll()
+                    .ToList();
+
+                dbContext
+                    .AddRange(mappings);
+
+                dbContext.SaveChanges();
+            }
+
+            // Deltaboards
+            var sqlDeltaboardsCount = dbContext
+                .Deltaboards
+                .Count();
+
+            if (sqlDeltaboardsCount == 0)
+            {
+                Console.WriteLine("Migrating Deltaboards");
+                var deltaboards = _liteDatabase.GetCollection<Deltaboard>(DeltaboardsCollectionName);
+
+                var boards = deltaboards
+                    .FindAll()
+                    .Where(e => !e.Id.Contains("5:00"))
+                    .Select(e =>
+                    {
+                        e.Id = e.Id.Replace(" 12:00:00 AM", string.Empty);
+                        return e;
+                    })
+                    .ToList();
+
+                foreach (var board in boards)
+                {
+                    foreach (var entry in board.Entries)
+                    {
+                        entry.Id = Guid.NewGuid();
+                        entry.DeltaboardId = board.Id;
+                    }
+                }
+
+                dbContext
+                    .AddRange(boards);
+
+                dbContext.SaveChanges();
+            }
+
+            Console.WriteLine("Done");
+        }
+
         public DateTime GetLastActivityTimeUtc()
         {
-            var stateCollection = getState();
-            return ((DateTime) stateCollection.FindById(LastActivityTimeUtcKey)[BsonValueField]).ToUniversalTime();
+            var state = getState();
+            return state.LastActivityTimeUtcKey.DateTime;
         }
 
         public void SetLastActivityTimeUtc()
         {
-            var stateCollection = getState();
+            var state = getState();
 
-            var lastActivityTimeUtcDocument = stateCollection.FindById(LastActivityTimeUtcKey);
-            lastActivityTimeUtcDocument[BsonValueField] = DateTime.UtcNow;
-            stateCollection.Update(lastActivityTimeUtcDocument);
+            var dbContext = new DeltaBotFourDbContext();
+            dbContext.Attach(state);
+
+            state.LastActivityTimeUtcKey = DateTimeOffset.UtcNow;
+
+            dbContext.SaveChangesAsync();
         }
 
         public List<string> GetLastProcessedCommentIds()
         {
-            var stateCollection = getState();
+            var state = getState();
 
-            var document = stateCollection.FindById(LastProcessedCommentIdsKey);
-            var bsonList = document[BsonValueField].AsArray;
-
-            var commentIds = new List<string>();
-            foreach (var value in bsonList)
-            {
-                commentIds.Add(value.AsString);
-            }
+            var commentIds = JsonConvert.DeserializeObject<List<string>>(state.LastProcessedCommentIds);
 
             // Reverse the list so newest are on top
             commentIds.Reverse();
@@ -86,33 +174,21 @@ namespace DeltaBotFour.Persistence.Implementation
 
             commentIds.Add(commentId);
 
-            var stateCollection = getState();
+            var state = getState();
 
-            var document = stateCollection.FindById(LastProcessedCommentIdsKey);
-            var bsonList = document[BsonValueField].AsArray;
+            var dbContext = new DeltaBotFourDbContext();
+            dbContext.Attach(state);
 
-            bsonList.Clear();
+            state.LastProcessedCommentIds = JsonConvert.SerializeObject(commentIds);
 
-            foreach (var id in commentIds)
-            {
-                bsonList.Add(id);
-            }
-
-            stateCollection.Update(document);
+            dbContext.SaveChanges();
         }
 
         public List<string> GetLastProcessedEditIds()
         {
-            var stateCollection = getState();
+            var state = getState();
 
-            var document = stateCollection.FindById(LastProcessedEditIdsKey);
-            var bsonList = document[BsonValueField].AsArray;
-
-            var editIds = new List<string>();
-            foreach (var value in bsonList)
-            {
-                editIds.Add(value.AsString);
-            }
+            var editIds = JsonConvert.DeserializeObject<List<string>>(state.LastProcessedEditIds);
 
             // Reverse the list so newest are on top
             editIds.Reverse();
@@ -136,70 +212,96 @@ namespace DeltaBotFour.Persistence.Implementation
 
             editIds.Add(editId);
 
-            var stateCollection = getState();
+            var state = getState();
 
-            var document = stateCollection.FindById(LastProcessedEditIdsKey);
-            var bsonList = document[BsonValueField].AsArray;
+            var dbContext = new DeltaBotFourDbContext();
+            dbContext.Attach(state);
 
-            bsonList.Clear();
+            state.LastProcessedEditIds = JsonConvert.SerializeObject(editIds);
 
-            foreach (var id in editIds)
-            {
-                bsonList.Add(id);
-            }
-
-            stateCollection.Update(document);
+            dbContext.SaveChanges();
         }
 
         public int CleanOldDeltaComments()
         {
-            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            var dbContext = new DeltaBotFourDbContext();
 
-            var deleted = deltaCommentsCollection
-                .Delete(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
+            var oldComments = dbContext
+                .DeltaComments
+                .ToList()
+                .Where(e => (DateTime.Now - e.CreatedUtc).TotalDays > DeltaCommentRetainDays)
+                .ToList();
 
-            return deleted;
+            dbContext.RemoveRange(oldComments);
+            dbContext.SaveChanges();
+
+            return oldComments.Count;
         }
 
         public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
         {
-            var deltaComment = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName)
-                .FindOne(dc => dc.ParentId == parentCommentId && dc.FromUsername == authorName);
+            var dbContext = new DeltaBotFourDbContext();
 
-            return deltaComment != null;
+            var exists = dbContext
+                .DeltaComments
+                .Any(dc => dc.ParentId == parentCommentId && dc.FromUsername == authorName);
+
+            return exists;
         }
 
         public void UpsertDeltaComment(DeltaComment commentWithDelta)
         {
-            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-            deltaCommentsCollection.EnsureIndex(d => d.Id, true);
-            deltaCommentsCollection.Upsert(commentWithDelta);
+            var dbContext = new DeltaBotFourDbContext();
+
+            dbContext
+                .DeltaComments
+                .Where(e => e.Id == commentWithDelta.Id)
+                .ExecuteDelete();
+
+            dbContext
+                .Add(commentWithDelta);
+
+            dbContext.SaveChanges();
         }
 
         public void RemoveDeltaComment(string commentId)
         {
-            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-            deltaCommentsCollection.Delete(commentId);
+            var dbContext = new DeltaBotFourDbContext();
+
+            var comment = dbContext
+                .DeltaComments
+                .SingleOrDefault(e => e.Id == commentId);
+
+            if (comment != null)
+            {
+                dbContext
+                    .Remove(comment);
+
+                dbContext.SaveChanges();
+            }
         }
 
         public List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "")
         {
-            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-            return deltaCommentsCollection.Find(dc =>
-                    dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.FromUsername == authorName))
+            var dbContext = new DeltaBotFourDbContext();
+
+            var comments = dbContext
+                .DeltaComments
+                .Where(e => e.ParentPostId == postId &&
+                            (string.IsNullOrEmpty(authorName) || e.FromUsername == authorName))
                 .ToList();
+
+            return comments;
         }
 
         public List<Deltaboard> GetCurrentDeltaboards()
         {
             var deltaboards = new List<Deltaboard>();
 
-            var deltaboardCollection = _liteDatabase.GetCollection<Deltaboard>(DeltaboardsCollectionName);
-
             // Get deltaboards - will be created if they don't exist
             foreach (var deltaboardType in Enum.GetValues(typeof(DeltaboardType)))
             {
-                deltaboards.Add(getCurrentDeltaboard(deltaboardCollection, (DeltaboardType) deltaboardType));
+                deltaboards.Add(getCurrentDeltaboard((DeltaboardType) deltaboardType));
             }
 
             return deltaboards;
@@ -271,115 +373,100 @@ namespace DeltaBotFour.Persistence.Implementation
 
         public DeltaLogPostMapping GetDeltaLogPostMapping(string postId)
         {
-            var deltaLogPostMappingsCollection =
-                _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
-            return deltaLogPostMappingsCollection.Find(dc => dc.Id == postId).FirstOrDefault();
+            var dbContext = new DeltaBotFourDbContext();
+
+            var mapping = dbContext
+                .DeltaLogPostMappings
+                .SingleOrDefault(e => e.Id == postId);
+
+            return mapping;
         }
 
         public void UpsertDeltaLogPostMapping(DeltaLogPostMapping mapping)
         {
-            var deltaLogPostMappingsCollection =
-                _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
-            deltaLogPostMappingsCollection.EnsureIndex(d => d.Id, true);
-            deltaLogPostMappingsCollection.Upsert(mapping);
+            var dbContext = new DeltaBotFourDbContext();
+
+            dbContext
+                .DeltaLogPostMappings
+                .Where(e => e.Id == mapping.Id)
+                .ExecuteDelete();
+
+            dbContext
+                .Add(mapping);
+
+            dbContext.SaveChanges();
         }
 
         public List<string> GetIgnoreQuotedDeltaPMUserList()
         {
-            var stateCollection = getState();
+            var state = getState();
 
-            var document = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = document[BsonValueField].AsArray;
+            var list = JsonConvert.DeserializeObject<List<string>>(state.IgnoreQuotedDeltaPMUserList);
 
-            var users = new List<string>();
-            foreach (var value in bsonList)
-            {
-                users.Add(value.AsString);
-            }
-
-            return users;
+            return list;
         }
 
         public void AddIgnoredQuotedDeltaPMUser(string username)
         {
-            var stateCollection = getState();
+            var userList = GetIgnoreQuotedDeltaPMUserList();
 
-            var document = stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey);
-            var bsonList = document[BsonValueField].AsArray;
-
-            bool userExists = false;
-            foreach (var value in bsonList)
+            if (!userList.Contains(username))
             {
-                if (value.AsString == username)
-                {
-                    userExists = true;
-                    break;
-                }
+                userList.Add(username);
             }
 
-            if (!userExists)
-            {
-                bsonList.Add(username);
-                stateCollection.Update(document);
-            }
+            var state = getState();
+
+            var dbContext = new DeltaBotFourDbContext();
+            dbContext.Attach(state);
+
+            state.IgnoreQuotedDeltaPMUserList = JsonConvert.SerializeObject(userList);
+
+            dbContext.SaveChanges();
         }
 
         public void UpsertWATTArticle(WATTArticle article)
         {
-            var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
-            wattArticlesCollection.EnsureIndex(d => d.Id, true);
-            wattArticlesCollection.Upsert(article);
+            //var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
+            //wattArticlesCollection.EnsureIndex(d => d.Id, true);
+            //wattArticlesCollection.Upsert(article);
         }
 
         public WATTArticle GetWattArticleForPost(string postId)
         {
-            var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
-            return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
+            //var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
+            //return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
+            return null;
         }
 
-        private LiteCollection<BsonDocument> getState()
+        private DB4State getState()
         {
-            var stateCollection = _liteDatabase.GetCollection<BsonDocument>(DeltaBotStateCollectionName);
+            var dbContext = new DeltaBotFourDbContext();
 
-            // Ensure that state key / value pairs exist
-            if (stateCollection.FindById(LastActivityTimeUtcKey) == null)
+            var db4State = dbContext
+                .Db4States
+                .SingleOrDefault();
+
+            if (db4State == null)
             {
-                // If no LastActivity exists, create a new one and set the date to 10 minutes prior
-                // so that it picks up anything during the transition
-                var document = new BsonDocument();
-                document[BsonIdField] = LastActivityTimeUtcKey;
-                document[BsonValueField] = DateTime.UtcNow.AddMinutes(-10);
-                stateCollection.Insert(document);
+                // Initialize default state
+                db4State = new DB4State
+                {
+                    Id = Guid.NewGuid(),
+                    LastActivityTimeUtcKey = DateTimeOffset.UtcNow,
+                    LastProcessedCommentIds = JsonConvert.SerializeObject(new List<string>()),
+                    LastProcessedEditIds = JsonConvert.SerializeObject(new List<string>()),
+                    IgnoreQuotedDeltaPMUserList = JsonConvert.SerializeObject(new List<string>())
+                };
+
+                dbContext.Add(db4State);
+                dbContext.SaveChanges();
             }
 
-            if (stateCollection.FindById(LastProcessedCommentIdsKey) == null)
-            {
-                var document = new BsonDocument();
-                document[BsonIdField] = LastProcessedCommentIdsKey;
-                document[BsonValueField] = new BsonArray();
-                stateCollection.Insert(document);
-            }
-
-            if (stateCollection.FindById(LastProcessedEditIdsKey) == null)
-            {
-                var document = new BsonDocument();
-                document[BsonIdField] = LastProcessedEditIdsKey;
-                document[BsonValueField] = new BsonArray();
-                stateCollection.Insert(document);
-            }
-
-            if (stateCollection.FindById(IgnoreQuotedDeltaPMUserListKey) == null)
-            {
-                var document = new BsonDocument();
-                document[BsonIdField] = IgnoreQuotedDeltaPMUserListKey;
-                document[BsonValueField] = new BsonArray();
-                stateCollection.Insert(document);
-            }
-
-            return stateCollection;
+            return db4State;
         }
 
-        private Deltaboard getCurrentDeltaboard(LiteCollection<Deltaboard> deltaboardCollection, DeltaboardType type)
+        private Deltaboard getCurrentDeltaboard(DeltaboardType type)
         {
             DateTime startUtc;
 
@@ -405,17 +492,22 @@ namespace DeltaBotFour.Persistence.Implementation
             }
 
             // Find deltaboard
-            string id = $"{type}-{startUtc}";
-            var deltaboard = deltaboardCollection
+            var dbContext = new DeltaBotFourDbContext();
+
+            string id = $"{type}-{startUtc.ToShortDateString()}";
+
+            var deltaboard = dbContext
+                .Deltaboards
                 .Include(d => d.Entries)
-                .FindById(id);
+                .SingleOrDefault(e => e.Id == id);
 
             // Create if it doesn't exist
             if (deltaboard == null)
             {
                 deltaboard = createDeltaboard(id, type, startUtc);
-                deltaboardCollection.EnsureIndex(d => d.Id, true);
-                deltaboardCollection.Insert(deltaboard);
+
+                dbContext.Add(deltaboard);
+                dbContext.SaveChanges();
             }
 
             return deltaboard;
@@ -446,12 +538,17 @@ namespace DeltaBotFour.Persistence.Implementation
 
         private void updateDeltaboards(List<Deltaboard> deltaboards)
         {
-            var deltaboardsCollection = _liteDatabase.GetCollection<Deltaboard>(DeltaboardsCollectionName);
+            var dbContext = new DeltaBotFourDbContext();
 
-            foreach (var deltaboard in deltaboards)
-            {
-                deltaboardsCollection.Update(deltaboard);
-            }
+            dbContext
+                .Deltaboards
+                .Where(e => deltaboards.Select(x => x.Id).Contains(e.Id))
+                .ExecuteDelete();
+
+            dbContext
+                .AddRange(deltaboards);
+
+            dbContext.SaveChanges();
         }
     }
 }

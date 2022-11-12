@@ -24,6 +24,9 @@ namespace DeltaBotFour.Console
 
             System.Console.Write("Cleaning up old delta comments...");
             var repository = _container.Resolve<IDB4Repository>();
+            repository.Migrate();
+            repository.MigrateLiteDbToSqlLite();
+
             var deletedCount = repository.CleanOldDeltaComments();
             System.Console.WriteLine($"{deletedCount} deleted");
 
