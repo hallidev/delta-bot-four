@@ -39,7 +39,7 @@ namespace DeltaBotFour.Persistence.Implementation
         public DateTime GetLastActivityTimeUtc()
         {
             var stateCollection = getState();
-            return ((DateTime)stateCollection.FindById(LastActivityTimeUtcKey)[BsonValueField]).ToUniversalTime();
+            return ((DateTime) stateCollection.FindById(LastActivityTimeUtcKey)[BsonValueField]).ToUniversalTime();
         }
 
         public void SetLastActivityTimeUtc()
@@ -83,16 +83,16 @@ namespace DeltaBotFour.Persistence.Implementation
             {
                 commentIds.RemoveAt(0);
             }
-            
+
             commentIds.Add(commentId);
 
             var stateCollection = getState();
 
             var document = stateCollection.FindById(LastProcessedCommentIdsKey);
             var bsonList = document[BsonValueField].AsArray;
-            
+
             bsonList.Clear();
-            
+
             foreach (var id in commentIds)
             {
                 bsonList.Add(id);
@@ -153,10 +153,17 @@ namespace DeltaBotFour.Persistence.Implementation
 
         public void CleanOldDeltaComments()
         {
-            var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
+            //var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
 
-            deltaCommentsCollection
-                .Delete(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
+            //var oldComments = deltaCommentsCollection
+            //    .Query()
+            //    .Select(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
+
+
+            //deltaCommentsCollection
+            //    .DeleteMany(dc => (DateTime.UtcNow - dc.CreatedUtc).TotalDays > DeltaCommentRetainDays);
+
+            _liteDatabase.Rebuild();
         }
 
         public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
@@ -183,7 +190,9 @@ namespace DeltaBotFour.Persistence.Implementation
         public List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "")
         {
             var deltaCommentsCollection = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-            return deltaCommentsCollection.Find(dc => dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.FromUsername == authorName)).ToList();
+            return deltaCommentsCollection.Find(dc =>
+                    dc.ParentPostId == postId && (string.IsNullOrEmpty(authorName) || dc.FromUsername == authorName))
+                .ToList();
         }
 
         public List<Deltaboard> GetCurrentDeltaboards()
@@ -195,7 +204,7 @@ namespace DeltaBotFour.Persistence.Implementation
             // Get deltaboards - will be created if they don't exist
             foreach (var deltaboardType in Enum.GetValues(typeof(DeltaboardType)))
             {
-                deltaboards.Add(getCurrentDeltaboard(deltaboardCollection, (DeltaboardType)deltaboardType));
+                deltaboards.Add(getCurrentDeltaboard(deltaboardCollection, (DeltaboardType) deltaboardType));
             }
 
             return deltaboards;
@@ -267,13 +276,15 @@ namespace DeltaBotFour.Persistence.Implementation
 
         public DeltaLogPostMapping GetDeltaLogPostMapping(string postId)
         {
-            var deltaLogPostMappingsCollection = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
+            var deltaLogPostMappingsCollection =
+                _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
             return deltaLogPostMappingsCollection.Find(dc => dc.Id == postId).FirstOrDefault();
         }
 
         public void UpsertDeltaLogPostMapping(DeltaLogPostMapping mapping)
         {
-            var deltaLogPostMappingsCollection = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
+            var deltaLogPostMappingsCollection =
+                _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
             deltaLogPostMappingsCollection.EnsureIndex(d => d.Id, true);
             deltaLogPostMappingsCollection.Upsert(mapping);
         }
@@ -331,7 +342,7 @@ namespace DeltaBotFour.Persistence.Implementation
             return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
         }
 
-        private LiteCollection<BsonDocument> getState()
+        private ILiteCollection<BsonDocument> getState()
         {
             var stateCollection = _liteDatabase.GetCollection<BsonDocument>(DeltaBotStateCollectionName);
 
@@ -350,7 +361,7 @@ namespace DeltaBotFour.Persistence.Implementation
             {
                 var document = new BsonDocument();
                 document[BsonIdField] = LastProcessedCommentIdsKey;
-                document[BsonValueField] = new List<BsonValue>();
+                document[BsonValueField] = new BsonArray();
                 stateCollection.Insert(document);
             }
 
@@ -358,7 +369,7 @@ namespace DeltaBotFour.Persistence.Implementation
             {
                 var document = new BsonDocument();
                 document[BsonIdField] = LastProcessedEditIdsKey;
-                document[BsonValueField] = new List<BsonValue>();
+                document[BsonValueField] = new BsonArray();
                 stateCollection.Insert(document);
             }
 
@@ -366,14 +377,14 @@ namespace DeltaBotFour.Persistence.Implementation
             {
                 var document = new BsonDocument();
                 document[BsonIdField] = IgnoreQuotedDeltaPMUserListKey;
-                document[BsonValueField] = new List<BsonValue>();
+                document[BsonValueField] = new BsonArray();
                 stateCollection.Insert(document);
             }
 
             return stateCollection;
         }
 
-        private Deltaboard getCurrentDeltaboard(LiteCollection<Deltaboard> deltaboardCollection, DeltaboardType type)
+        private Deltaboard getCurrentDeltaboard(ILiteCollection<Deltaboard> deltaboardCollection, DeltaboardType type)
         {
             DateTime startUtc;
 

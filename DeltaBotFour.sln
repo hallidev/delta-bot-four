@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Foundation", "Core.Foundation\Core.Foundation.csproj", "{E1D6893D-EB7D-4362-A9B7-88CE08F9C51B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{0BE0CE52-85DF-44C2-AA6A-5635F28E85C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Console", "DeltaBotFour.Console\DeltaBotFour.Console.csproj", "{CD1CFFEA-753B-4CC5-98FF-F7627CC04CFB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{47E2F6BD-C115-4C38-B7CF-6B6C55CF2BED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Models", "DeltaBotFour.Models\DeltaBotFour.Models.csproj", "{B0C635FC-A97D-482F-9E41-2C7CE095857F}"
 EndProject
@@ -22,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Shared", "DeltaBotFour.Shared\DeltaBotFour.Shared.csproj", "{7C6E2364-6794-475D-9F83-7F1C138CEA97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaBotFour.Persistence", "DeltaBotFour.Persistence\DeltaBotFour.Persistence.csproj", "{0C84DCAA-A879-43A6-B0A2-2EC68A331E08}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{22EB197F-0867-4C56-AEFD-8E4C69C57A84}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedditSharp", "RedditSharp\RedditSharp.csproj", "{1EAB5FD1-41AF-46D9-B9CE-4C33BAE65343}"
 EndProject
@@ -73,7 +73,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E1D6893D-EB7D-4362-A9B7-88CE08F9C51B} = {0BE0CE52-85DF-44C2-AA6A-5635F28E85C1}
-		{1EAB5FD1-41AF-46D9-B9CE-4C33BAE65343} = {47E2F6BD-C115-4C38-B7CF-6B6C55CF2BED}
+		{1EAB5FD1-41AF-46D9-B9CE-4C33BAE65343} = {22EB197F-0867-4C56-AEFD-8E4C69C57A84}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D73A23A-B5A9-403B-8EE6-33DFACC589F9}

@@ -6,7 +6,6 @@ using DeltaBotFour.Infrastructure.Interface;
 using DeltaBotFour.Persistence.Interface;
 using DeltaBotFour.Reddit.Interface;
 using DeltaBotFour.Shared;
-using DeltaBotFour.Shared.Logging;
 
 namespace DeltaBotFour.Console
 {
