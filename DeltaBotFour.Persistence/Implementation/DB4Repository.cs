@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Resources;
 using Core.Foundation.Exceptions;
 using Core.Foundation.Extensions;
 using DeltaBotFour.Models;
 using DeltaBotFour.Persistence.Interface;
-using LiteDB;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -17,115 +15,11 @@ namespace DeltaBotFour.Persistence.Implementation
         private const int DeltaCommentRetainDays = 365;
         private const int LastProcessedIdCountToTrack = 200;
 
-        private const string DbFileName = "DeltaBotFour.db";
-        private const string DeltaBotStateCollectionName = "deltabotstate";
-        private const string DeltaCommentsCollectionName = "deltacomments";
-        private const string DeltaboardsCollectionName = "deltaboards";
-        private const string DeltaLogPostMappingsCollectionName = "deltalogpostmappings";
-        private const string WATTArticlesCollectionName = "wattarticles";
-        private const string BsonIdField = "_id";
-        private const string BsonValueField = "value";
-        private const string LastActivityTimeUtcKey = "last_processed_comment_time_utc";
-        private const string LastProcessedCommentIdsKey = "last_processed_comment_ids";
-        private const string LastProcessedEditIdsKey = "last_processed_edit_ids";
-        private const string IgnoreQuotedDeltaPMUserListKey = "ignore_quoted_delta_pm_user_list";
-
-        private readonly LiteDatabase _liteDatabase;
-
-        public DB4Repository()
-        {
-            // DI Conttainer registers this as a singleton, so
-            // we want to hold onto this instance
-            _liteDatabase = new LiteDatabase($"Filename={DbFileName}");
-        }
 
         public void Migrate()
         {
             DeltaBotFourDbContext dbContext = new DeltaBotFourDbContext();
             dbContext.Database.Migrate();
-        }
-
-        public void MigrateLiteDbToSqlLite()
-        {
-            Console.WriteLine();
-            var dbContext = new DeltaBotFourDbContext();
-
-            // DeltaComments
-            var sqlDeltaCommentCount = dbContext
-                .DeltaComments
-                .Count();
-
-            if (sqlDeltaCommentCount == 0)
-            {
-                Console.WriteLine("Migrating Comments");
-                var deltaComments = _liteDatabase.GetCollection<DeltaComment>(DeltaCommentsCollectionName);
-
-                var comments = deltaComments
-                    .FindAll()
-                    .ToList();
-
-                dbContext
-                    .AddRange(comments);
-
-                dbContext.SaveChanges();
-            }
-
-            // PostMappings
-            var sqlDeltaLogPostMappingCount = dbContext
-                .DeltaLogPostMappings
-                .Count();
-
-            if (sqlDeltaLogPostMappingCount == 0)
-            {
-                Console.WriteLine("Migrating PostMappings");
-                var postMappings = _liteDatabase.GetCollection<DeltaLogPostMapping>(DeltaLogPostMappingsCollectionName);
-
-                var mappings = postMappings
-                    .FindAll()
-                    .ToList();
-
-                dbContext
-                    .AddRange(mappings);
-
-                dbContext.SaveChanges();
-            }
-
-            // Deltaboards
-            var sqlDeltaboardsCount = dbContext
-                .Deltaboards
-                .Count();
-
-            if (sqlDeltaboardsCount == 0)
-            {
-                Console.WriteLine("Migrating Deltaboards");
-                var deltaboards = _liteDatabase.GetCollection<Deltaboard>(DeltaboardsCollectionName);
-
-                var boards = deltaboards
-                    .FindAll()
-                    .Where(e => !e.Id.Contains("5:00"))
-                    .Select(e =>
-                    {
-                        e.Id = e.Id.Replace(" 12:00:00 AM", string.Empty);
-                        return e;
-                    })
-                    .ToList();
-
-                foreach (var board in boards)
-                {
-                    foreach (var entry in board.Entries)
-                    {
-                        entry.Id = Guid.NewGuid();
-                        entry.DeltaboardId = board.Id;
-                    }
-                }
-
-                dbContext
-                    .AddRange(boards);
-
-                dbContext.SaveChanges();
-            }
-
-            Console.WriteLine("Done");
         }
 
         public DateTime GetLastActivityTimeUtc()
@@ -427,15 +321,11 @@ namespace DeltaBotFour.Persistence.Implementation
 
         public void UpsertWATTArticle(WATTArticle article)
         {
-            //var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
-            //wattArticlesCollection.EnsureIndex(d => d.Id, true);
-            //wattArticlesCollection.Upsert(article);
+            throw new NotSupportedException();
         }
 
         public WATTArticle GetWattArticleForPost(string postId)
         {
-            //var wattArticlesCollection = _liteDatabase.GetCollection<WATTArticle>(WATTArticlesCollectionName);
-            //return wattArticlesCollection.Find(dc => dc.RedditPostId == postId).FirstOrDefault();
             return null;
         }
 

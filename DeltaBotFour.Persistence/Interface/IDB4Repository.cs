@@ -7,7 +7,6 @@ namespace DeltaBotFour.Persistence.Interface
     public interface IDB4Repository
     {
         void Migrate();
-        void MigrateLiteDbToSqlLite();
         DateTime GetLastActivityTimeUtc();
         void SetLastActivityTimeUtc();
         List<string> GetLastProcessedCommentIds();
