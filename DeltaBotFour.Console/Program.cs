@@ -22,9 +22,14 @@ namespace DeltaBotFour.Console
 
             var appConfiguration = _container.Resolve<AppConfiguration>();
 
-
             var repository = _container.Resolve<IDB4Repository>();
+            System.Console.Write("Running db migrations...");
             repository.Migrate();
+            System.Console.WriteLine("done");
+
+            System.Console.Write("Compacting database...");
+            repository.CompactDb();
+            System.Console.WriteLine("done");
 
             System.Console.Write("Cleaning up old delta comments...");
             var deletedCount = repository.CleanOldDeltaComments();

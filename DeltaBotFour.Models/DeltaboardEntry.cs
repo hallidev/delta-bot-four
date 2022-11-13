@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DeltaBotFour.Models
 {
@@ -6,9 +7,10 @@ namespace DeltaBotFour.Models
     {
         public Guid Id { get; set; }
         public string DeltaboardId { get; set; }
-        public int Rank { get; set; }
         public string Username { get; set; }
         public int Count { get; set; }
+        [NotMapped] public int Rank { get; set; }
+        public DateTime? LastUpdatedUtc { get; set; }
         public Deltaboard Deltaboard { get; set; }
     }
 }

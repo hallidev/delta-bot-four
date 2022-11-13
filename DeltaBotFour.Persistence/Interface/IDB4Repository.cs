@@ -7,13 +7,14 @@ namespace DeltaBotFour.Persistence.Interface
     public interface IDB4Repository
     {
         void Migrate();
+        void CompactDb();
+        int CleanOldDeltaComments();
         DateTime GetLastActivityTimeUtc();
         void SetLastActivityTimeUtc();
         List<string> GetLastProcessedCommentIds();
         void SetLastProcessedCommentId(string commentId);
         List<string> GetLastProcessedEditIds();
         void SetLastProcessedEditId(string editId);
-        int CleanOldDeltaComments();
         bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName);
         void UpsertDeltaComment(DeltaComment commentWithDelta);
         void RemoveDeltaComment(string commentId);

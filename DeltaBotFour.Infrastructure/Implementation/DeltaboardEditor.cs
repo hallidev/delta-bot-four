@@ -25,7 +25,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly string _deltaboardRowTemplate;
         private readonly string _deltaboardSidebarTemplate;
 
-        public DeltaboardEditor(AppConfiguration appConfiguration, 
+        public DeltaboardEditor(AppConfiguration appConfiguration,
             IDB4Repository db4Repository,
             ISubredditService subredditService,
             ILogger logger)
@@ -64,23 +64,19 @@ namespace DeltaBotFour.Infrastructure.Implementation
             buildAndUpdateDeltaboards();
         }
 
-        private List<Deltaboard> getDeltaboards()
-        {
-            return _db4Repository.GetCurrentDeltaboards();
-        }
-
         private void buildAndUpdateDeltaboards()
         {
             try
             {
                 // Get the updated deltaboards
-                var deltaboards = getDeltaboards();
+                var deltaboards = _db4Repository.GetCurrentDeltaboards();
 
                 // Build the actual string content
                 string updatedDeltaboards = buildDeltaboardsContent(deltaboards);
 
                 // Update the wiki page
-                _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards, UpdateDeltaboardsReason);
+                _subredditService.EditWikiPage(_appConfiguration.WikiUrlDeltaboards, updatedDeltaboards,
+                    UpdateDeltaboardsReason);
 
                 // Get sidebar
                 string sidebar = _subredditService.GetSidebar();
@@ -151,14 +147,16 @@ namespace DeltaBotFour.Infrastructure.Implementation
             string deltaboardContent = _deltaboardTemplate;
 
             deltaboardContent = deltaboardContent
-                .Replace(_appConfiguration.ReplaceTokens.DeltaboardTypeToken, deltaboard.DeltaboardType.GetDescription())
+                .Replace(_appConfiguration.ReplaceTokens.DeltaboardTypeToken,
+                    deltaboard.DeltaboardType.GetDescription())
                 .Replace(_appConfiguration.ReplaceTokens.DeltaboardRowsToken,
                     buildDeltaboardRows(deltaboard.Entries.OrderBy(e => e.Rank).Take(RanksToShow).ToList()))
                 .Replace(_appConfiguration.ReplaceTokens.DateToken, DateTime.UtcNow.ToString("M/d/yyyy HH:mm:ss UTC"));
 
             if (deltaboard.DeltaboardType == DeltaboardType.AllTime)
             {
-                deltaboardContent = $"{deltaboardContent}\r\n\r\n*Due to technical limitations, All Time Deltaboards do not count deltas awarded prior to June 2018*";
+                deltaboardContent =
+                    $"{deltaboardContent}\r\n\r\n*Due to technical limitations, All Time Deltaboards do not count deltas awarded prior to June 2018*";
             }
 
             return deltaboardContent;
@@ -197,7 +195,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
         private string getUserWikiUrl(string username)
         {
-            string userUrl = _appConfiguration.WikiUrlUser.Replace(_appConfiguration.ReplaceTokens.UsernameToken, username);
+            string userUrl =
+                _appConfiguration.WikiUrlUser.Replace(_appConfiguration.ReplaceTokens.UsernameToken, username);
             return $"{_appConfiguration.RedditBaseUrl}{_subredditService.GetWikiUrl()}{userUrl}";
         }
     }

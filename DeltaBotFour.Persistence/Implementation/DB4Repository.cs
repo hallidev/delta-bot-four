@@ -22,6 +22,28 @@ namespace DeltaBotFour.Persistence.Implementation
             dbContext.Database.Migrate();
         }
 
+        public void CompactDb()
+        {
+            var dbContext = new DeltaBotFourDbContext();
+            dbContext.Database.ExecuteSql($"VACUUM;");
+        }
+
+        public int CleanOldDeltaComments()
+        {
+            var dbContext = new DeltaBotFourDbContext();
+
+            var oldComments = dbContext
+                .DeltaComments
+                .ToList()
+                .Where(e => (DateTime.Now - e.CreatedUtc).TotalDays > DeltaCommentRetainDays)
+                .ToList();
+
+            dbContext.RemoveRange(oldComments);
+            dbContext.SaveChanges();
+
+            return oldComments.Count;
+        }
+
         public DateTime GetLastActivityTimeUtc()
         {
             var state = getState();
@@ -116,22 +138,6 @@ namespace DeltaBotFour.Persistence.Implementation
             dbContext.SaveChanges();
         }
 
-        public int CleanOldDeltaComments()
-        {
-            var dbContext = new DeltaBotFourDbContext();
-
-            var oldComments = dbContext
-                .DeltaComments
-                .ToList()
-                .Where(e => (DateTime.Now - e.CreatedUtc).TotalDays > DeltaCommentRetainDays)
-                .ToList();
-
-            dbContext.RemoveRange(oldComments);
-            dbContext.SaveChanges();
-
-            return oldComments.Count;
-        }
-
         public bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName)
         {
             var dbContext = new DeltaBotFourDbContext();
@@ -206,6 +212,8 @@ namespace DeltaBotFour.Persistence.Implementation
             // Get deltaboards
             var deltaboards = GetCurrentDeltaboards();
 
+            var dbContext = new DeltaBotFourDbContext();
+
             foreach (var deltaboard in deltaboards)
             {
                 // Get the existing user entry for each deltaboard (daily, weekly, monthly, etc)
@@ -213,8 +221,10 @@ namespace DeltaBotFour.Persistence.Implementation
 
                 if (existingEntry != null)
                 {
+                    dbContext.Attach(existingEntry);
                     // Increment count if it exists
                     existingEntry.Count++;
+                    existingEntry.LastUpdatedUtc = DateTime.UtcNow;
                 }
                 else
                 {
@@ -222,24 +232,26 @@ namespace DeltaBotFour.Persistence.Implementation
                     var newEntry = new DeltaboardEntry
                     {
                         Rank = int.MaxValue,
+                        DeltaboardId = deltaboard.Id,
                         Username = username,
-                        Count = 1
+                        Count = 1,
+                        LastUpdatedUtc = DateTime.UtcNow
                     };
 
+                    dbContext.Add(newEntry);
                     deltaboard.Entries.Add(newEntry);
                 }
-
-                calculateRanks(deltaboard);
             }
 
-            // Save changes
-            updateDeltaboards(deltaboards);
+            dbContext.SaveChanges();
         }
 
         public void RemoveDeltaboardEntry(string username)
         {
             // Get deltaboards
             var deltaboards = GetCurrentDeltaboards();
+
+            var dbContext = new DeltaBotFourDbContext();
 
             foreach (var deltaboard in deltaboards)
             {
@@ -248,21 +260,20 @@ namespace DeltaBotFour.Persistence.Implementation
 
                 if (existingEntry != null)
                 {
+                    dbContext.Attach(existingEntry);
                     // Increment count if it exists
                     existingEntry.Count--;
 
                     // If this set the user back to 0, remove the entry
                     if (existingEntry.Count == 0)
                     {
+                        dbContext.Remove(existingEntry);
                         deltaboard.Entries.Remove(existingEntry);
                     }
                 }
-
-                calculateRanks(deltaboard);
             }
 
-            // Save changes
-            updateDeltaboards(deltaboards);
+            dbContext.SaveChanges();
         }
 
         public DeltaLogPostMapping GetDeltaLogPostMapping(string postId)
@@ -384,20 +395,41 @@ namespace DeltaBotFour.Persistence.Implementation
             // Find deltaboard
             var dbContext = new DeltaBotFourDbContext();
 
-            string id = $"{type}-{startUtc.ToShortDateString()}";
+            string deltaboardId = $"{type}-{startUtc.ToShortDateString()}";
 
             var deltaboard = dbContext
                 .Deltaboards
-                .Include(d => d.Entries)
-                .SingleOrDefault(e => e.Id == id);
+                .SingleOrDefault(e => e.Id == deltaboardId);
 
             // Create if it doesn't exist
             if (deltaboard == null)
             {
-                deltaboard = createDeltaboard(id, type, startUtc);
+                deltaboard = createDeltaboard(deltaboardId, type, startUtc);
 
                 dbContext.Add(deltaboard);
                 dbContext.SaveChanges();
+            }
+
+            var deltaboardEntries = dbContext
+                .DeltaboardEntries
+                .Where(e => e.DeltaboardId == deltaboardId)
+                .OrderByDescending(e => e.Count)
+                .ThenByDescending(e => e.LastUpdatedUtc)
+                .ToList();
+
+            // Set rank based on order in collection
+            deltaboardEntries = deltaboardEntries
+                .Select((e, index) =>
+                {
+                    e.Rank = index + 1;
+                    return e;
+                })
+                .ToList();
+
+            if (deltaboard.Entries == null)
+            {
+                deltaboard.Entries = new List<DeltaboardEntry>();
+                deltaboard.Entries.AddRange(deltaboardEntries);
             }
 
             return deltaboard;
@@ -407,38 +439,12 @@ namespace DeltaBotFour.Persistence.Implementation
         {
             return new Deltaboard
             {
-                Id = id, // Composite keys aren't supported in LiteDb
+                Id = id,
                 DeltaboardType = type,
                 CreatedUtc = createdUtc,
                 LastUpdatedUtc = createdUtc,
                 Entries = new List<DeltaboardEntry>()
             };
-        }
-
-        private void calculateRanks(Deltaboard deltaboard)
-        {
-            int rank = 1;
-
-            foreach (var entry in deltaboard.Entries.OrderByDescending(e => e.Count))
-            {
-                deltaboard.Entries.First(e => e.Username == entry.Username).Rank = rank;
-                rank++;
-            }
-        }
-
-        private void updateDeltaboards(List<Deltaboard> deltaboards)
-        {
-            var dbContext = new DeltaBotFourDbContext();
-
-            dbContext
-                .Deltaboards
-                .Where(e => deltaboards.Select(x => x.Id).Contains(e.Id))
-                .ExecuteDelete();
-
-            dbContext
-                .AddRange(deltaboards);
-
-            dbContext.SaveChanges();
         }
     }
 }
