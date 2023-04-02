@@ -16,7 +16,6 @@ namespace RedditSharp
     {
         #region Constant Urls
 
-
         private const string MeUrl = "/api/me.json";
         private const string OAuthMeUrl = "/api/v1/me.json";
         private const string SubredditAboutUrl = "/r/{0}/about.json";
@@ -37,22 +36,27 @@ namespace RedditSharp
         private const string GetLiveEventUrl = "https://www.reddit.com/live/{0}/about";
 
         #endregion
+
         private IAdvancedSearchFormatter _searchFormatter;
+
         private IAdvancedSearchFormatter SearchFormatter
         {
             get
             {
-                if(_searchFormatter == null)
+                if (_searchFormatter == null)
                 {
                     _searchFormatter = new DefaultSearchFormatter();
                 }
+
                 return _searchFormatter;
             }
             set => _searchFormatter = value;
         }
 
         #region Properties
+
         internal IWebAgent WebAgent { get; set; }
+
         /// <summary>
         /// Captcha solver instance to use when solving captchas.
         /// </summary>
@@ -87,16 +91,19 @@ namespace RedditSharp
         {
             get { return Subreddit.GetRSlashAll(WebAgent); }
         }
+
         #endregion
 
 #pragma warning disable 1591
         public Reddit()
-            : this(true) { }
+            : this(true)
+        {
+        }
 
         public Reddit(bool useSsl)
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
-            
+
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
@@ -127,6 +134,7 @@ namespace RedditSharp
             WebAgent.AccessToken = accessToken;
             Task.Run(InitOrUpdateUserAsync);
         }
+
         /// <summary>
         /// Creates a Reddit instance with the given WebAgent implementation
         /// </summary>
@@ -164,7 +172,10 @@ namespace RedditSharp
         /// </summary>
         public async Task InitOrUpdateUserAsync()
         {
-            var json = await WebAgent.Get(!string.IsNullOrEmpty(WebAgent.AccessToken) || WebAgent.GetType() == typeof(RefreshTokenWebAgent) ? OAuthMeUrl : MeUrl).ConfigureAwait(false);
+            var json = await WebAgent
+                .Get(!string.IsNullOrEmpty(WebAgent.AccessToken) || WebAgent.GetType() == typeof(RefreshTokenWebAgent)
+                    ? OAuthMeUrl
+                    : MeUrl).ConfigureAwait(false);
             User = new AuthenticatedUser(WebAgent, json);
         }
 
@@ -192,7 +203,6 @@ namespace RedditSharp
             return new Domain(WebAgent, uri);
         }
 
-        
 
         /// <summary>
         /// Get a <see cref="Post"/> by uri.
@@ -212,7 +222,8 @@ namespace RedditSharp
         /// <param name="resources"></param>
         /// <param name="nsfw"></param>
         /// <returns></returns>
-        public async Task<LiveUpdateEvent> CreateLiveEventAsync(string title, string description, string resources = "", bool nsfw = false)
+        public async Task<LiveUpdateEvent> CreateLiveEventAsync(string title, string description, string resources = "",
+            bool nsfw = false)
         {
             if (String.IsNullOrEmpty(title))
                 throw new ArgumentException(nameof(title));
@@ -263,7 +274,8 @@ namespace RedditSharp
         /// <param name="captchaAnswer"></param>
         /// <remarks>If <paramref name="fromSubReddit"/> is passed in then the message is sent from the subreddit. the sender must be a mod of the specified subreddit.</remarks>
         /// <exception cref="AuthenticationException">Thrown when a subreddit is passed in and the user is not a mod of that sub.</exception>
-        public async Task ComposePrivateMessageAsync(string subject, string body, string to, string fromSubReddit = "", string captchaId = "", string captchaAnswer = "")
+        public async Task ComposePrivateMessageAsync(string subject, string body, string to, string fromSubReddit = "",
+            string captchaId = "", string captchaAnswer = "")
         {
             if (User == null)
                 throw new Exception("User can not be null.");
@@ -271,7 +283,8 @@ namespace RedditSharp
             if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
                 var subReddit = await GetSubredditAsync(fromSubReddit).ConfigureAwait(false);
-                var modNameList = (await subReddit.GetModeratorsAsync().ConfigureAwait(false)).Select(b => b.Name).ToList();
+                var modNameList = (await subReddit.GetModeratorsAsync().ConfigureAwait(false)).Select(b => b.Name)
+                    .ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
@@ -301,7 +314,8 @@ namespace RedditSharp
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(captchaId));
 
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
-                    await ComposePrivateMessageAsync(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer).ConfigureAwait(false);
+                    await ComposePrivateMessageAsync(subject, body, to, fromSubReddit, captchaId,
+                        captchaResponse.Answer).ConfigureAwait(false);
             }
         }
 
@@ -363,6 +377,7 @@ namespace RedditSharp
         {
             var url = string.Format(GetPostUrl, uri.AbsoluteUri);
             var json = await WebAgent.Get(url).ConfigureAwait(false);
+
             var sender = new Post(WebAgent, json[0]["data"]["children"][0]);
             return new Comment(WebAgent, json[1]["data"]["children"][0], sender);
         }
@@ -388,14 +403,16 @@ namespace RedditSharp
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         /// <returns></returns>
-        public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max = -1) where T : Thing
+        public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance,
+            TimeSorting timeE = TimeSorting.All, int max = -1) where T : Thing
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
             return Listing<T>.Create(this.WebAgent, string.Format(SearchUrl, query, sort, time), max, 100);
         }
 
-        public Listing<Post> AdvancedSearch(Expression<Func<AdvancedSearchFilter, bool>> searchFilter, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All)
+        public Listing<Post> AdvancedSearch(Expression<Func<AdvancedSearchFilter, bool>> searchFilter,
+            Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All)
         {
             string query = SearchFormatter.Format(searchFilter);
             string sort = sortE.ToString().ToLower();
@@ -416,8 +433,9 @@ namespace RedditSharp
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         /// <returns></returns>
-        [Obsolete("time search was discontinued by reddit",true)]
-        public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max = -1) where T : Thing
+        [Obsolete("time search was discontinued by reddit", true)]
+        public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "",
+            Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max = -1) where T : Thing
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
@@ -425,7 +443,8 @@ namespace RedditSharp
             var fromUnix = (from - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
             var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
 
-            string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
+            string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" +
+                                 subreddit + "')&syntax=cloudsearch";
             return Listing<T>.Create(this.WebAgent, string.Format(SearchUrl, searchQuery, sort, time), max, 100);
         }
 
@@ -436,32 +455,37 @@ namespace RedditSharp
         /// Returns a Listing of newly created subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetNewSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, NewSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetNewSubreddits(int max = -1) =>
+            Listing<Subreddit>.Create(this.WebAgent, NewSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of the most popular subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetPopularSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, PopularSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetPopularSubreddits(int max = -1) =>
+            Listing<Subreddit>.Create(this.WebAgent, PopularSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of Gold-only subreddits. This endpoint will not return anything if the authenticated Reddit account does not currently have gold.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetGoldSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, GoldSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetGoldSubreddits(int max = -1) =>
+            Listing<Subreddit>.Create(this.WebAgent, GoldSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of default subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetDefaultSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, DefaultSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetDefaultSubreddits(int max = -1) =>
+            Listing<Subreddit>.Create(this.WebAgent, DefaultSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of subreddits related to a query.
         /// </summary>
         /// <param name="query">Search query</param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> SearchSubreddits(string query, int max = -1) => Listing<Subreddit>.Create(this.WebAgent, string.Format(SearchSubredditsUrl, query), max, 100);
+        public Listing<Subreddit> SearchSubreddits(string query, int max = -1) =>
+            Listing<Subreddit>.Create(this.WebAgent, string.Format(SearchSubredditsUrl, query), max, 100);
 
         #endregion SubredditSearching
 

@@ -10,9 +10,11 @@ namespace RedditSharp
     public class BotWebAgent : WebAgent
     {
         //private so it doesn't leak app secret to other code
-        private AuthProvider TokenProvider;
-        private string Username;
-        private string Password;
+        private readonly AuthProvider _tokenProvider;
+        private readonly string _password;
+
+        public string Username { get; }
+        public string ClientId { get; }
 
         /// <summary>
         /// DateTime the token expires.
@@ -30,10 +32,11 @@ namespace RedditSharp
         public BotWebAgent(string username, string password, string clientID, string clientSecret, string redirectURI)
         {
             Username = username;
-            Password = password;
+            ClientId = clientID;
+            _password = password;
             RateLimiter.Mode = RateLimitMode.Burst;
             RootDomain = "oauth.reddit.com";
-            TokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);
+            _tokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);
             Task.Run(GetNewTokenAsync).Wait();
         }
 
@@ -45,6 +48,7 @@ namespace RedditSharp
             {
                 Task.Run(GetNewTokenAsync).Wait();
             }
+
             return base.CreateRequest(url, method);
         }
 
@@ -56,14 +60,14 @@ namespace RedditSharp
             {
                 Task.Run(GetNewTokenAsync).Wait();
             }
+
             return base.CreateRequest(uri, method);
         }
 
         private async Task GetNewTokenAsync()
         {
-            AccessToken = await TokenProvider.GetOAuthTokenAsync(Username, Password).ConfigureAwait(false);
+            AccessToken = await _tokenProvider.GetOAuthTokenAsync(Username, _password).ConfigureAwait(false);
             TokenValidTo = DateTime.UtcNow.AddHours(1);
         }
     }
-
 }

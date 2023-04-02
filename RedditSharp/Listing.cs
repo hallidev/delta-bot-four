@@ -59,12 +59,12 @@ namespace RedditSharp
             return new Unsubscriber(_observers, observer);
         }
 
-        public async Task Enumerate(CancellationToken cancelationToken)
+        public async Task Enumerate(CancellationToken cancellationToken)
         {
             await Listing.ForEachAsync(thing =>
             {
                 foreach (var observer in _observers) observer.OnNext(thing);
-            }, cancelationToken);
+            }, cancellationToken);
         }
 
         private class Unsubscriber : IDisposable
@@ -153,14 +153,15 @@ namespace RedditSharp
         /// <param name="maximumLimit">The maximum number of listings to return</param>
         /// <param name="stream">Set to true for a listing stream.</param>
         /// <returns></returns>
-        public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
+        public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false,
+            CancellationToken cancellationToken = default)
         {
-            return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream);
+            return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream, cancellationToken);
         }
 
-        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
-            return GetEnumerator(LimitPerRequest, MaximumLimit, IsStream);
+            return GetEnumerator(LimitPerRequest, MaximumLimit, IsStream, cancellationToken);
         }
 
         /// <summary>
@@ -177,6 +178,7 @@ namespace RedditSharp
         {
             private readonly ICollection<string> done;
             private readonly bool stream;
+            private readonly CancellationToken _cancellationToken;
 
             /// <summary>
             ///     Creates a new ListingEnumerator instance
@@ -188,13 +190,15 @@ namespace RedditSharp
             /// </param>
             /// <param name="maximumLimit">The maximum number of listings to return, -1 will not add a limit</param>
             /// <param name="stream">yield new <see cref="Thing" /> as they are created</param>
-            public ListingEnumerator(Listing<T> listing, int limitPerRequest, int maximumLimit, bool stream = false)
+            public ListingEnumerator(Listing<T> listing, int limitPerRequest, int maximumLimit, bool stream = false,
+                CancellationToken cancellationToken = default)
             {
                 Listing = listing;
                 CurrentPage = null; // new ReadOnlyCollection<T>(new T[0]);
                 CurrentIndex = -1;
                 done = new HashSet<string>();
                 this.stream = stream;
+                _cancellationToken = cancellationToken;
 
                 // Set the listings per page (if not specified, use the Reddit default of 25) and the maximum listings
                 LimitPerRequest = limitPerRequest <= 0 ? DefaultListingPerRequest : limitPerRequest;
@@ -220,8 +224,8 @@ namespace RedditSharp
             public async ValueTask<bool> MoveNextAsync()
             {
                 if (stream)
-                    return await MoveNextForwardAsync(default).ConfigureAwait(false);
-                return await MoveNextBackAsync(default).ConfigureAwait(false);
+                    return await MoveNextForwardAsync(_cancellationToken).ConfigureAwait(false);
+                return await MoveNextBackAsync(_cancellationToken).ConfigureAwait(false);
             }
 
             private Task FetchNextPageAsync()
