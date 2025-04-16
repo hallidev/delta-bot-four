@@ -44,7 +44,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // If we got here with a PM or post, that's a problem
             Assert.That(comment.Type == DB4ThingType.Comment, $"CommentProcessor received type: {comment.Type}");
 
-            _logger.Info($"Processing incoming comment{(comment.IsEdited ? " (edit)" : string.Empty)}: {comment.Permalink}");
+            _logger.Info(
+                $"Processing incoming comment{(comment.IsEdited ? " (edit)" : string.Empty)}: {comment.Permalink}");
 
             // DB4 shouldn't process its own comments
             if (comment.AuthorName == _appConfiguration.DB4Username)
@@ -67,7 +68,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // If there was no legitimate delta, but there was a delta in quotes, PM
             // the user to let them know in case they made a mistake with reddit quoting
-            if (!hasDelta && hadDeltaInQuotes && !_db4Repository.GetIgnoreQuotedDeltaPMUserList().Contains(comment.AuthorName))
+            if (!hasDelta && hadDeltaInQuotes &&
+                !_db4Repository.GetIgnoreQuotedDeltaPMUserList().Contains(comment.AuthorName))
             {
                 string subject = _appConfiguration.PrivateMessages.DeltaInQuoteSubject;
                 string body = _appConfiguration.PrivateMessages.DeltaInQuoteMessage
@@ -122,13 +124,15 @@ namespace DeltaBotFour.Infrastructure.Implementation
                     var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
                     // If DB4 replied and awarded a delta in the last HoursToUnawardDelta, unaward it
-                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply && (DateTime.UtcNow - comment.CreatedUtc).TotalHours < _appConfiguration.HoursToUnawardDelta)
+                    if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply &&
+                        (DateTime.UtcNow - comment.CreatedUtc).TotalHours < _appConfiguration.HoursToUnawardDelta)
                     {
                         // Unaward
                         // parentThing can safely be cast to Comment here - we could have only
                         // gotten here if a delta was previously awarded, meaning the parent of this
                         // Comment is a Comment also
                         Assert.That(comment.ParentThing.Type == DB4ThingType.Comment);
+
                         _deltaAwarder.Unaward(comment);
 
                         // Delete award comment
@@ -150,9 +154,9 @@ namespace DeltaBotFour.Infrastructure.Implementation
         {
             hadDeltaInQuotes = false;
 
-                // First split the comment up on newlines
-                var commentLines = commentBody.Split(
-                new[] { "\r\n", "\r", "\n" },
+            // First split the comment up on newlines
+            var commentLines = commentBody.Split(
+                new[] {"\r\n", "\r", "\n"},
                 StringSplitOptions.RemoveEmptyEntries
             );
 
@@ -163,7 +167,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 // delta symbols, so check both!
                 string commentLineLower = commentLine.ToLower();
 
-                if (_appConfiguration.ValidDeltaIndicators.Any(d => commentLine.Contains(d) || commentLineLower.Contains(d)))
+                if (_appConfiguration.ValidDeltaIndicators.Any(d =>
+                        commentLine.Contains(d) || commentLineLower.Contains(d)))
                 {
                     if (!commentLine.StartsWith("&gt;"))
                     {

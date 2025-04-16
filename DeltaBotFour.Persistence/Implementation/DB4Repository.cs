@@ -149,6 +149,17 @@ namespace DeltaBotFour.Persistence.Implementation
             return exists;
         }
 
+        public DeltaComment GetDeltaCommentByPermalink(string permalink)
+        {
+            var dbContext = new DeltaBotFourDbContext();
+
+            var deltaComment = dbContext
+                .DeltaComments
+                .SingleOrDefault(e => permalink.Contains(e.Permalink));
+
+            return deltaComment;
+        }
+
         public void UpsertDeltaComment(DeltaComment commentWithDelta)
         {
             var dbContext = new DeltaBotFourDbContext();

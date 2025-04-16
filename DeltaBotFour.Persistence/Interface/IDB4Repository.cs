@@ -16,6 +16,7 @@ namespace DeltaBotFour.Persistence.Interface
         List<string> GetLastProcessedEditIds();
         void SetLastProcessedEditId(string editId);
         bool DeltaCommentExistsForParentCommentByAuthor(string parentCommentId, string authorName);
+        DeltaComment GetDeltaCommentByPermalink(string permalink);
         void UpsertDeltaComment(DeltaComment commentWithDelta);
         void RemoveDeltaComment(string commentId);
         List<DeltaComment> GetDeltaCommentsForPost(string postId, string authorName = "");

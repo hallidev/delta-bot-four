@@ -43,7 +43,9 @@ public class RedditSharpRedditService : IRedditService
                 var postComments = await parentPost.GetCommentsAsync();
 
                 foreach (var postComment in postComments)
+                {
                     comment.ParentPost.Comments.Add(RedditThingConverter.Convert(postComment));
+                }
             }).Wait();
         }
 
@@ -51,7 +53,9 @@ public class RedditSharpRedditService : IRedditService
         var childComments = new List<DB4Thing>();
 
         foreach (var childComment in qualifiedComment.Comments)
+        {
             childComments.Add(RedditThingConverter.Convert(childComment));
+        }
 
         comment.Comments = childComments;
 
@@ -73,7 +77,10 @@ public class RedditSharpRedditService : IRedditService
         {
             var postComments = await qualifiedPost.GetCommentsAsync();
 
-            foreach (var postComment in postComments) post.Comments.Add(RedditThingConverter.Convert(postComment));
+            foreach (var postComment in postComments)
+            {
+                post.Comments.Add(RedditThingConverter.Convert(postComment));
+            }
         }).Wait();
     }
 
@@ -114,14 +121,21 @@ public class RedditSharpRedditService : IRedditService
             Comment newComment;
 
             if (qualifiedThing is Post post)
+            {
                 // Make a new comment
                 newComment = await post.CommentAsync(reply);
+            }
             else if (qualifiedThing is Comment comment)
+            {
                 // Reply to existing comment
                 newComment = await comment.ReplyAsync(reply);
+            }
             else
+            {
                 throw new InvalidOperationException(
                     $"Tried to reply to a Thing that isn't a Post or Comment - Thing ID: {qualifiedThing.Id}");
+            }
+
 
             // All DB4 replies should be distinguished
             await newComment.DistinguishAsync(ModeratableThing.DistinguishType.Moderator, isSticky);
@@ -158,7 +172,10 @@ public class RedditSharpRedditService : IRedditService
         // codebase and it appears that you need to do this
         Task.Run(async () =>
         {
-            if (_reddit.User == null) await _reddit.InitOrUpdateUserAsync();
+            if (_reddit.User == null)
+            {
+                await _reddit.InitOrUpdateUserAsync();
+            }
 
             await _reddit.ComposePrivateMessageAsync(subject, body, to, fromSubreddit);
         }).Wait();
@@ -168,12 +185,18 @@ public class RedditSharpRedditService : IRedditService
     {
         Task.Run(async () =>
         {
-            if (_reddit.User == null) await _reddit.InitOrUpdateUserAsync();
+            if (_reddit.User == null)
+            {
+                await _reddit.InitOrUpdateUserAsync();
+            }
 
             // Get private message with the specified id
             var privateMessage = getPrivateMessageById(privateMessageId);
 
-            if (privateMessage != null) await privateMessage.ReplyAsync(body);
+            if (privateMessage != null)
+            {
+                await privateMessage.ReplyAsync(body);
+            }
         }).Wait();
     }
 
@@ -181,12 +204,18 @@ public class RedditSharpRedditService : IRedditService
     {
         Task.Run(async () =>
         {
-            if (_reddit.User == null) await _reddit.InitOrUpdateUserAsync();
+            if (_reddit.User == null)
+            {
+                await _reddit.InitOrUpdateUserAsync();
+            }
 
             // Get private message with the specified id
             var privateMessage = getPrivateMessageById(privateMessageId);
 
-            if (privateMessage != null) await privateMessage.SetAsReadAsync();
+            if (privateMessage != null)
+            {
+                await privateMessage.SetAsReadAsync();
+            }
         }).Wait();
     }
 

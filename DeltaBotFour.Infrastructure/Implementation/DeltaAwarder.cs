@@ -23,7 +23,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             ILogger logger,
             IUserWikiEditor wikiEditor,
             IRedditService redditService,
-            ISubredditService subredditService, 
+            ISubredditService subredditService,
             IDeltaboardEditor deltaboardEditor,
             IDeltaLogEditor deltaLogEditor,
             IStickyCommentEditor stickyCommentEditor,
@@ -49,7 +49,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 return;
             }
 
-            _logger.Info($"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
+            _logger.Info(
+                $"---START AWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
             // Update wiki
             // The wiki is the standard from which delta counts come from
@@ -106,7 +107,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // Update DeltaLogs after repository update since it reads data from the repository
             _logger.Info("   ---Updating DeltaLog (award)");
-            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink,
+                comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is OP
             // This needs to be absolute last since it relies on getting a Url from the DeltaLog post
@@ -118,7 +120,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
                 // Update sticky comment
                 _logger.Info("   ---Updating post sticky (award)");
-                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
+                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null,
+                    deltaLogPostUrl);
             }
 
             _logger.Info("---END AWARD DELTA---");
@@ -133,7 +136,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 return;
             }
 
-            _logger.Info($"---START UNAWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
+            _logger.Info(
+                $"---START UNAWARD DELTA--- -> user: {comment.ParentThing.AuthorName}, comment: {comment.Permalink}");
 
             // Update wiki
             // The wiki is the standard from which delta counts come from
@@ -163,7 +167,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // Update DeltaLogs after repository update since it reads data from the repository
             _logger.Info("   ---Updating DeltaLog (unaward)");
-            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink, comment.ParentPost.Title, comment.ParentPost.AuthorName);
+            string deltaLogPostUrl = _deltaLogEditor.Upsert(comment.ParentPost.Id, comment.ParentPost.Permalink,
+                comment.ParentPost.Title, comment.ParentPost.AuthorName);
 
             // Update sticky if this is from OP
             if (comment.AuthorName == comment.ParentPost.AuthorName)
@@ -175,7 +180,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 // Update or remove sticky comment - make sure to remove one from the count since we haven't removed the data from
                 // the repository yet, so the current comment won't count
                 _logger.Info("   ---Updating post sticky (unaward)");
-                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null, deltaLogPostUrl);
+                _stickyCommentEditor.UpsertOrRemove(comment.ParentPost, opDeltaCommentsInPost.Count, null,
+                    deltaLogPostUrl);
             }
 
             _logger.Info("---END UNAWARD DELTA---");

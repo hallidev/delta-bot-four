@@ -25,9 +25,11 @@ namespace DeltaBotFour.Infrastructure.Implementation
         public void Process(DB4Thing privateMessage)
         {
             // If we got here with a comment or post, that's a problem
-            Assert.That(privateMessage.Type == DB4ThingType.PrivateMessage, $"CommentProcessor received type: {privateMessage.Type}");
+            Assert.That(privateMessage.Type == DB4ThingType.PrivateMessage,
+                $"CommentProcessor received type: {privateMessage.Type}");
 
-            _logger.Info($"Processing incoming private message from: {privateMessage.AuthorName}, subject: {privateMessage.Subject}");
+            _logger.Info(
+                $"Processing incoming private message from: {privateMessage.AuthorName}, subject: {privateMessage.Subject}");
 
             // Get a handler to handle this private message
             var handler = _privateMessageHandlerFactory.Create(privateMessage);

@@ -21,8 +21,8 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IStickyCommentEditor _stickyCommentEditor;
 
         public PrivateMessageHandlerFactory(AppConfiguration appConfiguration,
-            IDB4Repository db4Repository, 
-            IRedditService redditService, 
+            IDB4Repository db4Repository,
+            IRedditService redditService,
             ISubredditService subredditService,
             ICommentDetector commentDetector,
             ICommentBuilder commentBuilder,
@@ -52,34 +52,43 @@ namespace DeltaBotFour.Infrastructure.Implementation
 
             // Add Delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModAddDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModAddDeltaSubject,
+                    StringComparison.CurrentCultureIgnoreCase))
             {
-                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
+                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder,
+                    _replier, _deltaAwarder);
             }
 
             // Force Add Delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject,
+                    StringComparison.CurrentCultureIgnoreCase))
             {
-                return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
+                return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
+                    _commentBuilder, _replier, _deltaAwarder);
             }
 
             // Remove delta (moderator only)
             if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModDeleteDeltaSubject, StringComparison.CurrentCultureIgnoreCase))
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModDeleteDeltaSubject,
+                    StringComparison.CurrentCultureIgnoreCase))
             {
-                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder, _replier, _deltaAwarder);
+                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder,
+                    _replier, _deltaAwarder, _db4Repository);
             }
 
             // Stop quoted deltas warning
-            if (privateMessage.Subject.ToLower().Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
+            if (privateMessage.Subject.ToLower()
+                .Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
             {
                 return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository, _redditService);
             }
 
             // WATT Article created (author must be in ValidWATTUsers list)
-            if (_appConfiguration.ValidWATTUsers.Any(u => string.Equals(u, privateMessage.AuthorName, StringComparison.CurrentCultureIgnoreCase)) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.WATTArticleCreatedSubject, StringComparison.CurrentCultureIgnoreCase))
+            if (_appConfiguration.ValidWATTUsers.Any(u =>
+                    string.Equals(u, privateMessage.AuthorName, StringComparison.CurrentCultureIgnoreCase)) &&
+                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.WATTArticleCreatedSubject,
+                    StringComparison.CurrentCultureIgnoreCase))
             {
                 return new WATTArticleCreatedPMHandler(_db4Repository, _redditService, _stickyCommentEditor);
             }
