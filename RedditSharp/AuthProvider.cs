@@ -13,7 +13,8 @@ namespace RedditSharp
         /// <summary>
         /// Access token request url.
         /// </summary>
-        public const string AccessUrl = "https://ssl.reddit.com/api/v1/access_token";
+        public const string AccessUrl = "https://www.reddit.com/api/v1/access_token";
+
         private const string OauthGetMeUrl = "https://oauth.reddit.com/api/v1/me";
         private const string RevokeUrl = "https://www.reddit.com/api/v1/revoke_token";
 
@@ -62,6 +63,7 @@ namespace RedditSharp
             _redirectUri = redirectUri;
             _webAgent = new WebAgent();
         }
+
         /// <summary>
         /// Allows use of reddit's OAuth interface, using an app set up at https://ssl.reddit.com/prefs/apps/.
         /// </summary>
@@ -69,7 +71,7 @@ namespace RedditSharp
         /// <param name="clientSecret">Granted by reddit as part of app.</param>
         /// <param name="redirectUri">Selected as part of app. Reddit will send users back here.</param>
         /// <param name="agent">Implementation of IWebAgent to use to make requests.</param>
-        public AuthProvider(string clientId, string clientSecret, string redirectUri,IWebAgent agent)
+        public AuthProvider(string clientId, string clientSecret, string redirectUri, IWebAgent agent)
         {
             _clientId = clientId;
             _clientSecret = clientSecret;
@@ -86,7 +88,10 @@ namespace RedditSharp
         /// <returns></returns>
         public string GetAuthUrl(string state, Scope scope, bool permanent = false)
         {
-            return string.Format("https://ssl.reddit.com/api/v1/authorize?client_id={0}&response_type=code&state={1}&redirect_uri={2}&duration={3}&scope={4}", _clientId, state, _redirectUri, permanent ? "permanent" : "temporary", scope.ToString().Replace(" ",""));
+            return string.Format(
+                "https://ssl.reddit.com/api/v1/authorize?client_id={0}&response_type=code&state={1}&redirect_uri={2}&duration={3}&scope={4}",
+                _clientId, state, _redirectUri, permanent ? "permanent" : "temporary",
+                scope.ToString().Replace(" ", ""));
         }
 
         /// <summary>
@@ -101,32 +106,36 @@ namespace RedditSharp
             //if (Type.GetType("Mono.Runtime") != null)
             //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
 
-            var json = await _webAgent.ExecuteRequestAsync(() => {
-                  var request = _webAgent.CreateRequest(AccessUrl, "POST");
-                  request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-                  if (isRefresh)
-                  {
-                      _webAgent.WritePostBody(request, new
-                      {
-                          grant_type = "refresh_token",
-                          refresh_token = code
-                      });
-                  }
-                  else
-                  {
-                      _webAgent.WritePostBody(request, new
-                      {
-                          grant_type = "authorization_code",
-                          code,
-                          redirect_uri = _redirectUri
-                      });
-                  }
-                  return request;
-                }).ConfigureAwait(false);
+            var json = await _webAgent.ExecuteRequestAsync(() =>
+            {
+                var request = _webAgent.CreateRequest(AccessUrl, "POST");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
+                if (isRefresh)
+                {
+                    _webAgent.WritePostBody(request, new
+                    {
+                        grant_type = "refresh_token",
+                        refresh_token = code
+                    });
+                }
+                else
+                {
+                    _webAgent.WritePostBody(request, new
+                    {
+                        grant_type = "authorization_code",
+                        code,
+                        redirect_uri = _redirectUri
+                    });
+                }
+
+                return request;
+            }).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 return json["access_token"].ToString();
             }
+
             throw new AuthenticationException("Could not log in.");
         }
 
@@ -144,22 +153,25 @@ namespace RedditSharp
             //_webAgent.Cookies = new CookieContainer();
 
 
-            var json = await _webAgent.ExecuteRequestAsync(() => {
-                  var request = _webAgent.CreateRequest(AccessUrl, "POST");
-                  request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-                  _webAgent.WritePostBody(request, new
-                  {
-                      grant_type = "password",
-                      username,
-                      password,
-                      redirect_uri = _redirectUri
-                  });
-                  return request;
-                }).ConfigureAwait(false);
+            var json = await _webAgent.ExecuteRequestAsync(() =>
+            {
+                var request = _webAgent.CreateRequest(AccessUrl, "POST");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
+                _webAgent.WritePostBody(request, new
+                {
+                    grant_type = "password",
+                    username,
+                    password,
+                    redirect_uri = _redirectUri
+                });
+                return request;
+            }).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 return json["access_token"].ToString();
             }
+
             throw new AuthenticationException("Could not log in.");
         }
 
@@ -172,15 +184,18 @@ namespace RedditSharp
         public async Task RevokeTokenAsync(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";
-            await _webAgent.ExecuteRequestAsync(() => {
-                  var request = _webAgent.CreateRequest(RevokeUrl, "POST");
-                  request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-                  _webAgent.WritePostBody(request, new {
-                      token = token,
-                      token_type = tokenType
-                  });
-                  return request;
-                }).ConfigureAwait(false);
+            await _webAgent.ExecuteRequestAsync(() =>
+            {
+                var request = _webAgent.CreateRequest(RevokeUrl, "POST");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
+                _webAgent.WritePostBody(request, new
+                {
+                    token = token,
+                    token_type = tokenType
+                });
+                return request;
+            }).ConfigureAwait(false);
         }
     }
 }
