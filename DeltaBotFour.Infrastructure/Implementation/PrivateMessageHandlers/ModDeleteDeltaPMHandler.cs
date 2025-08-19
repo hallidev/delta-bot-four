@@ -48,7 +48,10 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         public void Handle(DB4Thing privateMessage)
         {
             // The body should be the URL to DeltaBot's "Confirmed: 1 delta awarded..." comment
-            string deltaBotAwardCommentUrl = privateMessage.Body.Trim();
+            var privateMessageParser = new PrivateMessageParser(privateMessage);
+            var parseResult = privateMessageParser.Parse();
+
+            var deltaBotAwardCommentUrl = parseResult.Argument.Trim();
 
             try
             {

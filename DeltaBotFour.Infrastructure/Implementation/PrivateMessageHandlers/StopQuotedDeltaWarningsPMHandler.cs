@@ -7,7 +7,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
 {
     public class StopQuotedDeltaWarningsPMHandler : IPrivateMessageHandler
     {
-        private const string StopIndicator = "stop";
+        private const string StopIndicator = "!stop";
 
         private readonly AppConfiguration _appConfiguration;
         private readonly IDB4Repository _db4Repository;
@@ -30,7 +30,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 _db4Repository.AddIgnoredQuotedDeltaPMUser(privateMessage.AuthorName);
 
                 // Send confirmation message
-                _redditService.ReplyToPrivateMessage(privateMessage.Id, _appConfiguration.PrivateMessages.ConfirmStopQuotedDeltaWarningMessage);
+                _redditService.ReplyToPrivateMessage(privateMessage.Id,
+                    _appConfiguration.PrivateMessages.ConfirmStopQuotedDeltaWarningMessage);
             }
         }
     }

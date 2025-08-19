@@ -50,36 +50,46 @@ namespace DeltaBotFour.Infrastructure.Implementation
                 return null;
             }
 
-            // Add Delta (moderator only)
-            if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModAddDeltaSubject,
-                    StringComparison.CurrentCultureIgnoreCase))
-            {
-                return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder,
-                    _replier, _deltaAwarder);
-            }
+            var privateMessageParser = new PrivateMessageParser(privateMessage);
+            var parseResult = privateMessageParser.Parse();
 
-            // Force Add Delta (moderator only)
-            if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject,
-                    StringComparison.CurrentCultureIgnoreCase))
-            {
-                return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
-                    _commentBuilder, _replier, _deltaAwarder);
-            }
+            var isMod = _subredditService.IsUserModerator(privateMessage.AuthorName);
 
-            // Remove delta (moderator only)
-            if (_subredditService.IsUserModerator(privateMessage.AuthorName) &&
-                string.Equals(privateMessage.Subject, _appConfiguration.PrivateMessages.ModDeleteDeltaSubject,
-                    StringComparison.CurrentCultureIgnoreCase))
+            // Mod commands
+            if (isMod)
             {
-                return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector, _commentBuilder,
-                    _replier, _deltaAwarder, _db4Repository);
+                // Add Delta (moderator only)
+                if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModAddDeltaSubject,
+                        StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
+                        _commentBuilder,
+                        _replier, _deltaAwarder);
+                }
+
+                // Force Add Delta (moderator only)
+                if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject,
+                        StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return new ModForceAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
+                        _commentBuilder, _replier, _deltaAwarder);
+                }
+
+                // Remove delta (moderator only)
+                if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModDeleteDeltaSubject,
+                        StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return new ModDeleteDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
+                        _commentBuilder,
+                        _replier, _deltaAwarder, _db4Repository);
+                }
             }
 
             // Stop quoted deltas warning
             if (privateMessage.Subject.ToLower()
-                .Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower()))
+                    .Contains(_appConfiguration.PrivateMessages.DeltaInQuoteSubject.ToLower())
+                || (parseResult.IsDirectChat && privateMessage.Body.ToLower()
+                    .Contains("!stop")))
             {
                 return new StopQuotedDeltaWarningsPMHandler(_appConfiguration, _db4Repository, _redditService);
             }

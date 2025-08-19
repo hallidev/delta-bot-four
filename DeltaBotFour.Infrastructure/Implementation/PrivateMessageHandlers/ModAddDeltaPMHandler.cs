@@ -8,9 +8,16 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
     public class ModAddDeltaPMHandler : IPrivateMessageHandler
     {
         private const string AddFailedCantAwardDeltaBot = "You can't award DeltaBot a delta with the 'add' comment.";
-        private const string AddFailedAuthorDeletedMessage = "The parent comment is deleted. DeltaBot can't add a delta.";
-        private const string AddFailedAlreadyAwardedMessage = "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
-        private const string AddFailedErrorMessageFormat = "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
+
+        private const string AddFailedAuthorDeletedMessage =
+            "The parent comment is deleted. DeltaBot can't add a delta.";
+
+        private const string AddFailedAlreadyAwardedMessage =
+            "I already successfully awarded a delta for this comment. I can't do 2 for the same comment.";
+
+        private const string AddFailedErrorMessageFormat =
+            "Add failed. DeltaBot is very sorry :(\n\nSend this to a DeltaBot dev:\n\n{0}";
+
         private const string AddSucceededMessage = "The 'add' command was processed successfully.";
 
         private readonly AppConfiguration _appConfiguration;
@@ -38,7 +45,10 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
         public void Handle(DB4Thing privateMessage)
         {
             // The body should be the URL to a comment
-            string commentUrl = privateMessage.Body.Trim();
+            var privateMessageParser = new PrivateMessageParser(privateMessage);
+            var parseResult = privateMessageParser.Parse();
+
+            var commentUrl = parseResult.Argument.Trim();
 
             try
             {
@@ -66,7 +76,8 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 }
 
                 // If a delta was already awarded successfully, bail
-                if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply || db4ReplyResult.CommentType == DB4CommentType.ModeratorAdded)
+                if (db4ReplyResult.HasDB4Replied && db4ReplyResult.WasSuccessReply ||
+                    db4ReplyResult.CommentType == DB4CommentType.ModeratorAdded)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedAlreadyAwardedMessage);
                     return;
@@ -86,7 +97,7 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 {
                     _replier.DeleteReply(db4ReplyResult.Comment);
                 }
-                
+
                 _replier.Reply(comment, reply);
 
                 // Build modmail body
