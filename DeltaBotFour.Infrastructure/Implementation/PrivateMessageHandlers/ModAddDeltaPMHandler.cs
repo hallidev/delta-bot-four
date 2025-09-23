@@ -61,14 +61,14 @@ namespace DeltaBotFour.Infrastructure.Implementation.PrivateMessageHandlers
                 // Check for replies
                 var db4ReplyResult = _commentDetector.DidDB4Reply(comment);
 
-                // If a the parent authorname is DeltaBot, bail
+                // If the parent author is DeltaBot, bail
                 if (comment.ParentThing.AuthorName == _appConfiguration.DB4Username)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedCantAwardDeltaBot);
                     return;
                 }
 
-                // If a the parent authorname is [deleted], bail
+                // If the parent author is [deleted], bail
                 if (comment.ParentThing.AuthorName == Constants.DeletedAuthorName)
                 {
                     _redditService.ReplyToPrivateMessage(privateMessage.Id, AddFailedAuthorDeletedMessage);
