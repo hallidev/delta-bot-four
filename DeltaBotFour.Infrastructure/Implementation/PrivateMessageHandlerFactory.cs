@@ -14,6 +14,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
         private readonly IDB4Repository _db4Repository;
         private readonly IRedditService _redditService;
         private readonly ISubredditService _subredditService;
+        private readonly ICommentProcessor _commentProcessor;
         private readonly ICommentDetector _commentDetector;
         private readonly ICommentBuilder _commentBuilder;
         private readonly ICommentReplier _replier;
@@ -24,6 +25,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             IDB4Repository db4Repository,
             IRedditService redditService,
             ISubredditService subredditService,
+            ICommentProcessor commentProcessor,
             ICommentDetector commentDetector,
             ICommentBuilder commentBuilder,
             ICommentReplier replier,
@@ -34,6 +36,7 @@ namespace DeltaBotFour.Infrastructure.Implementation
             _db4Repository = db4Repository;
             _redditService = redditService;
             _subredditService = subredditService;
+            _commentProcessor = commentProcessor;
             _commentDetector = commentDetector;
             _commentBuilder = commentBuilder;
             _replier = replier;
@@ -58,15 +61,6 @@ namespace DeltaBotFour.Infrastructure.Implementation
             // Mod commands
             if (isMod)
             {
-                // Add Delta (moderator only)
-                if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModAddDeltaSubject,
-                        StringComparison.CurrentCultureIgnoreCase))
-                {
-                    return new ModAddDeltaPMHandler(_appConfiguration, _redditService, _commentDetector,
-                        _commentBuilder,
-                        _replier, _deltaAwarder);
-                }
-
                 // Force Add Delta (moderator only)
                 if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModForceAddDeltaSubject,
                         StringComparison.CurrentCultureIgnoreCase))
@@ -83,6 +77,13 @@ namespace DeltaBotFour.Infrastructure.Implementation
                         _commentBuilder,
                         _replier, _deltaAwarder, _db4Repository);
                 }
+            }
+
+            // Add Delta
+            if (string.Equals(parseResult.Command, _appConfiguration.PrivateMessages.ModAddDeltaSubject,
+                    StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new AddDeltaPMHandler(_commentProcessor, _redditService);
             }
 
             // Stop quoted deltas warning
