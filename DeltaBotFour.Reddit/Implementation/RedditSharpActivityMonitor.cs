@@ -236,8 +236,7 @@ public class RedditSharpActivityMonitor : IActivityMonitor
                             }
                         }
 
-                        var editsJson = await _subreddit.WebAgent.Get(
-                            $"/r/{_subreddit.Name}/about/edited.json?only=comments&before={lastProcessedEditId}&limit=100");
+                        var editsJson = await getEditsJson(lastEditIds, lastProcessedEditId);
 
                         var children = editsJson["data"]["children"] as JArray;
                         var edits = new List<Comment>();
@@ -336,6 +335,49 @@ public class RedditSharpActivityMonitor : IActivityMonitor
                     lastEditSet = true;
                 }
             });
+    }
+
+    private async Task<JToken> getEditsJson(List<string> lastEditIds, string lastProcessedEditId)
+    {
+        var editIdsToTry = lastEditIds
+            .SkipWhile(lastEditId => lastEditId != lastProcessedEditId)
+            .ToList();
+
+        if (editIdsToTry.Count == 0 && !string.IsNullOrEmpty(lastProcessedEditId))
+        {
+            editIdsToTry.Add(lastProcessedEditId);
+        }
+
+        RedditSharp.RedditHttpException lastException = null;
+
+        foreach (var editId in editIdsToTry)
+        {
+            var editsUrl = $"/r/{_subreddit.Name}/about/edited.json?only=comments&before={editId}&limit=100";
+
+            try
+            {
+                var editsJson = await _subreddit.WebAgent.Get(editsUrl);
+
+                if (editId != lastProcessedEditId)
+                {
+                    _logger.Warn($"Recovered edit monitoring by falling back from {lastProcessedEditId} to {editId}.");
+                }
+
+                return editsJson;
+            }
+            catch (RedditSharp.RedditHttpException ex)
+            {
+                lastException = ex;
+                _logger.Warn($"Reddit rejected last processed edit id {editId} with {ex.StatusCode}; trying the previous tracked edit id...");
+            }
+        }
+
+        if (lastException != null)
+        {
+            throw lastException;
+        }
+
+        throw new InvalidOperationException("No last processed edit ids were available to query edits.");
     }
 
     private async Task<bool> isValidComment(string fullname)
