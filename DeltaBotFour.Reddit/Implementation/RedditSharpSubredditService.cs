@@ -41,7 +41,11 @@ namespace DeltaBotFour.Reddit.Implementation
             var post = subReddit.SubmitTextPostAsync(title, text).Result;
 
             // The returned post has basically nothing on it - need to retrieve a post with GetPost
-            var oAuthUrl = UrlHelper.ConvertToOAuth(post.Url.AbsoluteUri);
+            // Reddit may return a relative URL - resolve it against reddit.com if so
+            var postUrl = post.Url.IsAbsoluteUri
+                ? post.Url.AbsoluteUri
+                : new Uri(new Uri("https://www.reddit.com"), post.Url).AbsoluteUri;
+            var oAuthUrl = UrlHelper.ConvertToOAuth(postUrl);
             var fullPost = _reddit.GetPostAsync(new Uri(oAuthUrl)).Result;
 
             return RedditThingConverter.Convert(fullPost);
